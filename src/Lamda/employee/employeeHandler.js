@@ -157,52 +157,125 @@ const updateEmployee = async (event) => {
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
 
     if (!employeeId) {
-      throw new Error("employeeId not present");
+      console.log("Employee Id is required");
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.EMPLOYEE_ID_REQUIRED,
+      });
+      return response; // Return response to exit early
     }
 
-    // Check if the employeeId exists in the database
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId }),
+      Key: { employeeId: { S: employeeId } },
     };
-
     const { Item } = await client.send(new GetItemCommand(getItemParams));
-
+    // If employee not found, return 404
     if (!Item) {
-      response.statusCode = 404; // Employee Id not found
+      console.log("Employee not found");
+      response.statusCode = 404;
       response.body = JSON.stringify({
-        message: `Employee with employeeId ${employeeId} not found`,
+        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+      });
+      return response; // Return response to exit early
+    }
+
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "dateOfBirth",
+      "officeEmailAddress",
+      "branchOffice",
+      "password",
+      "gender",
+      "ssnNumber",
+      "aadharNumber",
+      "maritalStatus",
+      "nationality",
+      "passportNumber",
+      "mobileNumber",
+      "permanentAddress",
+      "contactPerson",
+      "personalEmailAddress",
+      "presentAddress",
+      "contactNumber",
+      "joiningDate",
+      "emergencyContactPerson",
+      "designation",
+      "emergencyContactNumber",
+      "resignedDate",
+      "relievedDate",
+      "leaveStructure",
+      "department",
+      "IsAbsconded",
+      "status",
+    ];
+
+    const validationResponse = validateUpdateEmployeeDetails(body);
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: validationResponse.validationMessage,
+      });
+      return response; // Return response to exit early
+    }
+
+    // Filter out fields that are not allowed to be updated
+    const updateFields = {};
+    for (const key of Object.keys(body)) {
+      if (allowedFields.includes(key)) {
+        updateFields[key] = body[key];
+      }
+    }
+
+    // Check if there are any valid fields to update
+    if (Object.keys(updateFields).length === 0) {
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: "No valid fields to update",
       });
       return response;
     }
 
-    const objKeys = Object.keys(body);
+    updateFields.updatedDateTime = formattedDate;
 
-    const params = {
+    // Construct update expression and attribute values dynamically
+    const UpdateExpression = `SET ${Object.keys(updateFields)
+      .map((key, index) => `#key${index} = :value${index}`)
+      .join(", ")}`;
+
+    const ExpressionAttributeNames = Object.keys(updateFields).reduce(
+      (acc, key, index) => ({
+        ...acc,
+        [`#key${index}`]: key,
+      }),
+      {}
+    );
+
+    const ExpressionAttributeValues = Object.keys(updateFields).reduce((acc, key, index) => {
+      const value = updateFields[key];
+      console.log(`Adding value for key ${key}: ${value}`);
+      return {
+        ...acc,
+        [`:value${index}`]: value,
+      };
+    }, {});
+
+    // Update employee record in the database
+    const updateParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId }),
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
-      ExpressionAttributeNames: objKeys.reduce(
-        (acc, key, index) => ({
-          ...acc,
-          [`#key${index}`]: key,
-        }),
-        {}
-      ),
-      ExpressionAttributeValues: marshall(
-        objKeys.reduce(
-          (acc, key, index) => ({
-            ...acc,
-            [`:value${index}`]: body[key],
-          }),
-          {}
-        )
-      ),
+      Key: { employeeId: { S: employeeId } },
+      UpdateExpression,
+      ExpressionAttributeNames,
+      ExpressionAttributeValues,
     };
-    const updateResult = await client.send(new UpdateItemCommand(params));
+
+    const updateResult = await client.send(new UpdateItemCommand(updateParams));
+    console.log(`employeeId: { S: employeeId } has updated successfully`);
     response.body = JSON.stringify({
-      message: "Successfully updated employee.",
-      updateResult,
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
+      employeeId: { S: employeeId },
     });
   } catch (e) {
     console.error(e);
@@ -216,6 +289,7 @@ const updateEmployee = async (event) => {
 
   return response;
 };
+
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
