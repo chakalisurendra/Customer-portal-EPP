@@ -12,6 +12,8 @@ const validateEmployeeDetails = (requestBody) => {
 };
 
 const validateUpdateEmployeeDetails = (requestBody) => {
+  console.log("validateUpdateEmployeeDetails method");
+
   const response = {
     validation: false,
     validationMessage: "Valid Data",
@@ -55,9 +57,13 @@ const validateUpdateEmployeeDetails = (requestBody) => {
 };
 
 const validatePhone = (phoneNumber) => {
+  console.log("validatePhone method");
+
   if (phoneNumber === null || phoneNumber === undefined) {
     return true; // Allow null or undefined values
   }
+  console.log("validatePhone not null");
+
   const numberPattern = /^\d+$/;
   return numberPattern.test(phoneNumber) && phoneNumber.length < 17;
 };

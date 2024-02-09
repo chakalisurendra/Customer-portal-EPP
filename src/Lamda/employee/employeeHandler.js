@@ -110,8 +110,12 @@ const updateEmployee = async (event) => {
 
     //const objKeys = Object.keys(body);
     const objKeys = Object.keys(body).filter((key) => updateEmployeeAllowedFields.includes(key));
+    console.log(`Employee with employeeId ${objKeys} not found`);
 
-const validationResponse = validateUpdateEmployeeDetails(body);
+    const validationResponse = validateUpdateEmployeeDetails(body);
+    console.log(`Employee with objKeys ${objKeys} `);
+    console.log(`validationResponse ${validationResponse.validation} `);
+
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
       response.statusCode = 400;
