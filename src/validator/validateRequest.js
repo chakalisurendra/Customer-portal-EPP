@@ -71,16 +71,33 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   return response;
 };
 
-const validatePhone = (phoneNumber) => {
-  console.log("validatePhone method");
+// const validatePhone = (phoneNumber) => {
+//   console.log("validatePhone method");
 
+//   if (phoneNumber === null || phoneNumber === undefined) {
+//     return true; // Allow null or undefined values
+//   }
+//   console.log("validatePhone not null");
+
+//   const numberPattern = /^\d+$/;
+//   return numberPattern.test(phoneNumber) && phoneNumber.length < 17;
+// };
+
+const validatePhone = (phoneNumber) => {
   if (phoneNumber === null || phoneNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  console.log("validatePhone not null");
+  // Regular expression to match phone number pattern
+  const phoneNumberPattern = /^\d{1,16}$/;
 
-  const numberPattern = /^\d+$/;
-  return numberPattern.test(phoneNumber) && phoneNumber.length < 17;
+  // Check if the phone number matches the pattern and its length is less than or equal to 16
+  if (phoneNumber.match(phoneNumberPattern) && phoneNumber.length <= 16) {
+    console.log("validatePhone true");
+    return true; // Phone number is valid
+  } else {
+    console.log("validatePhone false");
+    return false; // Phone number is invalid
+  }
 };
 const validateSsnNumber = (ssnNumber) => {
   if (ssnNumber === null || ssnNumber === undefined) {
@@ -103,6 +120,7 @@ const validatePassportNumber = (passportNumber) => {
   const numberPattern = /^\d+$/;
   return numberPattern.test(passportNumber) && passportNumber.length > 8 && passportNumber.length < 13;
 };
+
 const validateOfficeEmailAddress = (officeEmailAddress) => {
   if (officeEmailAddress === null || officeEmailAddress === undefined) {
     return true; // Allow null or undefined values
