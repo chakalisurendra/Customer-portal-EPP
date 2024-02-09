@@ -108,16 +108,8 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const objKeys = Object.keys(body);
-    const validationResponse = validateUpdateEmployeeDetails(objKeys);
-    if (!validationResponse.validation) {
-      console.log(validationResponse.validationMessage);
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: validationResponse.validationMessage,
-      });
-      return response; // Return response to exit early
-    }
+    //const objKeys = Object.keys(body);
+    const objKeys = Object.keys(body).filter((key) => updateEmployeeAllowedFields.includes(key));
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
