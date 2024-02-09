@@ -81,6 +81,74 @@ const createEmployee = async (event) => {
   return response;
 };
 
+// const updateEmployee = async (event) => {
+//   console.log("Update employee details");
+//   const response = { statusCode: httpStatusCodes.SUCCESS };
+//   try {
+//     const body = JSON.parse(event.body);
+//     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
+
+//     if (!employeeId) {
+//       throw new Error("employeeId not present");
+//     }
+
+//     // Check if the employeeId exists in the database
+//     const getItemParams = {
+//       TableName: process.env.EMPLOYEE_TABLE,
+//       Key: marshall({ employeeId }),
+//     };
+
+//     const { Item } = await client.send(new GetItemCommand(getItemParams));
+
+//     if (!Item) {
+//       response.statusCode = 404; // Employee Id not found
+//       response.body = JSON.stringify({
+//         message: `Employee with employeeId ${employeeId} not found`,
+//       });
+//       return response;
+//     }
+
+//     const objKeys = Object.keys(body);
+
+//     const params = {
+//       TableName: process.env.EMPLOYEE_TABLE,
+//       Key: marshall({ employeeId }),
+//       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+//       ExpressionAttributeNames: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`#key${index}`]: key,
+//         }),
+//         {}
+//       ),
+//       ExpressionAttributeValues: marshall(
+//         objKeys.reduce(
+//           (acc, key, index) => ({
+//             ...acc,
+//             [`:value${index}`]: body[key],
+//           }),
+//           {}
+//         )
+//       ),
+//     };
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+//     response.body = JSON.stringify({
+//       message: "Successfully updated employee.",
+//       updateResult,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.statusCode = 400;
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+//       errorMsg: e.message,
+//       errorStack: e.stack,
+//     });
+//   }
+
+//   return response;
+// };
+
 const updateEmployee = async (event) => {
   console.log("Update employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
