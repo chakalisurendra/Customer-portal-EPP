@@ -1,0 +1,27 @@
+{
+  "name": "customer-portal-management",
+  "version": "1.0.0",
+  "description": "Hyniva customer portal ",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Customer-portal-EPP"
+  },
+  "author": "Hyniva",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.503.1",
+    "@aws-sdk/util-dynamodb": "^3.503.1",
+    "aws-sdk": "^2.1548.0",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "serverless-iam-roles-per-function": "^3.2.0"
+  }
+}

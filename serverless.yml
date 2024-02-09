@@ -1,0 +1,75 @@
+service: customer-portal-service
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: ap-east-1
+  environment:
+    EMPLOYEE_TABLE: ${self:custom.employeeTableName}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:Scan"
+        - "dynamodb:DeleteItem"
+      Resource:
+        - !GetAtt EmployeeTable.Arn
+custom:
+  employeeTableName: customer-Details-${self:provider.stage}
+plugins:
+  - serverless-iam-roles-per-function
+functions:
+  employeeGet:
+    handler: src/Lamda/employee/employeeHandler.getEmployee
+    name: employeeGet
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: employee/get/{employeeId}
+          method: GET
+  employeeCreate:
+    handler: src/Lamda/employee/employeeHandler.createEmployee
+    name: employeeCreate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: employee
+          method: POST
+  employeeUpdate:
+    handler: src/Lamda/employee/employeeHandler.updateEmployee
+    name: employeeUpdate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: employee/{employeeId}
+          method: PUT
+  employeeGetAll:
+    handler: src/Lamda/employee/employeeHandler.getAllEmployees
+    name: employeeGetAll
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: employees
+          method: GET
+resources:
+  Resources:
+    EmployeeTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.employeeTableName}
+        AttributeDefinitions:
+          - AttributeName: employeeId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: employeeId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        
