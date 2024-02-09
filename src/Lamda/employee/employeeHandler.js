@@ -116,21 +116,21 @@ const updateEmployee = async (event) => {
     console.log(`Employee with objKeys ${objKeys} `);
     console.log(`validationResponse ${validationResponse.validation} `);
 
-    if (!validatePhone(body.contactNumber)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Invalid phone number format" }),
-      };
-    }
-
-    // if (!validationResponse.validation) {
-    //   console.log(validationResponse.validationMessage);
-    //   response.statusCode = 400;
-    //   response.body = JSON.stringify({
-    //     message: validationResponse.validationMessage,
-    //   });
-    //   return response; // Return response to exit early
+    // if (!validatePhone(body.contactNumber)) {
+    //   return {
+    //     statusCode: 400,
+    //     body: JSON.stringify({ message: "Invalid phone number format" }),
+    //   };
     // }
+
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: validationResponse.validationMessage,
+      });
+      return response; // Return response to exit early
+    }
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,

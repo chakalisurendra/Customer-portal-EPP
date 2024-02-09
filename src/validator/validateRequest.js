@@ -15,59 +15,75 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   console.log("validateUpdateEmployeeDetails method");
 
   const response = {
-    validation: true,
+    validation: false,
     validationMessage: "Valid Data",
   };
 
   if (!validatePhone(requestBody.mobileNumber)) {
     response.validationMessage = "Invalid Mobile Number";
     return response;
-  } else if (!validatePhone(requestBody.contactNumber)) {
+  }
+  if (!validatePhone(requestBody.contactNumber)) {
     response.validationMessage = "Invalid Contact Number";
     return response;
-  } else if (!validatePhone(requestBody.emergencyContactNumber)) {
+  }
+  if (!validatePhone(requestBody.emergencyContactNumber)) {
     response.validationMessage = "Invalid Emergency Contact Number";
     return response;
-  } else if (!validateSsnNumber(requestBody.ssnNumber)) {
+  }
+  if (!validateSsnNumber(requestBody.ssnNumber)) {
     response.validationMessage = "Invalid SSN Number";
     return response;
-  } else if (!validateAadharNumber(requestBody.aadharNumber)) {
+  }
+  if (!validateAadharNumber(requestBody.aadharNumber)) {
     response.validationMessage = "Invalid Aadhar Number";
     return response;
-  } else if (!validatePassportNumber(requestBody.passportNumber)) {
+  }
+  if (!validatePassportNumber(requestBody.passportNumber)) {
     response.validationMessage = "Invalid Passport Number";
     return response;
-  } else if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
+  }
+  if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
     response.validationMessage = "Invalid Office Email Address";
     return response;
-  } else if (!validateEmailAddress(requestBody.personalEmailAddress)) {
+  }
+  if (!validateEmailAddress(requestBody.personalEmailAddress)) {
     response.validationMessage = "Invalid Personal Email Address";
     return response;
-  } else if (!validateStatus(requestBody.status)) {
+  }
+  if (!validateStatus(requestBody.status)) {
     response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
-  } else if (!validateGender(requestBody.gender)) {
+  }
+  if (!validateGender(requestBody.gender)) {
     response.validationMessage = "Invalid gender. Gender should be either 'male' or 'female'.";
     return response;
-  } else if (!validatemaritalStatus(requestBody.maritalStatus)) {
+  }
+  if (!validatemaritalStatus(requestBody.maritalStatus)) {
     response.validationMessage = "Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.";
     return response;
-  } else if (!validateIsAbsconded(requestBody.absconded)) {
+  }
+  if (!validateIsAbsconded(requestBody.absconded)) {
     response.validationMessage = "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
     return response;
-  } else if (!validateDate(requestBody.joiningDate)) {
+  }
+  if (!validateDate(requestBody.joiningDate)) {
     response.validationMessage = `joiningDate should be in format \"YYYY-MM-DD\"`;
     return response;
-  } else if (!validateDate(requestBody.resignedDate)) {
+  }
+  if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"YYYY-MM-DD\"`;
     return response;
-  } else if (!validateDate(requestBody.relievedDate)) {
+  }
+  if (!validateDate(requestBody.relievedDate)) {
     response.validationMessage = `relievedDate should be in format \"YYYY-MM-DD\"`;
     return response;
-  } else if (!validateDate(requestBody.dateOfBirth)) {
+  }
+  if (!validateDate(requestBody.dateOfBirth)) {
     response.validationMessage = `dateOfBirth should be in format \"YYYY-MM-DD\"`;
     return response;
   }
+  response.validation = true;
   return response;
 };
 
