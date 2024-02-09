@@ -205,14 +205,13 @@ const updateEmployee = async (event) => {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
     };
-
     const updateResult = await client.send(new UpdateItemCommand(updateParams));
     console.log(`employeeId: { S: employeeId }  has updated successfully`);
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
       employeeId: { S: employeeId },
     });
-    
+
   } catch (e) {
     console.error(e);
     response.statusCode = 400;

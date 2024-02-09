@@ -3,7 +3,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   stage: dev
-  region: ap-east-1
+  region: ap-south-1
   environment:
     EMPLOYEE_TABLE: ${self:custom.employeeTableName}
   iamRoleStatements:
