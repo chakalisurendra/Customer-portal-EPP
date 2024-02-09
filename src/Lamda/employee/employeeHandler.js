@@ -167,7 +167,7 @@ const updateEmployee = async (event) => {
       response.body = JSON.stringify({
         message: "No valid fields to update",
       });
-      
+
       return response;
     }
 
@@ -187,7 +187,9 @@ const updateEmployee = async (event) => {
     );
 
     const ExpressionAttributeValues = Object.keys(updateFields).reduce((acc, key, index) => {
+      
       const value = updateFields[key];
+
       console.log(`Adding value for key ${key}: ${value}`);
       return {
         ...acc,
