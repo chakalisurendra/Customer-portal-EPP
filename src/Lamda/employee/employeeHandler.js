@@ -167,6 +167,7 @@ const updateEmployee = async (event) => {
       response.body = JSON.stringify({
         message: "No valid fields to update",
       });
+      
       return response;
     }
 
