@@ -207,7 +207,6 @@ const updateEmployee = async (event) => {
     };
 
     const updateResult = await client.send(new UpdateItemCommand(updateParams));
-
     console.log(`employeeId: { S: employeeId }  has updated successfully`);
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
