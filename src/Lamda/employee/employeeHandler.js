@@ -212,6 +212,7 @@ const updateEmployee = async (event) => {
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
       employeeId: { S: employeeId },
     });
+    
   } catch (e) {
     console.error(e);
     response.statusCode = 400;
