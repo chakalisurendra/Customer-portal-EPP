@@ -153,15 +153,15 @@ const updateEmployee = async (event) => {
       }
     }
 
-     const validationResponse = validateUpdateEmployeeDetails(updateFields);
-    if (!validationResponse.validation) {
-      console.log(validationResponse.validationMessage);
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: validationResponse.validationMessage,
-      });
-      return response; // Return response to exit early
-    }
+    //  const validationResponse = validateUpdateEmployeeDetails(updateFields);
+    // if (!validationResponse.validation) {
+    //   console.log(validationResponse.validationMessage);
+    //   response.statusCode = 400;
+    //   response.body = JSON.stringify({
+    //     message: validationResponse.validationMessage,
+    //   });
+    //   return response; // Return response to exit early
+    // }
     // Check if there are any valid fields to update
     // if (Object.keys(updateFields).length === 0) {
     //   response.statusCode = 400;
