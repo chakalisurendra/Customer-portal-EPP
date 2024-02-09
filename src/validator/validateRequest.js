@@ -55,66 +55,78 @@ const validateUpdateEmployeeDetails = (requestBody) => {
 };
 
 const validatePhone = (phoneNumber) => {
-  if (phoneNumber === null) {
-    return true;
+  if (phoneNumber === null || phoneNumber === undefined) {
+    return true; // Allow null or undefined values
   }
   const numberPattern = /^\d+$/;
   return numberPattern.test(phoneNumber) && phoneNumber.length < 17;
 };
 const validateSsnNumber = (ssnNumber) => {
-  if (ssnNumber === null) {
-    return true;
+  if (ssnNumber === null || ssnNumber === undefined) {
+    return true; // Allow null or undefined values
   }
   const numberPattern = /^\d+$/;
   return numberPattern.test(ssnNumber) && ssnNumber.length < 10;
 };
 const validateAadharNumber = (aadharNumber) => {
-  const numberPattern = /^\d+$/;
-  if (aadharNumber === null) {
-    return true;
+  if (aadharNumber === null || aadharNumber === undefined) {
+    return true; // Allow null or undefined values
   }
+  const numberPattern = /^\d+$/;
   return numberPattern.test(aadharNumber) && aadharNumber.length < 13;
 };
 const validatePassportNumber = (passportNumber) => {
-  if (passportNumber === null) {
-    return true;
+  if (passportNumber === null || passportNumber === undefined) {
+    return true; // Allow null or undefined values
   }
   const numberPattern = /^\d+$/;
   return numberPattern.test(passportNumber) && passportNumber.length > 8 && passportNumber.length < 13;
 };
 const validateOfficeEmailAddress = (officeEmailAddress) => {
-  if (officeEmailAddress === null) {
-    return true;
+  if (officeEmailAddress === null || officeEmailAddress === undefined) {
+    return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
   return emailPattern.test(officeEmailAddress);
 };
 const validateEmailAddress = (emailAddress) => {
-  if (emailAddress === null) {
-    return true;
+  if (emailAddress === null || emailAddress === undefined) {
+    return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(emailAddress);
 };
 const validateDate = (date) => {
-  if (date === null) {
-    return true;
+  if (date === null || date === undefined) {
+    return true; // Allow null or undefined values
   }
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
   return datePattern.test(date);
 };
 const validateIsAbsconded = (isAbsconded) => {
-  return isAbsconded === null || ["Yes", "No"].includes(requestBody.isAbsconded);
+  if (isAbsconded === null || isAbsconded === undefined) {
+    return true; // Allow null or undefined values
+  }
+  return ["Yes", "No"].includes(isAbsconded);
 };
 const validateStatus = (status) => {
-  return status === null || ["active", "inactive"].includes(requestBody.status);
+  if (status === null || status === undefined) {
+    return true; // Allow null or undefined values
+  }
+  return ["active", "inactive"].includes(status);
 };
 const validateGender = (gender) => {
-  return gender === null || ["male", "female"].includes(gender);
+  if (gender === null || gender === undefined) {
+    return true; // Allow null or undefined values
+  }
+  ["male", "female"].includes(gender);
 };
 
 const validatemaritalStatus = (maritalStatus) => {
-  return maritalStatus === null || ["Single", "Married", "Divorced"].includes(requestBody.maritalStatus);
+  if (maritalStatus === null || maritalStatus === undefined) {
+    return true; // Allow null or undefined values
+  }
+  return ["Single", "Married", "Divorced"].includes(maritalStatus);
 };
 module.exports = {
   validateEmployeeDetails,
