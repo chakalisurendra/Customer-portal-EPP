@@ -91,7 +91,8 @@ const validatePhone = (phoneNumber) => {
   const phoneNumberPattern = /^\d{1,16}$/;
 
   // Check if the phone number matches the pattern and its length is less than or equal to 16
-  if (phoneNumber.match(phoneNumberPattern) && phoneNumber.length <= 16) {
+  //if (phoneNumber.match(phoneNumberPattern) && phoneNumber.length <= 16) {
+  if (phoneNumber.toString().match(phoneNumberPattern) && phoneNumber.toString().length <= 16) {
     console.log("validatePhone true");
     return true; // Phone number is valid
   } else {
