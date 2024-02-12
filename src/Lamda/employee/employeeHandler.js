@@ -81,39 +81,33 @@ const createEmployee = async (event) => {
   return response;
 };
 
+
 const updateEmployee = async (event) => {
   console.log("Update employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
-    const body = JSON.parse(event.body);
+    const requestBody = JSON.parse(event.body);
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
-
     if (!employeeId) {
+      console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
     }
-
-    // Check if the employeeId exists in the database
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
     };
-
     const { Item } = await client.send(new GetItemCommand(getItemParams));
-
     if (!Item) {
+      console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404; // Employee Id not found
       response.body = JSON.stringify({
         message: `Employee with employeeId ${employeeId} not found`,
       });
       return response;
     }
-
-    //const objKeys = Object.keys(body);
-    const objKeys = Object.keys(body).filter((key) => updateEmployeeAllowedFields.includes(key));
-
-    const validationResponse = validateUpdateEmployeeDetails(body);
+    const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
-
+    const validationResponse = validateUpdateEmployeeDetails(objKeys);
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
       response.statusCode = 400;
@@ -122,14 +116,25 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
-    const emailExists = await isEmailNotEmployeeIdExists(body.officeEmailAddress, employeeId);
-    if (emailExists) {
+    const officeEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.officeEmailAddress, employeeId);
+    if (officeEmailAddressExists) {
+      console.log("officeEmailAddress already exists.");
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: "Email address already exists.",
+        message: "officeEmailAddress already exists.",
       });
       return response;
     }
+    const personalEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.personalEmailAddress, employeeId);
+    if (personalEmailAddressExists) {
+      console.log("personalEmailAddress already exists.");
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: "personalEmailAddress already exists.",
+      });
+      return response;
+    }
+    requestBody.updatedDateTime = formattedDate;
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
@@ -145,29 +150,125 @@ const updateEmployee = async (event) => {
         objKeys.reduce(
           (acc, key, index) => ({
             ...acc,
-            [`:value${index}`]: body[key],
+            [`:value${index}`]: requestBody[key],
           }),
           {}
         )
       ),
     };
     const updateResult = await client.send(new UpdateItemCommand(params));
+    console.log("Successfully updated Employee details.");
     response.body = JSON.stringify({
-      message: "Successfully updated employee.",
-      updateResult,
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
+      employeeId: employeeId,
     });
   } catch (e) {
     console.error(e);
     response.statusCode = 400;
     response.body = JSON.stringify({
       message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+      employeeId: employeeId,
       errorMsg: e.message,
-      errorStack: e.stack,
     });
   }
-
   return response;
 };
+
+// const updateEmployee = async (event) => {
+//   console.log("Update employee details");
+//   const response = { statusCode: httpStatusCodes.SUCCESS };
+//   try {
+//     const body = JSON.parse(event.body);
+//     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
+
+//     if (!employeeId) {
+//       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
+//     }
+
+//     // Check if the employeeId exists in the database
+//     const getItemParams = {
+//       TableName: process.env.EMPLOYEE_TABLE,
+//       Key: marshall({ employeeId }),
+//     };
+
+//     const { Item } = await client.send(new GetItemCommand(getItemParams));
+
+//     if (!Item) {
+//       response.statusCode = 404; // Employee Id not found
+//       response.body = JSON.stringify({
+//         message: `Employee with employeeId ${employeeId} not found`,
+//       });
+//       return response;
+//     }
+
+//     //const objKeys = Object.keys(body);
+//     const objKeys = Object.keys(body).filter((key) => updateEmployeeAllowedFields.includes(key));
+
+//     const validationResponse = validateUpdateEmployeeDetails(body);
+//     console.log(`Employee with objKeys ${objKeys} `);
+
+//     if (!validationResponse.validation) {
+//       console.log(validationResponse.validationMessage);
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: validationResponse.validationMessage,
+//       });
+//       return response;
+//     }
+//     const officeEmailAddressExists = await isEmailNotEmployeeIdExists(body.officeEmailAddress, employeeId);
+//     if (officeEmailAddressExists) {
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: "officeEmailAddress already exists.",
+//       });
+//       return response;
+//     }
+//     const personalEmailAddressExists = await isEmailNotEmployeeIdExists(body.personalEmailAddress, employeeId);
+//     if (personalEmailAddressExists) {
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: " personalEmailAddress already exists.",
+//       });
+//       return response;
+//     }
+//     const params = {
+//       TableName: process.env.EMPLOYEE_TABLE,
+//       Key: marshall({ employeeId }),
+//       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+//       ExpressionAttributeNames: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`#key${index}`]: key,
+//         }),
+//         {}
+//       ),
+//       ExpressionAttributeValues: marshall(
+//         objKeys.reduce(
+//           (acc, key, index) => ({
+//             ...acc,
+//             [`:value${index}`]: body[key],
+//           }),
+//           {}
+//         )
+//       ),
+//     };
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+//     response.body = JSON.stringify({
+//       message: "Successfully updated employee.",
+//       updateResult,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.statusCode = 400;
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+//       errorMsg: e.message,
+//       errorStack: e.stack,
+//     });
+//   }
+
+//   return response;
+// };
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
@@ -274,7 +375,7 @@ const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
     FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
-      ":id": { S: employeeId } // Assuming employeeId is a string, adjust if needed
+      ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
     },
     ProjectionExpression: "officeEmailAddress",
   };
