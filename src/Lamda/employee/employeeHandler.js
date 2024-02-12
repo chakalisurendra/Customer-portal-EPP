@@ -2,7 +2,7 @@ const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, Ge
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const { validateEmployeeDetails, validateUpdateEmployeeDetails, validatePhone } = require("../../validator/validateRequest");
+const { validateEmployeeDetails, validateUpdateEmployeeDetails, isEmailNotEmployeeIdExists } = require("../../validator/validateRequest");
 const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now(); // get the current date and time in milliseconds
@@ -110,18 +110,9 @@ const updateEmployee = async (event) => {
 
     //const objKeys = Object.keys(body);
     const objKeys = Object.keys(body).filter((key) => updateEmployeeAllowedFields.includes(key));
-    console.log(`Employee with employeeId ${objKeys} not found`);
 
     const validationResponse = validateUpdateEmployeeDetails(body);
     console.log(`Employee with objKeys ${objKeys} `);
-    console.log(`validationResponse ${validationResponse.validation} `);
-
-    // if (!validatePhone(body.contactNumber)) {
-    //   return {
-    //     statusCode: 400,
-    //     body: JSON.stringify({ message: "Invalid phone number format" }),
-    //   };
-    // }
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -129,9 +120,17 @@ const updateEmployee = async (event) => {
       response.body = JSON.stringify({
         message: validationResponse.validationMessage,
       });
-      return response; // Return response to exit early
+      return response;
     }
-
+    const emailExists = await isEmailNotEmployeeIdExists(emailAddress, employeeId);
+    if (emailExists) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: "Email address already exists.",
+      });
+      return response;
+    }
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
