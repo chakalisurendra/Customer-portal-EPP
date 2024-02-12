@@ -2,7 +2,7 @@ const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, Ge
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const { validateEmployeeDetails, validateUpdateEmployeeDetails, isEmailNotEmployeeIdExists } = require("../../validator/validateRequest");
+const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
 const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now(); // get the current date and time in milliseconds
@@ -259,6 +259,22 @@ const isEmailExists = async (emailAddress) => {
     FilterExpression: "officeEmailAddress = :email",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
+    },
+    ProjectionExpression: "officeEmailAddress",
+  };
+
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
+};
+
+const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
+    ExpressionAttributeValues: {
+      ":email": { S: emailAddress },
+      ":id": { S: employeeId } // Assuming employeeId is a string, adjust if needed
     },
     ProjectionExpression: "officeEmailAddress",
   };

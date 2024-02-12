@@ -182,25 +182,10 @@ const validatemaritalStatus = (maritalStatus) => {
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
 };
 
-const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
-    ExpressionAttributeValues: {
-      ":email": { S: emailAddress },
-      ":id": { S: employeeId } // Assuming employeeId is a string, adjust if needed
-    },
-    ProjectionExpression: "officeEmailAddress",
-  };
 
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
-  isEmailNotEmployeeIdExists,
   validatePhone,
   validateSsnNumber,
   validateAadharNumber,
