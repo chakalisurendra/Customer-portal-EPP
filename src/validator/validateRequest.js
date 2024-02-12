@@ -87,55 +87,49 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   return response;
 };
 
-// const validatePhone = (phoneNumber) => {
-//   console.log("validatePhone method");
-
-//   if (phoneNumber === null || phoneNumber === undefined) {
-//     return true; // Allow null or undefined values
-//   }
-//   console.log("validatePhone not null");
-
-//   const numberPattern = /^\d+$/;
-//   return numberPattern.test(phoneNumber) && phoneNumber.length < 17;
-// };
-
 const validatePhone = (phoneNumber) => {
   if (phoneNumber === null || phoneNumber === undefined) {
-    return true; // Allow null or undefined values
+    return true;
   }
-  // Regular expression to match phone number pattern
   const phoneNumberPattern = /^\d{1,16}$/;
-
-  // Check if the phone number matches the pattern and its length is less than or equal to 16
-  //if (phoneNumber.match(phoneNumberPattern) && phoneNumber.length <= 16) {
-  if (phoneNumber.toString().match(phoneNumberPattern) && phoneNumber.toString().length <= 16) {
-    console.log("validatePhone true");
-    return true; // Phone number is valid
+  if (phoneNumber.toString().match(phoneNumberPattern)) {
+    return true;
   } else {
-    console.log("validatePhone false");
-    return false; // Phone number is invalid
+    return false;
   }
 };
 const validateSsnNumber = (ssnNumber) => {
   if (ssnNumber === null || ssnNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  const numberPattern = /^\d+$/;
-  return numberPattern.test(ssnNumber) && ssnNumber.length < 10;
+  const numberPattern = /^\d{9}$/;
+  if (numberPattern.toString().match(ssnNumber)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 const validateAadharNumber = (aadharNumber) => {
   if (aadharNumber === null || aadharNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  const numberPattern = /^\d+$/;
-  return numberPattern.test(aadharNumber) && aadharNumber.length < 13;
+  const numberPattern = /^\d{12}$/;
+  if (numberPattern.toString().match(aadharNumber)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 const validatePassportNumber = (passportNumber) => {
   if (passportNumber === null || passportNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  const numberPattern = /^\d+$/;
-  return numberPattern.test(passportNumber) && passportNumber.length > 8 && passportNumber.length < 13;
+  const numberPattern = /^\d{8,12}$/;
+  if (numberPattern.toString().match(passportNumber)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const validateOfficeEmailAddress = (officeEmailAddress) => {
@@ -157,7 +151,11 @@ const validateDate = (date) => {
     return true; // Allow null or undefined values
   }
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-  return datePattern.test(date);
+  if (datePattern.toString().match(date)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
