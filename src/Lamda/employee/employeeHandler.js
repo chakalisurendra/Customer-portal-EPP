@@ -125,16 +125,16 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
-    const personalEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.personalEmailAddress, employeeId);
-    if (personalEmailAddressExists) {
-      console.log("personalEmailAddress already exists.");
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: "personalEmailAddress already exists.",
-      });
-      return response;
-    }
-    requestBody.updatedDateTime = formattedDate;
+    // const personalEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.personalEmailAddress, employeeId);
+    // if (personalEmailAddressExists) {
+    //   console.log("personalEmailAddress already exists.");
+    //   response.statusCode = 400;
+    //   response.body = JSON.stringify({
+    //     message: "personalEmailAddress already exists.",
+    //   });
+    //   return response;
+    // }
+    // requestBody.updatedDateTime = formattedDate;
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
