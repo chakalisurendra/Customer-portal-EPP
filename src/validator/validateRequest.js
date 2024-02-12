@@ -109,17 +109,6 @@ const validateSsnNumber = (ssnNumber) => {
     return false;
   }
 };
-// const validateAadharNumber = (aadharNumber) => {
-//   if (aadharNumber === null || aadharNumber === undefined) {
-//     return true; // Allow null or undefined values
-//   }
-//   const numberPattern = /^\d{12}$/;
-//   if (numberPattern.toString().match(aadharNumber)) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
 const validateAadharNumber = (aadharNumber) => {
   if (aadharNumber === null || aadharNumber === undefined) {
     return true; // Allow null or undefined values
@@ -184,7 +173,7 @@ const validateGender = (gender) => {
   if (gender === null || gender === undefined) {
     return true; // Allow null or undefined values
   }
-  ["male", "female"].includes(gender);
+  return ["male", "female"].includes(gender);
 };
 
 const validatemaritalStatus = (maritalStatus) => {
