@@ -107,7 +107,7 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
-    requestBody.updatedDateTime = formattedDate;
+    //requestBody.updatedDateTime = formattedDate;
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
     const validationResponse = validateUpdateEmployeeDetails(objKeys);
