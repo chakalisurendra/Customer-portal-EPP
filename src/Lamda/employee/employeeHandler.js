@@ -85,6 +85,9 @@ const updateEmployee = async (event) => {
   console.log("Update employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
+    const currentDate = Date.now(); // get the current date and time in milliseconds
+    const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); // formatting date
+
     const requestBody = JSON.parse(event.body);
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
     if (!employeeId) {
