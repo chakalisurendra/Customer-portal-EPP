@@ -122,9 +122,8 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
-    const emailExists = await isEmailNotEmployeeIdExists(emailAddress, employeeId);
+    const emailExists = await isEmailNotEmployeeIdExists(body.officeEmailAddress, employeeId);
     if (emailExists) {
-      console.log(validationResponse.validationMessage);
       response.statusCode = 400;
       response.body = JSON.stringify({
         message: "Email address already exists.",
