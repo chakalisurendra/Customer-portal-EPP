@@ -103,7 +103,7 @@ const validateSsnNumber = (ssnNumber) => {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^\d{9}$/;
-  if (numberPattern.toString().match(ssnNumber)) {
+  if (numberPattern.test(ssnNumber)) {
     return true;
   } else {
     return false;
@@ -136,7 +136,7 @@ const validatePassportNumber = (passportNumber) => {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^\d{8,12}$/;
-  if (numberPattern.toString().match(passportNumber)) {
+  if (numberPattern.test(passportNumber)) {
     return true;
   } else {
     return false;
@@ -162,7 +162,7 @@ const validateDate = (date) => {
     return true; // Allow null or undefined values
   }
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-  if (datePattern.toString().match(date)) {
+  if (datePattern.test(date)) {
     return true;
   } else {
     return false;
