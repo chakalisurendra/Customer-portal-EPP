@@ -107,6 +107,7 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
+    requestBody.updatedDateTime = formattedDate;
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
     const validationResponse = validateUpdateEmployeeDetails(objKeys);
@@ -128,7 +129,6 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    requestBody.updatedDateTime = formattedDate;
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
