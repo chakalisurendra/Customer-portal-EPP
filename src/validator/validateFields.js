@@ -27,6 +27,7 @@ const updateEmployeeAllowedFields = [
   "department",
   "IsAbsconded",
   "status",
+  "updatedDateTime"
 ];
 
 module.exports = {

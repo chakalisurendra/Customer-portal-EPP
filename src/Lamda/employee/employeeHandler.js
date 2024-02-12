@@ -128,6 +128,8 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
+    requestBody.updatedDateTime = formattedDate;
+    console.log("Updated date in requestBody:", requestBody.updatedDateTime);
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
