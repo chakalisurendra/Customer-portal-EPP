@@ -121,14 +121,14 @@ const updateEmployee = async (event) => {
     const validationResponse = validateUpdateEmployeeDetails(objKeys);
      console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
-    if (!validationResponse.validation) {
-      console.log(validationResponse.validationMessage);
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: validationResponse.validationMessage,
-      });
-      return response;
-    }
+    // if (!validationResponse.validation) {
+    //   console.log(validationResponse.validationMessage);
+    //   response.statusCode = 400;
+    //   response.body = JSON.stringify({
+    //     message: validationResponse.validationMessage,
+    //   });
+    //   return response;
+    // }
 
     const officeEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.officeEmailAddress, employeeId);
     if (officeEmailAddressExists) {

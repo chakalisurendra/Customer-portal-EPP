@@ -10,80 +10,133 @@ const validateEmployeeDetails = (requestBody) => {
   // You can add more specific validation logic for each field if needed
   return true;
 };
+// const validateUpdateEmployeeDetails = (requestBody) => {
+//   console.log("validateUpdateEmployeeDetails method");
+
+//   const response = {
+//     validation: false,
+//     validationMessage: "Valid Data",
+//   };
+
+//   if (!validatePhone(requestBody.mobileNumber)) {
+//     response.validationMessage = "Invalid Mobile Number";
+//     return response;
+//   }
+//   if (!validatePhone(requestBody.contactNumber)) {
+//     response.validationMessage = "Invalid Contact Number";
+//     return response;
+//   }
+//   if (!validatePhone(requestBody.emergencyContactNumber)) {
+//     response.validationMessage = "Invalid Emergency Contact Number";
+//     return response;
+//   }
+//   if (!validateSsnNumber(requestBody.ssnNumber)) {
+//     response.validationMessage = "Invalid SSN Number";
+//     return response;
+//   }
+//   if (!validateAadharNumber(requestBody.aadharNumber)) {
+//     response.validationMessage = "Invalid Aadhar Number";
+//     return response;
+//   }
+//   if (!validatePassportNumber(requestBody.passportNumber)) {
+//     response.validationMessage = "Invalid Passport Number";
+//     return response;
+//   }
+//   if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
+//     response.validationMessage = "Invalid Office Email Address";
+//     return response;
+//   }
+//   if (!validateEmailAddress(requestBody.personalEmailAddress)) {
+//     response.validationMessage = "Invalid Personal Email Address";
+//     return response;
+//   }
+//   if (!validateStatus(requestBody.status)) {
+//     response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+//     return response;
+//   }
+//   if (!validateGender(requestBody.gender)) {
+//     response.validationMessage = "Invalid gender. Gender should be either 'male' or 'female'.";
+//     return response;
+//   }
+//   if (!validatemaritalStatus(requestBody.maritalStatus)) {
+//     response.validationMessage = "Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.";
+//     return response;
+//   }
+//   if (!validateIsAbsconded(requestBody.absconded)) {
+//     response.validationMessage = "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
+//     return response;
+//   }
+//   if (!validateDate(requestBody.joiningDate)) {
+//     response.validationMessage = `joiningDate should be in format \"YYYY-MM-DD\"`;
+//     return response;
+//   }
+//   if (!validateDate(requestBody.resignedDate)) {
+//     response.validationMessage = `resignedDate should be in format \"YYYY-MM-DD\"`;
+//     return response;
+//   }
+//   if (!validateDate(requestBody.relievedDate)) {
+//     response.validationMessage = `relievedDate should be in format \"YYYY-MM-DD\"`;
+//     return response;
+//   }
+//   if (!validateDate(requestBody.dateOfBirth)) {
+//     response.validationMessage = `dateOfBirth should be in format \"YYYY-MM-DD\"`;
+//     return response;
+//   }
+//   response.validation = true;
+//   return response;
+// };
+
 const validateUpdateEmployeeDetails = (requestBody) => {
   console.log("validateUpdateEmployeeDetails method");
 
-  const response = {
-    validation: false,
-    validationMessage: "Valid Data",
-  };
-
   if (!validatePhone(requestBody.mobileNumber)) {
-    response.validationMessage = "Invalid Mobile Number";
-    return response;
+    throw new Error("Invalid Mobile Number");
   }
   if (!validatePhone(requestBody.contactNumber)) {
-    response.validationMessage = "Invalid Contact Number";
-    return response;
+    throw new Error("Invalid Contact Number");
   }
   if (!validatePhone(requestBody.emergencyContactNumber)) {
-    response.validationMessage = "Invalid Emergency Contact Number";
-    return response;
+    throw new Error("Invalid Emergency Contact Number");
   }
   if (!validateSsnNumber(requestBody.ssnNumber)) {
-    response.validationMessage = "Invalid SSN Number";
-    return response;
+    throw new Error("Invalid SSN Number");
   }
   if (!validateAadharNumber(requestBody.aadharNumber)) {
-    response.validationMessage = "Invalid Aadhar Number";
-    return response;
+    throw new Error("Invalid Aadhar Number");
   }
   if (!validatePassportNumber(requestBody.passportNumber)) {
-    response.validationMessage = "Invalid Passport Number";
-    return response;
+    throw new Error("Invalid Passport Number");
   }
   if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
-    response.validationMessage = "Invalid Office Email Address";
-    return response;
+    throw new Error("Invalid Office Email Address");
   }
   if (!validateEmailAddress(requestBody.personalEmailAddress)) {
-    response.validationMessage = "Invalid Personal Email Address";
-    return response;
+    throw new Error("Invalid Personal Email Address");
   }
   if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
-    return response;
+    throw new Error("Invalid status. Status should be either 'active' or 'inactive'.");
   }
   if (!validateGender(requestBody.gender)) {
-    response.validationMessage = "Invalid gender. Gender should be either 'male' or 'female'.";
-    return response;
+    throw new Error("Invalid gender. Gender should be either 'male' or 'female'.");
   }
   if (!validatemaritalStatus(requestBody.maritalStatus)) {
-    response.validationMessage = "Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.";
-    return response;
+    throw new Error("Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.");
   }
   if (!validateIsAbsconded(requestBody.absconded)) {
-    response.validationMessage = "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
-    return response;
+    throw new Error("Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.");
   }
   if (!validateDate(requestBody.joiningDate)) {
-    response.validationMessage = `joiningDate should be in format \"YYYY-MM-DD\"`;
-    return response;
+    throw new Error(`joiningDate should be in format "YYYY-MM-DD"`);
   }
   if (!validateDate(requestBody.resignedDate)) {
-    response.validationMessage = `resignedDate should be in format \"YYYY-MM-DD\"`;
-    return response;
+    throw new Error(`resignedDate should be in format "YYYY-MM-DD"`);
   }
   if (!validateDate(requestBody.relievedDate)) {
-    response.validationMessage = `relievedDate should be in format \"YYYY-MM-DD\"`;
-    return response;
+    throw new Error(`relievedDate should be in format "YYYY-MM-DD"`);
   }
   if (!validateDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `dateOfBirth should be in format \"YYYY-MM-DD\"`;
-    return response;
+    throw new Error(`dateOfBirth should be in format "YYYY-MM-DD"`);
   }
-  response.validation = true;
-  return response;
 };
 
 const validatePhone = (phoneNumber) => {
