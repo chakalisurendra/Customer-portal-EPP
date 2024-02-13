@@ -157,7 +157,7 @@ const validateDate = (date) => {
   if (date === null || date === undefined) {
     return true; // Allow null or undefined values
   }
-  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
   if (datePattern.test(date)) {
     return true;
   } else {
