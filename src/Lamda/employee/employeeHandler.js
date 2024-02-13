@@ -89,6 +89,8 @@ const createEmployee = async (event) => {
 const updateEmployee = async (event) => {
   console.log("Update employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
+  const currentDate = Date.now(); // get the current date and time in milliseconds
+  const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
 
   try {
     const requestBody = JSON.parse(event.body);
@@ -119,7 +121,7 @@ const updateEmployee = async (event) => {
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
     const validationResponse = validateUpdateEmployeeDetails(requestBody);
-     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -160,7 +162,9 @@ const updateEmployee = async (event) => {
           {}
         )
       ),
+      ":updatedDateTime": requestBody.updatedDateTime,
     };
+
     const updateResult = await client.send(new UpdateItemCommand(params));
     console.log("Successfully updated Employee details.");
     response.body = JSON.stringify({

@@ -67,19 +67,19 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateDate(requestBody.joiningDate)) {
-    response.validationMessage = `joiningDate should be in format \"YYYY-MM-DD\"`;
+    response.validationMessage = `joiningDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
-    response.validationMessage = `resignedDate should be in format \"YYYY-MM-DD\"`;
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validateDate(requestBody.relievedDate)) {
-    response.validationMessage = `relievedDate should be in format \"YYYY-MM-DD\"`;
+    response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validateDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `dateOfBirth should be in format \"YYYY-MM-DD\"`;
+    response.validationMessage = `dateOfBirth should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   response.validation = true;
