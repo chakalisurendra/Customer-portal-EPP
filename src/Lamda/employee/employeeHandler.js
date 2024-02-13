@@ -118,17 +118,17 @@ const updateEmployee = async (event) => {
 
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
-    const validationResponse = validateUpdateEmployeeDetails(objKeys);
+    const validationResponse = validateUpdateEmployeeDetails(requestBody);
      console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
-    // if (!validationResponse.validation) {
-    //   console.log(validationResponse.validationMessage);
-    //   response.statusCode = 400;
-    //   response.body = JSON.stringify({
-    //     message: validationResponse.validationMessage,
-    //   });
-    //   return response;
-    // }
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: validationResponse.validationMessage,
+      });
+      return response;
+    }
 
     const officeEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.officeEmailAddress, employeeId);
     if (officeEmailAddressExists) {
