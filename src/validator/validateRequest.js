@@ -19,31 +19,31 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   };
 
   if (!validatePhone(requestBody.mobileNumber)) {
-    response.validationMessage = "Invalid Mobile Number";
+    response.validationMessage = "Invalid Mobile Number it will allow 10 to 16 digits";
     return response;
   }
   if (!validatePhone(requestBody.contactNumber)) {
-    response.validationMessage = "Invalid Contact Number";
+    response.validationMessage = "Invalid Contact Number it will allow 10 to 16 digits";
     return response;
   }
   if (!validatePhone(requestBody.emergencyContactNumber)) {
-    response.validationMessage = "Invalid Emergency Contact Number";
+    response.validationMessage = "Invalid Emergency Contact Number it will allow 10 to 16 digits";
     return response;
   }
   if (!validateSsnNumber(requestBody.ssnNumber)) {
-    response.validationMessage = "Invalid SSN Number";
+    response.validationMessage = "Invalid SSN Number it will allow only 9 digits";
     return response;
   }
   if (!validateAadharNumber(requestBody.aadharNumber)) {
-    response.validationMessage = "Invalid Aadhar Number";
+    response.validationMessage = "Invalid Aadhar Number it will allow only 12 digits";
     return response;
   }
   if (!validatePassportNumber(requestBody.passportNumber)) {
-    response.validationMessage = "Invalid Passport Number";
+    response.validationMessage = "Invalid Passport Number it will allow 8 to 12 digits";
     return response;
   }
   if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
-    response.validationMessage = "Invalid Office Email Address";
+    response.validationMessage = "Invalid Office Email Address it will allow @hyniva.com";
     return response;
   }
   if (!validateEmailAddress(requestBody.personalEmailAddress)) {
@@ -91,7 +91,7 @@ const validatePhone = (phoneNumber) => {
   if (phoneNumber === null || phoneNumber === undefined) {
     return true;
   }
-  const phoneNumberPattern = /^\d{1,16}$/;
+  const phoneNumberPattern = /^\d{10,16}$/;
   if (phoneNumber.toString().match(phoneNumberPattern)) {
     return true;
   } else {
@@ -124,8 +124,6 @@ const validateAadharNumber = (aadharNumber) => {
 };
 
 const validatePassportNumber = (passportNumber) => {
-    console.log("validatemaritalStatus method" + passportNumber);
-
   if (passportNumber === null || passportNumber === undefined) {
     return true; // Allow null or undefined values
   }
@@ -186,7 +184,6 @@ const validateGender = (gender) => {
   return ["male", "female"].includes(gender);
 };
 const validatemaritalStatus = (maritalStatus) => {
-  console.log("validatemaritalStatus method" + maritalStatus);
   if (maritalStatus === null || maritalStatus === undefined) {
     return true; // Allow null or undefined values
   }

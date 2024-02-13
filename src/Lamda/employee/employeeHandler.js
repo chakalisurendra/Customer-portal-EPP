@@ -89,13 +89,12 @@ const createEmployee = async (event) => {
 const updateEmployee = async (event) => {
   console.log("Update employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
-  // const currentDate = Date.now(); // get the current date and time in milliseconds
-  // const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
 
   try {
     const requestBody = JSON.parse(event.body);
-    console.log("Request Body:", requestBody); // Log request body
-
+    console.log("Request Body:", requestBody);
+    const currentDate = Date.now(); 
+    const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
     if (!employeeId) {
       console.log("Employee Id is required");
@@ -109,7 +108,7 @@ const updateEmployee = async (event) => {
     const { Item } = await client.send(new GetItemCommand(getItemParams));
     if (!Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
-      response.statusCode = 404; // Employee Id not found
+      response.statusCode = 404;
       response.body = JSON.stringify({
         message: `Employee with employeeId ${employeeId} not found`,
       });
