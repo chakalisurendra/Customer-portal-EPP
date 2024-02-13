@@ -118,7 +118,9 @@ const updateEmployee = async (event) => {
 
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
-    const validationResponse = validateUpdateEmployeeDetails(requestBody);
+    const validationResponse = validateUpdateEmployeeDetails(objKeys);
+     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
       response.statusCode = 400;

@@ -123,6 +123,8 @@ const validateAadharNumber = (aadharNumber) => {
 };
 
 const validatePassportNumber = (passportNumber) => {
+    console.log("validatemaritalStatus method" + passportNumber);
+
   if (passportNumber === null || passportNumber === undefined) {
     return true; // Allow null or undefined values
   }
@@ -183,6 +185,7 @@ const validateGender = (gender) => {
   return ["male", "female"].includes(gender);
 };
 const validatemaritalStatus = (maritalStatus) => {
+  console.log("validatemaritalStatus method" + maritalStatus);
   if (maritalStatus === null || maritalStatus === undefined) {
     return true; // Allow null or undefined values
   }
