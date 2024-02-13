@@ -10,7 +10,6 @@ const validateEmployeeDetails = (requestBody) => {
   // You can add more specific validation logic for each field if needed
   return true;
 };
-
 const validateUpdateEmployeeDetails = (requestBody) => {
   console.log("validateUpdateEmployeeDetails method");
 
@@ -98,6 +97,7 @@ const validatePhone = (phoneNumber) => {
     return false;
   }
 };
+
 const validateSsnNumber = (ssnNumber) => {
   if (ssnNumber === null || ssnNumber === undefined) {
     return true; // Allow null or undefined values
@@ -109,6 +109,7 @@ const validateSsnNumber = (ssnNumber) => {
     return false;
   }
 };
+
 const validateAadharNumber = (aadharNumber) => {
   if (aadharNumber === null || aadharNumber === undefined) {
     return true; // Allow null or undefined values
@@ -120,6 +121,7 @@ const validateAadharNumber = (aadharNumber) => {
     return false;
   }
 };
+
 const validatePassportNumber = (passportNumber) => {
   if (passportNumber === null || passportNumber === undefined) {
     return true; // Allow null or undefined values
@@ -139,6 +141,7 @@ const validateOfficeEmailAddress = (officeEmailAddress) => {
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
   return emailPattern.test(officeEmailAddress);
 };
+
 const validateEmailAddress = (emailAddress) => {
   if (emailAddress === null || emailAddress === undefined) {
     return true; // Allow null or undefined values
@@ -146,6 +149,7 @@ const validateEmailAddress = (emailAddress) => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(emailAddress);
 };
+
 const validateDate = (date) => {
   if (date === null || date === undefined) {
     return true; // Allow null or undefined values
@@ -157,18 +161,21 @@ const validateDate = (date) => {
     return false;
   }
 };
+
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
     return true; // Allow null or undefined values
   }
   return ["Yes", "No"].includes(isAbsconded);
 };
+
 const validateStatus = (status) => {
   if (status === null || status === undefined) {
     return true; // Allow null or undefined values
   }
   return ["active", "inactive"].includes(status);
 };
+
 const validateGender = (gender) => {
   if (gender === null || gender === undefined) {
     return true; // Allow null or undefined values
@@ -182,14 +189,7 @@ const validatemaritalStatus = (maritalStatus) => {
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
 };
 
-
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
-  validatePhone,
-  validateSsnNumber,
-  validateAadharNumber,
-  validatePassportNumber,
-  validateOfficeEmailAddress,
-  validateEmailAddress,
 };
