@@ -93,7 +93,7 @@ const updateEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const currentDate = Date.now(); 
+    const currentDate = Date.now();
     const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
     if (!employeeId) {

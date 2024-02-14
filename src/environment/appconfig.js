@@ -16,6 +16,10 @@ const httpStatusMessages = {
   EMPLOYEE_ID_REQUIRED: "Employee Id is required",
   SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS: "Successfully updated Employee details.",
   FAILED_TO_UPDATED_EMPLOYEE_DETAILS: "Failed to updated Employee details.",
+  SUCCESSFULLY_CREATED_ASSET_DETAILS: "Successfully created asset details.",
+  FAILED_TO_CREATE_ASSET_DETAILS: "Failed to create asset details.",
+  EMPLOYEE_ALREADY_EXISTS: "Employee already exists.",
+
 };
 
 module.exports = {

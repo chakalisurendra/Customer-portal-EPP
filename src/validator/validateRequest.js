@@ -86,7 +86,6 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   return response;
 };
 
-
 const validatePhone = (phoneNumber) => {
   if (phoneNumber === null || phoneNumber === undefined) {
     return true;
@@ -189,8 +188,28 @@ const validatemaritalStatus = (maritalStatus) => {
   }
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
 };
+const validateAssetDetails = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  const { assetId, assetsType, serialNumber, status } = requestBody;
+  const requiredProperties = ["assetId", "assetsType", "serialNumber", "status"];
+
+  for (const property of requiredProperties) {
+    if (!requestBody[property] || requestBody[property] === "") {
+      response.validationMessage = `${property} is required`;
+      return response;
+    }
+  }
+
+  response.validation = true;
+  return response;
+};
 
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
+  validateAssetDetails,
 };
