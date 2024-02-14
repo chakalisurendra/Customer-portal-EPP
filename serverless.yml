@@ -6,6 +6,7 @@ provider:
   region: ap-south-1
   environment:
     EMPLOYEE_TABLE: ${self:custom.employeeTableName}
+    ASSIGNMENTS_TABLE: ${self:custom.assignmentTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -14,10 +15,13 @@ provider:
         - "dynamodb:GetItem"
         - "dynamodb:Scan"
         - "dynamodb:DeleteItem"
+        - "dynamodb:Query"
       Resource:
         - !GetAtt EmployeeTable.Arn
+        - !GetAtt AssignmentTable.Arn
 custom:
-  employeeTableName: customer-Details-${self:provider.stage}
+  employeeTableName: employee-Details-${self:provider.stage}
+  assignmentTableName: assignment-Details-${self:provider.stage}
 plugins:
   - serverless-iam-roles-per-function
 functions:
@@ -57,6 +61,15 @@ functions:
       - http:
           path: employees
           method: GET
+  assignmentCreate:
+    handler: src/Lamda/assignment/assignmentHandler.createAssignment
+    name: assignmentCreate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: assignment
+          method: POST
 resources:
   Resources:
     EmployeeTable:
@@ -72,4 +85,30 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        
+    AssignmentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.assignmentTableName}
+        AttributeDefinitions:
+          - AttributeName: assignmentId
+            AttributeType: N
+          - AttributeName: employeeId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: assignmentId
+            KeyType: HASH
+          - AttributeName: employeeId
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: EmployeeIndex
+            KeySchema:
+              - AttributeName: employeeId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
