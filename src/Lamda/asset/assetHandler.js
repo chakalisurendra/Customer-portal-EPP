@@ -7,31 +7,6 @@ const { httpStatusCodes, httpStatusMessages } = require("../../environment/appco
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); // formatting date
 
-async function getMaxIdUsingScan() {
-  try {
-    const params = {
-      TableName: ASSETS_TABLE,
-      ProjectionExpression: "assetId", // Assuming 'id' is the attribute name for the ID
-    };
-    const { Items } = await client.send(new ScanCommand(params));
-    if (Items && Items.length > 0) {
-      // Find the maximum ID among the items
-      let maxId = 0;
-      for (const item of Items) {
-        const assetId = parseInt(item.assetId.N); // Assuming 'id' attribute is of type Number
-        if (assetId > maxId) {
-          maxId = assetId;
-        }
-      }
-      return maxId;
-    } else {
-      return 0; // If no items found, return 0
-    }
-  } catch (error) {
-    console.error("Error getting max ID:", error);
-    throw error;
-  }
-}
 const createAsset = async (event) => {
   console.log("Create asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -70,14 +45,11 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Generate auto-incremented assetId
-    let assetMaxId = await getMaxIdUsingScan();
-    const assetId = assetMaxId + 1;
     const params = {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
+        assetId: requestBody.assetId,
         employeeId: requestBody.employeeId,
-        assetId: assetId,
         assetsType: requestBody.assetsType,
         serialNumber: requestBody.serialNumber,
         status: requestBody.status,

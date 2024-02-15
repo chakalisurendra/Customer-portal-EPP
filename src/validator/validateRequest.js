@@ -194,8 +194,8 @@ const validateAssetDetails = (requestBody) => {
     validationMessage: "Valid Data",
   };
 
-  const { assetsType, serialNumber, status } = requestBody;
-  const requiredProperties = ["assetsType", "serialNumber", "status"];
+  const { assetId, employeeId, assetsType, serialNumber, status } = requestBody;
+  const requiredProperties = ["assetId", "employeeId", "assetsType", "serialNumber", "status"];
 
   for (const property of requiredProperties) {
     if (!requestBody[property] || requestBody[property] === "") {
