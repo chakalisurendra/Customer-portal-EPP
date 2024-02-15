@@ -7,20 +7,20 @@ const { httpStatusCodes, httpStatusMessages } = require("../../environment/appco
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); // formatting date
 
-async function getMaxIdUsingScan(tableName) {
+async function getMaxIdUsingScan() {
   try {
     const params = {
-      TableName: tableName,
-      ProjectionExpression: "id", // Assuming 'id' is the attribute name for the ID
+      TableName: ASSETS_TABLE,
+      ProjectionExpression: "assetId", // Assuming 'id' is the attribute name for the ID
     };
     const { Items } = await client.send(new ScanCommand(params));
     if (Items && Items.length > 0) {
       // Find the maximum ID among the items
       let maxId = 0;
       for (const item of Items) {
-        const id = parseInt(item.id.N); // Assuming 'id' attribute is of type Number
-        if (id > maxId) {
-          maxId = id;
+        const assetId = parseInt(item.assetId.N); // Assuming 'id' attribute is of type Number
+        if (assetId > maxId) {
+          maxId = assetId;
         }
       }
       return maxId;
@@ -99,4 +99,8 @@ const isEmployeeIdExists = async (employeeId) => {
   };
   const { Item } = await client.send(new GetItemCommand(params));
   return !!Item;
+};
+
+module.exports = {
+  createAsset,
 };
