@@ -1,50 +1,60 @@
-const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
+const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+const { marshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
-const client = new DynamoDBClient();
 const { validateAssetDetails } = require("../../validator/validateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-const currentDate = Date.now(); // get the current date and time in milliseconds
-const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); // formatting date
 
+// Create a DynamoDB client instance
+const client = new DynamoDBClient();
+
+// Get the current date and time in the desired format
+const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
+
+// Function to create an asset
 const createAsset = async (event) => {
   console.log("Create asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
+
   try {
+    // Parse the request body
     const requestBody = JSON.parse(event.body);
 
+    // Validate the asset details
     const validationResponse = validateAssetDetails(requestBody);
-    console.log(`validation: ${validationResponse.validation} message: ${validationResponse.validationMessage}`);
+    console.log(`Validation: ${validationResponse.validation} Message: ${validationResponse.validationMessage}`);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
-      response.statusCode = 400;
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
         message: validationResponse.validationMessage,
       });
       return response;
     }
 
+    // Check if the employee ID exists
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
     if (!employeeIdExists) {
-      console.log("Employee Details not found.");
-      response.statusCode = 400;
+      console.log("Employee details not found.");
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
         message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
       });
       return response;
     }
 
-    const employeeIdExistsInAssert = await isEmployeeIdExistsInAssert(requestBody.employeeId);
-    if (employeeIdExistsInAssert) {
-      console.log("EmployeeId already exists.");
-      response.statusCode = 400;
+    // Check if the employee ID exists in the asset table
+    const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
+    if (employeeIdExistsInAssets) {
+      console.log("Employee ID already exists in assets.");
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS,
+        message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS_IN_ASSETS,
       });
       return response;
     }
 
+    // Construct the parameters for putting the item into the DynamoDB table
     const params = {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
@@ -57,23 +67,29 @@ const createAsset = async (event) => {
         updatedDateTime: formattedDate,
       }),
     };
+
+    // Put the item into the DynamoDB table
     const createResult = await client.send(new PutItemCommand(params));
+    console.log("Successfully created asset details.");
+
+    // Set the response body
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_ASSET_DETAILS,
       createResult,
     });
-  } catch (e) {
-    console.error(e);
-    response.statusCode = httpStatusCodes.BAD_REQUEST;
+  } catch (error) {
+    console.error("Error creating asset:", error);
+    response.statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
     response.body = JSON.stringify({
       message: httpStatusMessages.FAILED_TO_CREATE_ASSET_DETAILS,
-      errorMsg: e.message,
-      errorStack: e.stack,
+      errorMsg: error.message,
     });
   }
+
   return response;
 };
 
+// Function to check if the employee ID exists
 const isEmployeeIdExists = async (employeeId) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
@@ -83,7 +99,8 @@ const isEmployeeIdExists = async (employeeId) => {
   return !!Item;
 };
 
-const isEmployeeIdExistsInAssert = async (employeeId) => {
+// Function to check if the employee ID exists in the asset table
+const isEmployeeIdExistsInAssets = async (employeeId) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
     Key: { employeeId: { S: employeeId } },
@@ -92,6 +109,7 @@ const isEmployeeIdExistsInAssert = async (employeeId) => {
   return !!Item;
 };
 
+// Export the createAsset function
 module.exports = {
   createAsset,
 };
