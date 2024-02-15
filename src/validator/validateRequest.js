@@ -203,6 +203,10 @@ const validateAssetDetails = (requestBody) => {
       return response;
     }
   }
+  if (!validateStatus(requestBody.status)) {
+    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    return response;
+  }
 
   response.validation = true;
   return response;
