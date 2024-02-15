@@ -128,7 +128,7 @@ const isEmployeeIdExistsInAssets = async (employeeId) => {
 const isAssetIdExists = async (assetId) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    Key: { assetId: { N: assetId } },
+    Key: { assetId: { N: assetId.toString() } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
   return !!Item;
