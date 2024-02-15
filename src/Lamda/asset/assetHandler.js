@@ -43,6 +43,15 @@ const createAsset = async (event) => {
       return response;
     }
 
+    if (isNaN(requestBody.assetId)) {
+      console.log("Invalid assetId:", requestBody.assetId);
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
+      response.body = JSON.stringify({
+        message: "Invalid assetId. Please provide a valid number for assetId.",
+      });
+      return response;
+    }
+
     const assetIdExists = await isAssetIdExists(requestBody.assetId);
     if (assetIdExists) {
       console.log("Asset details already exists.");
@@ -128,7 +137,7 @@ const isEmployeeIdExists = async (employeeId) => {
 const isAssetIdExists = async (assetId) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
-    Key: { assetId: { N: assetId } },
+    Key: { assetId: { N: assetId.toString() } }, // Convert assetId to string
   };
   const { Item } = await client.send(new GetItemCommand(params));
   return !!Item;
