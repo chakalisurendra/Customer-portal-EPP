@@ -43,15 +43,15 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // const assetIdExists = await isAssetIdExists(requestBody.assetId);
-    // if (assetIdExists) {
-    //   console.log("Asset details already exists.");
-    //   response.statusCode = httpStatusCodes.BAD_REQUEST;
-    //   response.body = JSON.stringify({
-    //     message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS,
-    //   });
-    //   return response;
-    // }
+    const assetIdExists = await isAssetIdExists(requestBody.assetId);
+    if (assetIdExists) {
+      console.log("Asset details already exists.");
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS,
+      });
+      return response;
+    }
 
     // // Check if the employee ID exists in the asset table
     // const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
@@ -124,15 +124,15 @@ const isEmployeeIdExists = async (employeeId) => {
 //   return Items.length > 0;
 // };
 
-// // Function to check if the employee ID exists
-// const isAssetIdExists = async (assetId) => {
-//   const params = {
-//     TableName: process.env.EMPLOYEE_TABLE,
-//     Key: { assetId: { N: assetId.toString() } },
-//   };
-//   const { Item } = await client.send(new GetItemCommand(params));
-//   return !!Item;
-// };
+// Function to check if the employee ID exists
+const isAssetIdExists = async (assetId) => {
+  const params = {
+    TableName: process.env.ASSETS_TABLE,
+    Key: { assetId: { N: assetId.toString() } },
+  };
+  const { Item } = await client.send(new GetItemCommand(params));
+  return !!Item;
+};
 
 // Export the createAsset function
 module.exports = {
