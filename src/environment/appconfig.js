@@ -20,6 +20,7 @@ const httpStatusMessages = {
   FAILED_TO_CREATE_ASSET_DETAILS: "Failed to create asset details.",
   EMPLOYEE_ALREADY_EXISTS: "Employee already exists.",
   ASSET_ALREADY_EXISTS: "Asset already exists.",
+  EMPLOYEE_ALREADY_EXISTS_IN_ASSETS: "Employee already exists in asset."
 };
 
 module.exports = {

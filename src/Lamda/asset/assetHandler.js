@@ -57,7 +57,7 @@ const createAsset = async (event) => {
       console.log("Asset details already exists.");
       response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS,
+        message: httpStatusMessages.ASSET_ALREADY_EXISTS,
       });
       return response;
     }
@@ -94,7 +94,7 @@ const createAsset = async (event) => {
     // Set the response body
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_ASSET_DETAILS,
-      createResult,
+      assetId: requestBody.assetId,
     });
   } catch (error) {
     console.error("Error creating asset:", error);
