@@ -51,7 +51,17 @@ const createAsset = async (event) => {
     }
 
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-    if (employeeIdExists) {
+    if (!employeeIdExists) {
+      console.log("Employee Details not found.");
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+      });
+      return response;
+    }
+
+    const employeeIdExistsInAssert = await isEmployeeIdExistsInAssert(requestBody.employeeId);
+    if (employeeIdExistsInAssert) {
       console.log("EmployeeId already exists.");
       response.statusCode = 400;
       response.body = JSON.stringify({
@@ -95,6 +105,15 @@ const createAsset = async (event) => {
 const isEmployeeIdExists = async (employeeId) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
+    Key: { employeeId: { S: employeeId } },
+  };
+  const { Item } = await client.send(new GetItemCommand(params));
+  return !!Item;
+};
+
+const isEmployeeIdExistsInAssert = async (employeeId) => {
+  const params = {
+    TableName: process.env.ASSETS_TABLE,
     Key: { employeeId: { S: employeeId } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
