@@ -5,8 +5,33 @@ const client = new DynamoDBClient();
 const { validateAssetDetails } = require("../../validator/validateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now(); // get the current date and time in milliseconds
-const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
+const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); // formatting date
 
+async function getMaxIdUsingScan(tableName) {
+  try {
+    const params = {
+      TableName: tableName,
+      ProjectionExpression: "id", // Assuming 'id' is the attribute name for the ID
+    };
+    const { Items } = await client.send(new ScanCommand(params));
+    if (Items && Items.length > 0) {
+      // Find the maximum ID among the items
+      let maxId = 0;
+      for (const item of Items) {
+        const id = parseInt(item.id.N); // Assuming 'id' attribute is of type Number
+        if (id > maxId) {
+          maxId = id;
+        }
+      }
+      return maxId;
+    } else {
+      return 0; // If no items found, return 0
+    }
+  } catch (error) {
+    console.error("Error getting max ID:", error);
+    throw error;
+  }
+}
 const createAsset = async (event) => {
   console.log("Create asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -14,7 +39,7 @@ const createAsset = async (event) => {
     const requestBody = JSON.parse(event.body);
 
     const validationResponse = validateAssetDetails(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    console.log(`validation: ${validationResponse.validation} message: ${validationResponse.validationMessage}`);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -35,11 +60,14 @@ const createAsset = async (event) => {
       return response;
     }
 
+    // Generate auto-incremented assetId
+    let assetMaxId = await getMaxIdUsingScan();
+    const assetId = assetMaxId + 1;
     const params = {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
         employeeId: requestBody.employeeId,
-        assetId: requestBody.assetId,
+        assetId: assetId,
         assetsType: requestBody.assetsType,
         serialNumber: requestBody.serialNumber,
         status: requestBody.status,
