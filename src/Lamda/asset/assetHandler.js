@@ -118,21 +118,35 @@ const isEmployeeIdExists = async (employeeId) => {
   return !!Item;
 };
 
-// Function to check if the employee ID exists in the asset table
+// // Function to check if the employee ID exists in the asset table
+// const isEmployeeIdExistsInAssets = async (employeeId) => {
+//   const params = {
+//     TableName: process.env.ASSETS_TABLE,
+//     KeyConditionExpression: "employeeId = :id",
+//     ExpressionAttributeValues: {
+//       ":id": { S: employeeId },
+//     },
+//     ProjectionExpression: "employeeId", // You can project only the attributes you need
+//     Limit: 1, // Limit the result to 1 item since you only need to check existence
+//   };
+//   const { Items } = await client.send(new QueryCommand(params));
+//   return Items.length > 0;
+// };
+
 const isEmployeeIdExistsInAssets = async (employeeId) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
-    KeyConditionExpression: "employeeId = :id",
+    FilterExpression: "employeeId = :eId",
     ExpressionAttributeValues: {
-      ":id": { S: employeeId },
+      ":eId": { S: employeeId },
     },
-    ProjectionExpression: "employeeId", // You can project only the attributes you need
-    Limit: 1, // Limit the result to 1 item since you only need to check existence
+    ProjectionExpression: "employeeId",
   };
-  const { Items } = await client.send(new QueryCommand(params));
-  return Items.length > 0;
-};
 
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
+};
 // Function to check if the employee ID exists
 const isAssetIdExists = async (assetId) => {
   const params = {
