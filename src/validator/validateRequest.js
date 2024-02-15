@@ -182,6 +182,7 @@ const validateGender = (gender) => {
   }
   return ["male", "female"].includes(gender);
 };
+
 const validatemaritalStatus = (maritalStatus) => {
   if (maritalStatus === null || maritalStatus === undefined) {
     return true; // Allow null or undefined values
