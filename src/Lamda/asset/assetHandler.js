@@ -32,16 +32,16 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // // Check if the employee ID exists
-    // const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-    // if (!employeeIdExists) {
-    //   console.log("Employee details not found.");
-    //   response.statusCode = httpStatusCodes.BAD_REQUEST;
-    //   response.body = JSON.stringify({
-    //     message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
-    //   });
-    //   return response;
-    // }
+    // Check if the employee ID exists
+    const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
+    if (!employeeIdExists) {
+      console.log("Employee details not found.");
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+      });
+      return response;
+    }
 
     // const assetIdExists = await isAssetIdExists(requestBody.assetId);
     // if (assetIdExists) {
@@ -99,15 +99,15 @@ const createAsset = async (event) => {
   return response;
 };
 
-// // Function to check if the employee ID exists
-// const isEmployeeIdExists = async (employeeId) => {
-//   const params = {
-//     TableName: process.env.EMPLOYEE_TABLE,
-//     Key: { employeeId: { S: employeeId } },
-//   };
-//   const { Item } = await client.send(new GetItemCommand(params));
-//   return !!Item;
-// };
+// Function to check if the employee ID exists
+const isEmployeeIdExists = async (employeeId) => {
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    Key: { employeeId: { S: employeeId } },
+  };
+  const { Item } = await client.send(new GetItemCommand(params));
+  return !!Item;
+};
 
 // Function to check if the employee ID exists in the asset table
 // const isEmployeeIdExistsInAssets = async (employeeId) => {
