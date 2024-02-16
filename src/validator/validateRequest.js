@@ -208,25 +208,24 @@ const validateAssetDetails = (requestBody) => {
     response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
+  if (!validateInputNumber(requestBody.assetId)) {
+    response.validationMessage = `Invalid assetId. Please provide a valid number, it will not allow Alphabets`;
+    return response;
+  }
 
   response.validation = true;
   return response;
 };
 
-const validateInputNumber = (requestBody) => {
-  if (isNaN(requestBody)) {
-    console.log(`Invalid ${requestBody}. Please provide a valid number`);
-    response.statusCode = httpStatusCodes.BAD_REQUEST;
-    response.body = JSON.stringify({
-      message: `Invalid ${requestBody}. Please provide a valid number`,
-    });
-    return response;
+const validateInputNumber = (emailAddress) => {
+  if (emailAddress === null || emailAddress === undefined) {
+    return true; // Allow null or undefined values
   }
+  return isNaN(requestBody);
 };
 
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
-  validateInputNumber,
 };

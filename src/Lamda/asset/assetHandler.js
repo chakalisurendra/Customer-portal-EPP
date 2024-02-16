@@ -1,7 +1,7 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
-const { validateAssetDetails, validateInputNumber } = require("../../validator/validateRequest");
+const { validateAssetDetails } = require("../../validator/validateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const client = new DynamoDBClient();
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
@@ -34,18 +34,7 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Check if the assetId is number
-    validateInputNumber(requestBody.assetId);
-
-    // if (isNaN(requestBody.assetId)) {
-    //   console.log("Invalid assetId:", requestBody.assetId);
-    //   response.statusCode = httpStatusCodes.BAD_REQUEST;
-    //   response.body = JSON.stringify({
-    //     message: "Invalid assetId. Please provide a valid number for assetId.",
-    //   });
-    //   return response;
-    // }
-
+  
     // Check if the assetId is exists
     const assetIdExists = await isAssetIdExists(requestBody.assetId);
     if (assetIdExists) {
