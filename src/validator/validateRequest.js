@@ -213,8 +213,20 @@ const validateAssetDetails = (requestBody) => {
   return response;
 };
 
+const validateInputNumber = (requestBody) => {
+  if (isNaN(requestBody)) {
+    console.log(`Invalid ${requestBody}. Please provide a valid number`);
+    response.statusCode = httpStatusCodes.BAD_REQUEST;
+    response.body = JSON.stringify({
+      message: `Invalid ${requestBody}. Please provide a valid number`,
+    });
+    return response;
+  }
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
+  validateInputNumber,
 };

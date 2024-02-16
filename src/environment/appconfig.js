@@ -13,7 +13,7 @@ const httpStatusMessages = {
   SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS: "Successfully retrieved Employees details.",
   SUCCESSFULLY_RETRIEVED_EMPLOYEE_DETAILS: "Successfully retrieved Employee details.",
   EMPLOYEE_DETAILS_NOT_FOUND: "Employee details not found.",
-  EMPLOYEE_ID_REQUIRED: "Employee Id is required",
+  EMPLOYEE_ID_REQUIRED: "Employee Id is required", 
   SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS: "Successfully updated Employee details.",
   FAILED_TO_UPDATED_EMPLOYEE_DETAILS: "Failed to updated Employee details.",
   SUCCESSFULLY_CREATED_ASSET_DETAILS: "Successfully created asset details.",

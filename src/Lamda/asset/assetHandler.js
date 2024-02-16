@@ -1,28 +1,19 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
-const { validateAssetDetails } = require("../../validator/validateRequest");
+const { validateAssetDetails, validateInputNumber } = require("../../validator/valmidateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-
-// Create a DynamoDB client instance
 const client = new DynamoDBClient();
-
-// Get the current date and time in the desired format
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
 
-// Function to create an asset
 const createAsset = async (event) => {
   console.log("Create asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
-
   try {
-    // Parse the request body
     const requestBody = JSON.parse(event.body);
 
-    // Validate the asset details
     const validationResponse = validateAssetDetails(requestBody);
     console.log(`Validation: ${validationResponse.validation} Message: ${validationResponse.validationMessage}`);
-
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
       response.statusCode = httpStatusCodes.BAD_REQUEST;
@@ -32,7 +23,7 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Check if the employee ID exists
+    // Check if the employee ID exists in Employee Details
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
     if (!employeeIdExists) {
       console.log("Employee details not found.");
@@ -43,15 +34,19 @@ const createAsset = async (event) => {
       return response;
     }
 
-    if (isNaN(requestBody.assetId)) {
-      console.log("Invalid assetId:", requestBody.assetId);
-      response.statusCode = httpStatusCodes.BAD_REQUEST;
-      response.body = JSON.stringify({
-        message: "Invalid assetId. Please provide a valid number for assetId.",
-      });
-      return response;
-    }
+    // Check if the assetId is number
+    validateInputNumber(requestBody.assetId);
 
+    // if (isNaN(requestBody.assetId)) {
+    //   console.log("Invalid assetId:", requestBody.assetId);
+    //   response.statusCode = httpStatusCodes.BAD_REQUEST;
+    //   response.body = JSON.stringify({
+    //     message: "Invalid assetId. Please provide a valid number for assetId.",
+    //   });
+    //   return response;
+    // }
+
+    // Check if the assetId is exists
     const assetIdExists = await isAssetIdExists(requestBody.assetId);
     if (assetIdExists) {
       console.log("Asset details already exists.");
@@ -73,7 +68,7 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Construct the parameters for putting the item into the DynamoDB table
+    // Construct the parameters for putting the item into the asset table
     const params = {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
@@ -87,11 +82,9 @@ const createAsset = async (event) => {
       }),
     };
 
-    // Put the item into the DynamoDB table
     const createResult = await client.send(new PutItemCommand(params));
     console.log("Successfully created asset details.");
 
-    // Set the response body
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_ASSET_DETAILS,
       assetId: requestBody.assetId,
@@ -118,21 +111,7 @@ const isEmployeeIdExists = async (employeeId) => {
   return !!Item;
 };
 
-// // Function to check if the employee ID exists in the asset table
-// const isEmployeeIdExistsInAssets = async (employeeId) => {
-//   const params = {
-//     TableName: process.env.ASSETS_TABLE,
-//     KeyConditionExpression: "employeeId = :id",
-//     ExpressionAttributeValues: {
-//       ":id": { S: employeeId },
-//     },
-//     ProjectionExpression: "employeeId", // You can project only the attributes you need
-//     Limit: 1, // Limit the result to 1 item since you only need to check existence
-//   };
-//   const { Items } = await client.send(new QueryCommand(params));
-//   return Items.length > 0;
-// };
-
+// Function to check if the employee ID exists in the asset table
 const isEmployeeIdExistsInAssets = async (employeeId) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
@@ -147,17 +126,17 @@ const isEmployeeIdExistsInAssets = async (employeeId) => {
   const data = await client.send(command);
   return data.Items.length > 0;
 };
-// Function to check if the employee ID exists
+
+// Function to check if the asset ID exists
 const isAssetIdExists = async (assetId) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
-    Key: { assetId: { N: assetId.toString() } }, // Convert assetId to string
+    Key: { assetId: { N: assetId.toString() } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
   return !!Item;
 };
 
-// Export the createAsset function
 module.exports = {
   createAsset,
 };
