@@ -1,7 +1,7 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
-const { validateAssetDetails, validateInputNumber } = require("../../validator/valmidateRequest");
+const { validateAssetDetails, validateInputNumber } = require("../../validator/validateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const client = new DynamoDBClient();
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
