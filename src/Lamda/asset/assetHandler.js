@@ -224,12 +224,12 @@ const getAssetDetails = async (event) => {
     } else {
       const params = {
         TableName: process.env.ASSETS_TABLE,
-        FilterExpression: "employeeId = :id",
+        KeyConditionExpression: "employeeId = :id",
         ExpressionAttributeValues: {
           ":id": employeeId,
         },
       };
-      const { Items } = await client.send(new ScanCommand(params));
+      const { Items } = await client.send(new QueryCommand(params));
       console.log({ Items });
       if (!Items || Items.length === 0) {
         console.log("Asset information not found.");
