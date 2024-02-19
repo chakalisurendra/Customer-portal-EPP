@@ -221,40 +221,41 @@ const getAssetDetails = async (event) => {
       response.body = JSON.stringify({
         message: `Employee with employeeId ${employeeId} not found`,
       });
-    }
-
-    const params = {
-      TableName: process.env.ASSETS_TABLE,
-      FilterExpression: "employeeId = :id",
-      ExpressionAttributeValues: {
-        ":id": employeeId,
-      },
-    };
-    const { Items } = await client.send(new ScanCommand(params));
-    console.log({ Items });
-    if (!Items || Items.length === 0) {
-      console.log("Asset information not found.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
-      response.body = JSON.stringify({
-        message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
-      });
     } else {
-      console.log("Successfully retrieved Asset information.");
-      response.body = JSON.stringify({
-        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
-        data: Items.map((item) => unmarshall(item)),
-      });
+      const params = {
+        TableName: process.env.ASSETS_TABLE,
+        FilterExpression: "employeeId = :id",
+        ExpressionAttributeValues: {
+          ":id": employeeId,
+        },
+      };
+      const { Items } = await client.send(new ScanCommand(params));
+      console.log({ Items });
+      if (!Items || Items.length === 0) {
+        console.log("Asset information not found.");
+        response.statusCode = httpStatusCodes.NOT_FOUND;
+        response.body = JSON.stringify({
+          message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
+        });
+      } else {
+        console.log("Successfully retrieved Asset information.");
+        response.body = JSON.stringify({
+          message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
+          data: Items.map((item) => unmarshall(item)),
+        });
+      }
     }
   } catch (e) {
     console.error(e);
     response.body = JSON.stringify({
-      statusCode: e.statusCode,
+      statusCode: e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR,
       message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSET_INFORMATION,
       errorMsg: e.message,
     });
   }
   return response;
 };
+
 module.exports = {
   createAsset,
   updateAssetDetails,
