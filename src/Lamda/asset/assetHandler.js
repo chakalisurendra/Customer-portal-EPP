@@ -44,8 +44,6 @@ const createAsset = async (event) => {
       return response;
     }
 
-    
-
     // Construct the parameters for putting the item into the asset table
     const params = {
       TableName: process.env.ASSETS_TABLE,
@@ -60,29 +58,29 @@ const createAsset = async (event) => {
       }),
     };
 
-    //if (requestBody.employeeId !== null || requestBody.employeeId !== undefined) {
-      // Check if the employee ID exists in Employee Details
-      const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-      if (!employeeIdExists) {
-        console.log("Employee details not found.");
-        response.statusCode = httpStatusCodes.BAD_REQUEST;
-        response.body = JSON.stringify({
-          message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
-        });
-        return response;
-      }
+    // //if (requestBody.employeeId !== null || requestBody.employeeId !== undefined) {
+    //   // Check if the employee ID exists in Employee Details
+    //   const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
+    //   if (!employeeIdExists) {
+    //     console.log("Employee details not found.");
+    //     response.statusCode = httpStatusCodes.BAD_REQUEST;
+    //     response.body = JSON.stringify({
+    //       message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+    //     });
+    //     return response;
+    //   }
 
-      // Check if the employee ID exists in the asset table
-      const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
-      if (employeeIdExistsInAssets) {
-        console.log("Employee ID already exists in assets.");
-        response.statusCode = httpStatusCodes.BAD_REQUEST;
-        response.body = JSON.stringify({
-          message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS_IN_ASSETS,
-        });
-        return response;
-      }
-    
+    //   // Check if the employee ID exists in the asset table
+    //   const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
+    //   if (employeeIdExistsInAssets) {
+    //     console.log("Employee ID already exists in assets.");
+    //     response.statusCode = httpStatusCodes.BAD_REQUEST;
+    //     response.body = JSON.stringify({
+    //       message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS_IN_ASSETS,
+    //     });
+    //     return response;
+    //   }
+
     const createResult = await client.send(new PutItemCommand(params));
     console.log("Successfully created asset details.");
 
