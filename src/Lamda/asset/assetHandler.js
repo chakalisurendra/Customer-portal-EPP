@@ -200,7 +200,63 @@ const updateAssetDetails = async (event) => {
   }
 };
 
+const getAssetDetails = async (event) => {
+  console.log("Get asset details");
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+  try {
+    const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
+    if (!employeeId) {
+      console.log("Employee Id is required");
+      throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
+    }
+
+    const getEmployeeParams = {
+      TableName: process.env.EMPLOYEE_TABLE,
+      Key: marshall({ employeeId }),
+    };
+    const { Item } = await client.send(new GetItemCommand(getEmployeeParams));
+    if (!Item) {
+      console.log(`Employee with employeeId ${employeeId} not found`);
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `Employee with employeeId ${employeeId} not found`,
+      });
+    }
+
+    const params = {
+      TableName: process.env.ASSETS_TABLE,
+      FilterExpression: "employeeId = :id",
+      ExpressionAttributeValues: {
+        ":id": employeeId,
+      },
+    };
+    const { Items } = await client.send(new ScanCommand(params));
+    console.log({ Items });
+    if (!Items || Items.length === 0) {
+      console.log("Asset information not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
+      });
+    } else {
+      console.log("Successfully retrieved Asset information.");
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
+        data: Items.map((item) => unmarshall(item)),
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: e.statusCode,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSET_INFORMATION,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
 module.exports = {
   createAsset,
   updateAssetDetails,
+  getAssetDetails,
 };

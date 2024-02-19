@@ -21,6 +21,9 @@ const httpStatusMessages = {
   EMPLOYEE_ALREADY_EXISTS: "EmployeeId already exists.",
   ASSET_ALREADY_EXISTS: "Assetid already exists.",
   EMPLOYEE_ALREADY_EXISTS_IN_ASSETS: "EmployeeId already exists in asset.",
+  SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION: "Successfully retrieved Asset information.",
+  ASSET_INFORMATION_NOT_FOUND: "Asset information not found.",
+  FAILED_TO_RETRIEVE_ASSET_INFORMATION: "Failed to retrieve Asset information.",
 };
 
 module.exports = {

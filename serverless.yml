@@ -101,6 +101,15 @@ functions:
       - http:
           path: asset/{employeeId}
           method: PUT
+  assetGet:
+    handler: src/Lamda/asset/assetHandler.getAssetDetails
+    name: assetGet
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: asset/get/{employeeId}
+          method: GET
 resources:
   Resources:
     EmployeeTable:
