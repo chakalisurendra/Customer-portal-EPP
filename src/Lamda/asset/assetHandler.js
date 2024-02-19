@@ -60,7 +60,7 @@ const createAsset = async (event) => {
       }),
     };
 
-    if (requestBody.employeeId !== null) {
+    if (requestBody.employeeId !== null || requestBody.employeeId !== undefined) {
       // Check if the employee ID exists in Employee Details
       const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
       if (!employeeIdExists) {
