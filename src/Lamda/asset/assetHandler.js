@@ -1,5 +1,5 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall } = require("@aws-sdk/util-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const { validateAssetDetails } = require("../../validator/validateRequest");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
@@ -23,18 +23,16 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Check if the employee ID exists in Employee Details
-    const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-    if (!employeeIdExists) {
-      console.log("Employee details not found.");
+    // Check if the assetId is number
+    if (isNaN(requestBody.assetId)) {
+      console.log("Invalid assetId:", requestBody.assetId);
       response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+        message: "Invalid assetId. Please provide a valid number for assetId.",
       });
       return response;
     }
 
-  
     // Check if the assetId is exists
     const assetIdExists = await isAssetIdExists(requestBody.assetId);
     if (assetIdExists) {
@@ -46,15 +44,28 @@ const createAsset = async (event) => {
       return response;
     }
 
-    // Check if the employee ID exists in the asset table
-    const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
-    if (employeeIdExistsInAssets) {
-      console.log("Employee ID already exists in assets.");
-      response.statusCode = httpStatusCodes.BAD_REQUEST;
-      response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS_IN_ASSETS,
-      });
-      return response;
+    if (requestBody.employeeId !== null) {
+      // Check if the employee ID exists in Employee Details
+      const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
+      if (!employeeIdExists) {
+        console.log("Employee details not found.");
+        response.statusCode = httpStatusCodes.BAD_REQUEST;
+        response.body = JSON.stringify({
+          message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
+        });
+        return response;
+      }
+
+      // Check if the employee ID exists in the asset table
+      const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
+      if (employeeIdExistsInAssets) {
+        console.log("Employee ID already exists in assets.");
+        response.statusCode = httpStatusCodes.BAD_REQUEST;
+        response.body = JSON.stringify({
+          message: httpStatusMessages.EMPLOYEE_ALREADY_EXISTS_IN_ASSETS,
+        });
+        return response;
+      }
     }
 
     // Construct the parameters for putting the item into the asset table
@@ -62,7 +73,7 @@ const createAsset = async (event) => {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
         assetId: requestBody.assetId,
-        employeeId: requestBody.employeeId,
+        employeeId: requestBody.employeeId || null,
         assetsType: requestBody.assetsType,
         serialNumber: requestBody.serialNumber,
         status: requestBody.status,
@@ -126,6 +137,70 @@ const isAssetIdExists = async (assetId) => {
   return !!Item;
 };
 
+const updateAssetDetails = async (event) => {
+  try {
+    const requestBody = JSON.parse(event.body);
+    const employeeId = event.pathParameters.employeeId;
+
+    // Scan DynamoDB to find the asset details based on the employeeId
+    const params = {
+      TableName: process.env.ASSETS_TABLE,
+      FilterExpression: "employeeId = :eId",
+      ExpressionAttributeValues: {
+        ":eId": { S: employeeId },
+      },
+      ProjectionExpression: "employeeId",
+    };
+
+    const command = new ScanCommand(params);
+    const asset = await client.send(command);
+
+    if (!asset) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          message: "No assets found for the specified employeeId",
+        }),
+      };
+    }
+
+    // Update the asset with the new values
+    const currentDateTime = moment().toISOString();
+    const updateParams = {
+      TableName: process.env.ASSETS_TABLE,
+      Key: {
+        assetId: asset.assetId,
+      },
+      UpdateExpression: "SET assetsType = :assetsType, serialNumber = :serialNumber, #st = :status, updatedDateTime = :updatedDateTime",
+      ExpressionAttributeValues: {
+        ":assetsType": requestBody.assetsType,
+        ":serialNumber": requestBody.serialNumber,
+        ":status": requestBody.status,
+        ":updatedDateTime": currentDateTime,
+      },
+      ExpressionAttributeNames: {
+        "#st": "status",
+      },
+      ReturnValues: "ALL_NEW",
+    };
+
+    const updateCommand = new UpdateItemCommand(updateParams);
+    const updatedAsset = await client.send(updateCommand);
+
+    return {
+      statusCode: httpStatusCodes.SUCCESS,
+      body: JSON.stringify(updatedAsset.Attributes),
+    };
+  } catch (error) {
+    console.error("Error updating asset details:", error);
+    return {
+      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
+      body: JSON.stringify({ message: "Failed to update asset details" }),
+    };
+  }
+};
+
 module.exports = {
   createAsset,
+  updateAssetDetails,
 };

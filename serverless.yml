@@ -26,7 +26,6 @@ custom:
   employeeTableName: employee-Details-${self:provider.stage}
   assignmentTableName: assignment-Details-${self:provider.stage}
   assetTableName: asset-Details-${self:provider.stage}
-
 plugins:
   - serverless-iam-roles-per-function
 functions:
@@ -75,6 +74,15 @@ functions:
       - http:
           path: assignment
           method: POST
+  assignmentGet:
+    handler: src/Lamda/assignment/assignmentHandler.getAssignmentByEmployeeId
+    name: assignmentGet
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: assignment/{employeeId}
+          method: GET
   assetCreate:
     handler: src/Lamda/asset/assetHandler.createAsset
     name: assetCreate
@@ -84,6 +92,15 @@ functions:
       - http:
           path: asset
           method: POST
+  assetUpdate:
+    handler: src/Lamda/asset/assetHandler.updateAssetDetails
+    name: assetUpdate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: asset/{employeeId}
+          method: PUT
 resources:
   Resources:
     EmployeeTable:
@@ -139,4 +156,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        

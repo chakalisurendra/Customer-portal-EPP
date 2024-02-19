@@ -19,27 +19,27 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   };
 
   if (!validatePhone(requestBody.mobileNumber)) {
-    response.validationMessage = "Invalid Mobile Number it will allow 10 to 16 digits";
+    response.validationMessage = "Invalid Mobile Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePhone(requestBody.contactNumber)) {
-    response.validationMessage = "Invalid Contact Number it will allow 10 to 16 digits";
+    response.validationMessage = "Invalid Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePhone(requestBody.emergencyContactNumber)) {
-    response.validationMessage = "Invalid Emergency Contact Number it will allow 10 to 16 digits";
+    response.validationMessage = "Invalid Emergency Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validateSsnNumber(requestBody.ssnNumber)) {
-    response.validationMessage = "Invalid SSN Number it will allow only 9 digits";
+    response.validationMessage = "Invalid SSN Number it will allow only 9 digits, it will not allow Alphabets";
     return response;
   }
   if (!validateAadharNumber(requestBody.aadharNumber)) {
-    response.validationMessage = "Invalid Aadhar Number it will allow only 12 digits";
+    response.validationMessage = "Invalid Aadhar Number it will allow only 12 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePassportNumber(requestBody.passportNumber)) {
-    response.validationMessage = "Invalid Passport Number it will allow 8 to 12 digits";
+    response.validationMessage = `Invalid Passport Number it will allow 8 to 12 digits, Example "AWTY12345678"`;
     return response;
   }
   if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
@@ -126,7 +126,7 @@ const validatePassportNumber = (passportNumber) => {
   if (passportNumber === null || passportNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  const numberPattern = /^\d{8,12}$/;
+  const numberPattern = /^[A-Z]{4}\d{8}$/;
   if (numberPattern.test(passportNumber)) {
     return true;
   } else {
@@ -182,21 +182,21 @@ const validateGender = (gender) => {
   }
   return ["male", "female"].includes(gender);
 };
-
 const validatemaritalStatus = (maritalStatus) => {
   if (maritalStatus === null || maritalStatus === undefined) {
     return true; // Allow null or undefined values
   }
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
 };
+
 const validateAssetDetails = (requestBody) => {
   const response = {
     validation: false,
     validationMessage: "Valid Data",
   };
 
-  const { assetId, employeeId, assetsType, serialNumber, status } = requestBody;
-  const requiredProperties = ["assetId", "employeeId", "assetsType", "serialNumber", "status"];
+  const { assetId, assetsType, serialNumber, status } = requestBody;
+  const requiredProperties = ["assetId", "assetsType", "serialNumber", "status"];
 
   for (const property of requiredProperties) {
     if (!requestBody[property] || requestBody[property] === "") {
@@ -208,20 +208,9 @@ const validateAssetDetails = (requestBody) => {
     response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
-  if (!validateInputNumber(requestBody.assetId)) {
-    response.validationMessage = `Invalid assetId. Please provide a valid number, it will not allow Alphabets`;
-    return response;
-  }
 
   response.validation = true;
   return response;
-};
-
-const validateInputNumber = (emailAddress) => {
-  if (emailAddress === null || emailAddress === undefined) {
-    return true; // Allow null or undefined values
-  }
-  return isNaN(requestBody);
 };
 
 module.exports = {
