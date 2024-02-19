@@ -226,7 +226,9 @@ const getAssetDetails = async (event) => {
         TableName: process.env.ASSETS_TABLE,
         KeyConditionExpression: "employeeId = :id",
         ExpressionAttributeValues: {
-          ":id": employeeId,
+          ":id": {
+            S: employeeId,
+          },
         },
       };
       const { Items } = await client.send(new QueryCommand(params));
