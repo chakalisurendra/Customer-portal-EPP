@@ -44,6 +44,22 @@ const createAsset = async (event) => {
       return response;
     }
 
+    
+
+    // Construct the parameters for putting the item into the asset table
+    const params = {
+      TableName: process.env.ASSETS_TABLE,
+      Item: marshall({
+        assetId: requestBody.assetId,
+        employeeId: requestBody.employeeId || null,
+        assetsType: requestBody.assetsType,
+        serialNumber: requestBody.serialNumber,
+        status: requestBody.status,
+        createdDateTime: formattedDate,
+        updatedDateTime: formattedDate,
+      }),
+    };
+
     if (requestBody.employeeId !== null) {
       // Check if the employee ID exists in Employee Details
       const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
@@ -67,21 +83,6 @@ const createAsset = async (event) => {
         return response;
       }
     }
-
-    // Construct the parameters for putting the item into the asset table
-    const params = {
-      TableName: process.env.ASSETS_TABLE,
-      Item: marshall({
-        assetId: requestBody.assetId,
-        employeeId: requestBody.employeeId || null,
-        assetsType: requestBody.assetsType,
-        serialNumber: requestBody.serialNumber,
-        status: requestBody.status,
-        createdDateTime: formattedDate,
-        updatedDateTime: formattedDate,
-      }),
-    };
-
     const createResult = await client.send(new PutItemCommand(params));
     console.log("Successfully created asset details.");
 
@@ -200,64 +201,6 @@ const updateAssetDetails = async (event) => {
   }
 };
 
-// const getAssetDetails = async (event) => {
-//   console.log("Get asset details");
-//   const response = { statusCode: httpStatusCodes.SUCCESS };
-//   try {
-//     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
-//     if (!employeeId) {
-//       console.log("Employee Id is required");
-//       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
-//     }
-
-//     const getEmployeeParams = {
-//       TableName: process.env.EMPLOYEE_TABLE,
-//       Key: marshall({ employeeId }),
-//     };
-//     const { Item } = await client.send(new GetItemCommand(getEmployeeParams));
-//     if (!Item) {
-//       console.log(`Employee with employeeId ${employeeId} not found`);
-//       response.statusCode = 404;
-//       response.body = JSON.stringify({
-//         message: `Employee with employeeId ${employeeId} not found`,
-//       });
-//     } else {
-//       const params = {
-//         TableName: process.env.ASSETS_TABLE,
-//         KeyConditionExpression: "employeeId = :id",
-//         ExpressionAttributeValues: {
-//           ":id": {
-//             S: employeeId,
-//           },
-//         },
-//       };
-//       const { Items } = await client.send(new QueryCommand(params));
-//       console.log({ Items });
-//       if (!Items || Items.length === 0) {
-//         console.log("Asset information not found.");
-//         response.statusCode = httpStatusCodes.NOT_FOUND;
-//         response.body = JSON.stringify({
-//           message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
-//         });
-//       } else {
-//         console.log("Successfully retrieved Asset information.");
-//         response.body = JSON.stringify({
-//           message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
-//           data: Items.map((item) => unmarshall(item)),
-//         });
-//       }
-//     }
-//   } catch (e) {
-//     console.error(e);
-//     response.body = JSON.stringify({
-//       statusCode: e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR,
-//       message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSET_INFORMATION,
-//       errorMsg: e.message,
-//     });
-//   }
-//   return response;
-// };
-
 const getAssetDetails = async (event) => {
   console.log("Get asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -267,7 +210,6 @@ const getAssetDetails = async (event) => {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
     }
-
     const getEmployeeParams = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
