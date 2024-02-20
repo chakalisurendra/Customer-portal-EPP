@@ -23,22 +23,14 @@ const createMetadata = async (event) => {
       return response;
     }
 
-    const incrementparams = {
-      TableName: process.env.METADATA_TABLE,
-      ProjectionExpression: "metadataId",
-    };
-    let maxAssetId;
-    client.scan(incrementparams, (err, data) => {
-      if (err) {
-        maxAssetId = 0;
-        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-      } else {
-        // Extract the assetIds from the items and find the maximum
-        const assetIds = data.Items.map((item) => item["assetId"]);
-        maxAssetId = Math.max(...assetIds);
-        console.log("Max Asset ID:", maxAssetId);
-      }
-    });
+    let maxAssetId = 0;
+    const data = await client.send(new ScanCommand(params));
+    // Extract the assetIds from the items and find the maximum
+    if (data.Items.length > 0) {
+      const assetIds = data.Items.map((item) => item["assetId"]);
+      maxAssetId = Math.max(...assetIds);
+      console.log("Max Asset ID:", maxAssetId);
+    }
     const nextSerialNumber = maxAssetId + 1;
     // const highestSerialNumber = await getMaxNumberFromTable();
     // console.log("Highest Serial Number:", highestSerialNumber);
