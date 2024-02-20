@@ -203,7 +203,7 @@ const getAssetDetails = async (event) => {
   console.log("Get asset details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
-    const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
+    const employeeId = event.pathParameters ? event.pathParameters.assignTo : null;
     if (!employeeId) {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
@@ -222,7 +222,7 @@ const getAssetDetails = async (event) => {
     } else {
       const params = {
         TableName: process.env.ASSETS_TABLE,
-        FilterExpression: "employeeId = :id",
+        FilterExpression: "assignTo = :id",
         ExpressionAttributeValues: {
           ":id": { S: employeeId },
         },

@@ -108,7 +108,7 @@ functions:
     timeout: 120
     events:
       - http:
-          path: asset/get/{employeeId}
+          path: asset/get/{assignTo}
           method: GET
 resources:
   Resources:
