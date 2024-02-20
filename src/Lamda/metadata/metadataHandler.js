@@ -22,39 +22,57 @@ const createMetadata = async (event) => {
       });
       return response;
     }
-    const highestSerialNumber = await getMaxNumberFromTable();
-    console.log("Highest Serial Number:", highestSerialNumber);
 
-    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
-
-    async function getMaxNumberFromTable() {
-      const params = {
-        TableName: process.env.METADATA_TABLE,
-        KeyConditionExpression: "metadataId > :minNumber",
-        ExpressionAttributeValues: {
-          ":minNumber": 0, // Assuming the minimum value is 0, adjust accordingly if different
-        },
-        ScanIndexForward: false, // Retrieve items in descending order
-        Limit: 1, // Limit the result to just one item
-      };
-
-      try {
-        const result = await client.send(new QueryCommand(params));
-        console.log("DynamoDB Result:", result);
-        if (!result.Items || result.Items.length === 0) {
-          return 0; // No items found
-        } else {
-          const maxNumberObj = result.Items[0].metadataId;
-          console.log("Max Number from DynamoDB:", maxNumberObj);
-          const maxNumber = parseInt(maxNumberObj);
-          console.log("Parsed Max Number:", maxNumber);
-          return maxNumber;
-        }
-      } catch (error) {
-        console.error("Error retrieving max number from table:", error);
-        throw error;
+    const incrementparams = {
+      TableName: process.env.METADATA_TABLE,
+      ProjectionExpression: "metadataId",
+    };
+    let maxAssetId;
+    client.scan(incrementparams, (err, data) => {
+      if (err) {
+        maxAssetId = 0;
+        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+      } else {
+        // Extract the assetIds from the items and find the maximum
+        const assetIds = data.Items.map((item) => item["assetId"]);
+        maxAssetId = Math.max(...assetIds);
+        console.log("Max Asset ID:", maxAssetId);
       }
-    }
+    });
+    const nextSerialNumber = maxAssetId + 1;
+    // const highestSerialNumber = await getMaxNumberFromTable();
+    // console.log("Highest Serial Number:", highestSerialNumber);
+
+    // const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+
+    // async function getMaxNumberFromTable() {
+    //   const params = {
+    //     TableName: process.env.METADATA_TABLE,
+    //     KeyConditionExpression: "metadataId > :minNumber",
+    //     ExpressionAttributeValues: {
+    //       ":minNumber": 0, // Assuming the minimum value is 0, adjust accordingly if different
+    //     },
+    //     ScanIndexForward: false, // Retrieve items in descending order
+    //     Limit: 1, // Limit the result to just one item
+    //   };
+
+    //   try {
+    //     const result = await client.send(new QueryCommand(params));
+    //     console.log("DynamoDB Result:", result);
+    //     if (!result.Items || result.Items.length === 0) {
+    //       return 0; // No items found
+    //     } else {
+    //       const maxNumberObj = result.Items[0].metadataId;
+    //       console.log("Max Number from DynamoDB:", maxNumberObj);
+    //       const maxNumber = parseInt(maxNumberObj);
+    //       console.log("Parsed Max Number:", maxNumber);
+    //       return maxNumber;
+    //     }
+    //   } catch (error) {
+    //     console.error("Error retrieving max number from table:", error);
+    //     throw error;
+    //   }
+    // }
 
     // const highestSerialNumber = await getHighestSerialNumber();
     // console.log("Highest Serial Number:", highestSerialNumber);
