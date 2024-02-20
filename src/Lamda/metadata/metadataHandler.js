@@ -69,7 +69,7 @@ const createMetadata = async (event) => {
 
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_METADATA,
-      metadataId: requestBody.metadataId,
+      metadataId: nextSerialNumber,
     });
   } catch (error) {
     console.error("Error creating metadata:", error);
@@ -82,24 +82,58 @@ const createMetadata = async (event) => {
   return response;
 };
 
+// const getMetadata = async (event) => {
+//   console.log("Get metadata details");
+//   const response = { statusCode: httpStatusCodes.SUCCESS };
+//   try {
+//     const params = {
+//       TableName: process.env.METADATA_TABLE,
+//       Key: marshall({ metadataId: event.pathParameters.metadataId }),
+//     };
+//     const { Item } = await client.send(new GetItemCommand(params));
+//     console.log({ Item });
+//     if (!Item) {
+//       console.log("Employee details not found.");
+//       response.statusCode = httpStatusCodes.NOT_FOUND;
+//       response.body = JSON.stringify({
+//         message: httpStatusMessages.METADATA_NOT_FOUND,
+//       });
+//     } else {
+//       console.log("Successfully retrieved Employee details.");
+//       response.body = JSON.stringify({
+//         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
+//         data: unmarshall(Item),
+//       });
+//     }
+//   } catch (e) {
+//     console.error(e);
+//     response.body = JSON.stringify({
+//       statusCode: e.statusCode,
+//       message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA,
+//       errorMsg: e.message,
+//     });
+//   }
+//   return response;
+// };
 const getMetadata = async (event) => {
   console.log("Get metadata details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
+    const metadataId = parseInt(event.pathParameters.metadataId); // Convert to number type
     const params = {
       TableName: process.env.METADATA_TABLE,
-      Key: marshall({ metadataId: event.pathParameters.metadataId }),
+      Key: marshall({ metadataId }), // Assuming metadataId is the primary key
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
     if (!Item) {
-      console.log("Employee details not found.");
+      console.log("Metadata details not found.");
       response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
         message: httpStatusMessages.METADATA_NOT_FOUND,
       });
     } else {
-      console.log("Successfully retrieved Employee details.");
+      console.log("Successfully retrieved metadata details.");
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
         data: unmarshall(Item),
@@ -107,8 +141,8 @@ const getMetadata = async (event) => {
     }
   } catch (e) {
     console.error(e);
+    response.statusCode = e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR;
     response.body = JSON.stringify({
-      statusCode: e.statusCode,
       message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA,
       errorMsg: e.message,
     });
