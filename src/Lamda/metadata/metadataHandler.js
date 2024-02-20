@@ -25,32 +25,34 @@ const createMetadata = async (event) => {
 
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
-
     const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
     async function getHighestSerialNumber() {
       const params = {
         TableName: process.env.METADATA_TABLE,
         ProjectionExpression: "metadataId",
-        Limit: 1,
-        ScanIndexForward: false,
+        Limit: 1000, // Increase the limit to retrieve more items for sorting
       };
 
       try {
         const result = await client.send(new ScanCommand(params));
-        console.log("DynamoDB Result:", result);
-        if (result.Items.length === 0) {
-          return 0;
+
+        // Sort the items in descending order based on assignmentId
+        const sortedItems = result.Items.sort((a, b) => {
+          return parseInt(b.metadataId.N) - parseInt(a.metadataId.N);
+        });
+
+        console.log("Sorted Items:", sortedItems); // Log the sorted items
+
+        if (sortedItems.length === 0) {
+          return 0; // If no records found, return null
         } else {
-          // Parse and return the highest serial number without incrementing
-          const metadataIdObj = result.Items[0].metadataId;
-          console.log("Assignment ID from DynamoDB:", metadataIdObj);
-          const metadataId = parseInt(metadataIdObj.N);
-          console.log("Parsed Assignment ID:", metadataId);
-          return metadataId;
+          const highestmetadataId = parseInt(sortedItems[0].metadataId.N);
+          console.log("Highest Assignment ID:", highestmetadataId);
+          return highestmetadataId;
         }
       } catch (error) {
         console.error("Error retrieving highest serial number:", error);
-        throw error;
+        throw error; // Propagate the error up the call stack
       }
     }
 
