@@ -26,23 +26,30 @@ const createMetadata = async (event) => {
     console.log("Highest Serial Number:", highestSerialNumber);
 
     const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+
     async function getHighestSerialNumber() {
       const params = {
         TableName: process.env.METADATA_TABLE,
-        ProjectionExpression: "metadataId",
-        Limit: 1,
+        KeyConditionExpression: "#metadataId > :startId",
+        ExpressionAttributeNames: {
+          "#metadataId": "metadataId",
+        },
+        ExpressionAttributeValues: {
+          ":startId": 0, // Assuming metadataId starts from 0
+        },
         ScanIndexForward: false,
+        Limit: 1,
       };
 
       try {
-        const result = await client.send(new ScanCommand(params));
+        const result = await client.send(new QueryCommand(params));
         console.log("DynamoDB Result:", result);
         if (result.Items.length === 0) {
-          return 0;
+          return null; // No items found
         } else {
           const metadataIdObj = result.Items[0].metadataId;
           console.log("Metadata ID from DynamoDB:", metadataIdObj);
-          const metadataId = parseInt(metadataIdObj.N);
+          const metadataId = parseInt(metadataIdObj);
           console.log("Parsed Metadata ID:", metadataId);
           return metadataId;
         }
@@ -51,6 +58,36 @@ const createMetadata = async (event) => {
         throw error;
       }
     }
+
+    // const highestSerialNumber = await getHighestSerialNumber();
+    // console.log("Highest Serial Number:", highestSerialNumber);
+
+    // const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+    // async function getHighestSerialNumber() {
+    //   const params = {
+    //     TableName: process.env.METADATA_TABLE,
+    //     ProjectionExpression: "metadataId",
+    //     Limit: 1,
+    //     ScanIndexForward: false,
+    //   };
+
+    //   try {
+    //     const result = await client.send(new ScanCommand(params));
+    //     console.log("DynamoDB Result:", result);
+    //     if (result.Items.length === 0) {
+    //       return 0;
+    //     } else {
+    //       const metadataIdObj = result.Items[0].metadataId;
+    //       console.log("Metadata ID from DynamoDB:", metadataIdObj);
+    //       const metadataId = parseInt(metadataIdObj.N);
+    //       console.log("Parsed Metadata ID:", metadataId);
+    //       return metadataId;
+    //     }
+    //   } catch (error) {
+    //     console.error("Error retrieving highest serial number:", error);
+    //     throw error;
+    //   }
+    // }
     // Construct the parameters for putting the item into the metadata table
     const params = {
       TableName: process.env.METADATA_TABLE,
