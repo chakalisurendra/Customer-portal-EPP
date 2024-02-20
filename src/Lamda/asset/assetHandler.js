@@ -120,6 +120,7 @@ const isEmployeeIdExistsInAssets = async (assignTo) => {
     },
     ProjectionExpression: "assignTo",
   };
+  
   const command = new ScanCommand(params);
   const data = await client.send(command);
   return data.Items.length > 0;
