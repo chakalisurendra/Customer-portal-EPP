@@ -49,7 +49,7 @@ const createAsset = async (event) => {
       TableName: process.env.ASSETS_TABLE,
       Item: marshall({
         assetId: requestBody.assetId,
-        employeeId: requestBody.employeeId || null,
+        assignTo: requestBody.assignTo || null,
         assetsType: requestBody.assetsType,
         serialNumber: requestBody.serialNumber,
         status: requestBody.status,
@@ -58,9 +58,9 @@ const createAsset = async (event) => {
       }),
     };
 
-    if (requestBody.employeeId !== null && requestBody.employeeId !== undefined) {
+    if (requestBody.assignTo !== null && requestBody.assignTo !== undefined) {
       // Check if the employee ID exists in Employee Details
-      const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
+      const employeeIdExists = await isEmployeeIdExists(requestBody.assignTo);
       if (!employeeIdExists) {
         console.log("Employee details not found.");
         response.statusCode = httpStatusCodes.BAD_REQUEST;
@@ -71,7 +71,7 @@ const createAsset = async (event) => {
       }
 
       // Check if the employee ID exists in the asset table
-      const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.employeeId);
+      const employeeIdExistsInAssets = await isEmployeeIdExistsInAssets(requestBody.assignTo);
       if (employeeIdExistsInAssets) {
         console.log("Employee ID already exists in assets.");
         response.statusCode = httpStatusCodes.BAD_REQUEST;
@@ -101,24 +101,24 @@ const createAsset = async (event) => {
 };
 
 // Function to check if the employee ID exists
-const isEmployeeIdExists = async (employeeId) => {
+const isEmployeeIdExists = async (assignTo) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    Key: { employeeId: { S: employeeId } },
+    Key: { employeeId: { S: assignTo } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
   return !!Item;
 };
 
 // Function to check if the employee ID exists in the asset table
-const isEmployeeIdExistsInAssets = async (employeeId) => {
+const isEmployeeIdExistsInAssets = async (assignTo) => {
   const params = {
     TableName: process.env.ASSETS_TABLE,
-    FilterExpression: "employeeId = :eId",
+    FilterExpression: "assignTo = :eId",
     ExpressionAttributeValues: {
-      ":eId": { S: employeeId },
+      ":eId": { S: assignTo },
     },
-    ProjectionExpression: "employeeId",
+    ProjectionExpression: "assignTo",
   };
 
   const command = new ScanCommand(params);
