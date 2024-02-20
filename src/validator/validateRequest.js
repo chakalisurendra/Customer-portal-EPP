@@ -213,8 +213,35 @@ const validateAssetDetails = (requestBody) => {
   return response;
 };
 
+// =================================================================================
+
+const validateMetadata = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  const { name, type, status } = requestBody;
+  const requiredProperties = ["name", "type", "status"];
+
+  for (const property of requiredProperties) {
+    if (!requestBody[property] || requestBody[property] === "") {
+      response.validationMessage = `${property} is required`;
+      return response;
+    }
+  }
+  if (!validateStatus(requestBody.status)) {
+    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    return response;
+  }
+
+  response.validation = true;
+  return response;
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
+  validateMetadata,
 };

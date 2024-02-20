@@ -8,7 +8,7 @@ provider:
     EMPLOYEE_TABLE: ${self:custom.employeeTableName}
     ASSIGNMENTS_TABLE: ${self:custom.assignmentTableName}
     ASSETS_TABLE: ${self:custom.assetTableName}
-
+    METADATA_TABLE: ${self:custom.metadataTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -22,10 +22,13 @@ provider:
         - !GetAtt EmployeeTable.Arn
         - !GetAtt AssignmentTable.Arn
         - !GetAtt AssetTable.Arn
+        - !GetAtt MetadataTable.Arn
 custom:
   employeeTableName: employee-Details-${self:provider.stage}
   assignmentTableName: assignment-Details-${self:provider.stage}
   assetTableName: asset-Details-${self:provider.stage}
+  metadataTableName: metadata
+
 plugins:
   - serverless-iam-roles-per-function
 functions:
@@ -110,6 +113,24 @@ functions:
       - http:
           path: asset/get/{employeeId}
           method: GET
+  metadataCreate:
+    handler: src/Lamda/metadata/metadataHandler.createMetadata
+    name: metadataCreate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: metadata
+          method: POST
+  metadataGet:
+    handler: src/Lamda/metadata/metadataHandler.getMetadata
+    name: metadataGet
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: metadata/get/{metadataId}
+          method: GET
 resources:
   Resources:
     EmployeeTable:
@@ -161,6 +182,19 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: assetId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    MetadataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.metadataTableName}
+        AttributeDefinitions:
+          - AttributeName: metadataId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: metadataId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

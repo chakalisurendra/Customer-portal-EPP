@@ -24,6 +24,13 @@ const httpStatusMessages = {
   SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION: "Successfully retrieved Asset information.",
   ASSET_INFORMATION_NOT_FOUND: "Asset information not found.",
   FAILED_TO_RETRIEVE_ASSET_INFORMATION: "Failed to retrieve Asset information.",
+  SUCCESSFULLY_CREATED_METADATA: "Successfully created metadata.",
+  FAILED_TO_CREATE_METADATA: "Failed to create metadata.",
+  METADATA_ALREADY_EXISTS: "Metadata already exists.",
+  SUCCESSFULLY_RETRIEVED_METADATA: "Successfully retrieved metadata.",
+  FAILED_TO_RETRIEVE_METADATA: "Failed to retrieve metadata.",
+  METADATA_NOT_FOUND: "Metadata not found.",
+  METADATA_ID_REQUIRED: "Metadata Id is required",
 };
 
 module.exports = {
