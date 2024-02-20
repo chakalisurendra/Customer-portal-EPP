@@ -41,7 +41,7 @@ const createMetadata = async (event) => {
       try {
         const result = await client.send(new QueryCommand(params));
         console.log("DynamoDB Result:", result);
-        if (result.Items.length === 0) {
+        if (!result.Items || result.Items.length === 0) {
           return 0; // No items found
         } else {
           const maxNumberObj = result.Items[0].metadataId;
