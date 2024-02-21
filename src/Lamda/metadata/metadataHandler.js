@@ -172,13 +172,8 @@ const getMetadata = async (event) => {
 // };
 const getMetadataByStatusAndType = async (event) => {
   try {
-    // Extract query parameters from the event object
     const { type, status } = event.queryStringParameters;
 
-    // Marshall the query parameters for DynamoDB query
-    const marshalledParams = marshall({ type: type, status: status });
-
-    // Construct DynamoDB query parameters based on the marshalled query parameters
     const params = {
       TableName: process.env.METADATA_TABLE,
       KeyConditionExpression: "#type = :typeValue AND #status = :statusValue",
@@ -186,16 +181,16 @@ const getMetadataByStatusAndType = async (event) => {
         "#type": "type",
         "#status": "status",
       },
-      ExpressionAttributeValues: marshalledParams,
+      ExpressionAttributeValues: {
+        ":typeValue": { S: type },
+        ":statusValue": { S: status },
+      },
     };
 
-    // Execute the DynamoDB query
-    const data = await client.send(new QueryCommand(params));
+    const data = await dynamodbClient.send(new QueryCommand(params));
 
-    // Unmarshall the query results
-    const items = data.Items.map((item) => unmarshall(item));
+    const items = data.Items.map(item => unmarshall(item));
 
-    // Construct a successful response with the query results
     const response = {
       statusCode: httpStatusCodes.OK,
       body: JSON.stringify(items),
@@ -203,7 +198,6 @@ const getMetadataByStatusAndType = async (event) => {
 
     return response;
   } catch (error) {
-    // Handle any errors that occur during execution
     console.error("Error:", error);
     return {
       statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
