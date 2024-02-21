@@ -187,9 +187,9 @@ const getMetadataByStatusAndType = async (event) => {
       },
     };
 
-    const data = await dynamodbClient.send(new QueryCommand(params));
+    const data = await client.send(new QueryCommand(params));
 
-    const items = data.Items.map(item => unmarshall(item));
+    const items = data.Items.map((item) => unmarshall(item));
 
     const response = {
       statusCode: httpStatusCodes.OK,
