@@ -181,33 +181,20 @@ const getMetadataByStatusAndType = async (event) => {
 
 const isNameAndTypeExists = async (name, type) => {
   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-//   const params = {
-//     TableName: process.env.METADATA_TABLE,
-//     FilterExpression: "#type = :typeValue AND #name = :nameValue",
-//     ExpressionAttributeNames: {
-//       "#type": "type",
-//       "#name": "name",
-//     },
-//     ExpressionAttributeValues: {
-//       ":typeValue": { S: type },
-//       ":nameValue": { S: name },
-//     },
-//   };
+  const params = {
+    TableName: process.env.METADATA_TABLE,
+    FilterExpression: "#type = :typeValue AND #name = :nameValue",
+    ExpressionAttributeNames: {
+      "#type": "type",
+      "#name": "name",
+    },
+    ExpressionAttributeValues: {
+      ":typeValue": { S: type },
+      ":nameValue": { S: name },
+    },
+  };
 
-    const params = {
-      TableName: process.env.METADATA_TABLE,
-      KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
-      ExpressionAttributeNames: {
-        "#type": "type",
-        "#name": "name",
-      },
-      ExpressionAttributeValues: {
-        ":typeValue": { S: type },
-        ":nameValue": { S: name },
-      },
-    };
-
-  const data = await client.send(new QueryCommand(params));
+  const data = await client.send(new ScanCommand(params));
   console.log(`In side isNameAndTypeExists length : ${data.Items.length}`);
 
   return data.Items.length > 0;
