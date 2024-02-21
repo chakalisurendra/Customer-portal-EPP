@@ -131,6 +131,20 @@ functions:
       - http:
           path: metadata/get/{metadataId}
           method: GET
+  metadataGetbyIdandStatus:
+    handler: src/Lamda/metadata/metadataHandler.getMetadataIdAndStatus
+    name: metadataGet
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: metadata/getAll
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                type: true
+                status: true
 resources:
   Resources:
     EmployeeTable:

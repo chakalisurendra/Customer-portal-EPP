@@ -122,6 +122,55 @@ const getMetadata = async (event) => {
   return response;
 };
 
+const getMetadataIdAndStatus = async (event) => {
+  console.log("Get metadata details");
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+  try {
+    const { type, status } = event.queryStringParameters;
+
+    const params = {
+      TableName: process.env.METADATA_TABLE,
+    };
+    // Construct the FilterExpression and ExpressionAttributeValues based on type and status
+    if (type && status) {
+      params.FilterExpression = "#type = :typeValue AND #status = :statusValue";
+      params.ExpressionAttributeNames = { "#type": "type", "#status": "status" };
+      params.ExpressionAttributeValues = { ":typeValue": type, ":statusValue": status };
+    } else if (type) {
+      params.FilterExpression = "#type = :typeValue";
+      params.ExpressionAttributeNames = { "#type": "type" };
+      params.ExpressionAttributeValues = { ":typeValue": type };
+    } else if (status) {
+      params.FilterExpression = "#status = :statusValue";
+      params.ExpressionAttributeNames = { "#status": "status" };
+      params.ExpressionAttributeValues = { ":statusValue": status };
+    }
+    const { Item } = await client.send(new GetItemCommand(params));
+    console.log({ Item });
+    if (!Item) {
+      console.log("Metadata details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.METADATA_NOT_FOUND,
+      });
+    } else {
+      console.log("Successfully retrieved metadata details.");
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
+        data: unmarshall(Item),
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.statusCode = e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR;
+    response.body = JSON.stringify({
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
+
 module.exports = {
   createMetadata,
   getMetadata,
