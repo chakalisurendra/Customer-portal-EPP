@@ -23,6 +23,17 @@ const createMetadata = async (event) => {
       return response;
     }
 
+    const nameAndTypeExists = await isNameAndTypeExists(requestBody.type, requestBody.name);
+    if (nameAndTypeExists) {
+      console.log("With Name And Type already metadata exists.");
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: "With Name And Type already metadata exists.",
+      });
+      return response;
+    }
+
+    // Get max id
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
     const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
@@ -30,21 +41,18 @@ const createMetadata = async (event) => {
       const params = {
         TableName: process.env.METADATA_TABLE,
         ProjectionExpression: "metadataId",
-        Limit: 1000, // Increase the limit to retrieve more items for sorting
+        Limit: 1000,
       };
 
       try {
         const result = await client.send(new ScanCommand(params));
-
-        // Sort the items in descending order based on assignmentId
         const sortedItems = result.Items.sort((a, b) => {
           return parseInt(b.metadataId.N) - parseInt(a.metadataId.N);
         });
 
-        console.log("Sorted Items:", sortedItems); // Log the sorted items
-
+        console.log("Sorted Items:", sortedItems);
         if (sortedItems.length === 0) {
-          return 0; // If no records found, return null
+          return 0;
         } else {
           const highestmetadataId = parseInt(sortedItems[0].metadataId.N);
           console.log("Highest Assignment ID:", highestmetadataId);
@@ -52,7 +60,7 @@ const createMetadata = async (event) => {
         }
       } catch (error) {
         console.error("Error retrieving highest serial number:", error);
-        throw error; // Propagate the error up the call stack
+        throw error;
       }
     }
 
@@ -167,25 +175,25 @@ const getMetadataByStatusAndType = async (event) => {
     });
   }
   return response;
+};
 
-  //     const items = data.Items.map((item) => unmarshall(item));
+const isNameAndTypeExists = async (name, type) => {
+  console.log("in side isNameAndTypeExists");
+  const params = {
+    TableName: process.env.METADATA_TABLE,
+    FilterExpression: "#type = :typeValue AND #name = :nameValue",
+    ExpressionAttributeNames: {
+      "#type": "type",
+      "#name": "name",
+    },
+    ExpressionAttributeValues: {
+      ":typeValue": { S: type },
+      ":nameValue": { S: name },
+    },
+  };
 
-  //     const response = {
-  //       statusCode: httpStatusCodes.OK,
-  //       body: JSON.stringify(items),
-  //     };
-
-  //     return response;
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     return {
-  //       statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
-  //       body: JSON.stringify({
-  //         message: "Internal Server Error",
-  //         error: error.message,
-  //       }),
-  //     };
-  //   }
+  const data = await client.send(new ScanCommand(params));
+  return data.Items.length > 0;
 };
 
 module.exports = {
