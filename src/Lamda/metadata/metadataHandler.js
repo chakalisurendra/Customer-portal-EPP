@@ -176,7 +176,7 @@ const getMetadataByStatusAndType = async (event) => {
 
     const params = {
       TableName: process.env.METADATA_TABLE,
-      KeyConditionExpression: "#type = :typeValue AND #status = :statusValue",
+      FilterExpression: "#type = :typeValue AND #status = :statusValue",
       ExpressionAttributeNames: {
         "#type": "type",
         "#status": "status",
