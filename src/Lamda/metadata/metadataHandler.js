@@ -123,6 +123,8 @@ const getMetadata = async (event) => {
 };
 
 const getMetadataByStatusAndType = async (event) => {
+  console.log("Get metadata with type and status");
+  const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
     const { type, status } = event.queryStringParameters;
 
