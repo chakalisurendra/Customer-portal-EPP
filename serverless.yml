@@ -131,7 +131,17 @@ functions:
       - http:
           path: metadata/get/{metadataId}
           method: GET
-  
+  getMetadataByStatusAndType:
+    handler: src/Lamda/metadata/metadataHandler.getMetadataByStatusAndType
+    events:
+      - http:
+          path: metadata/getby
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                type: true
+                status: true
 resources:
   Resources:
     EmployeeTable:
