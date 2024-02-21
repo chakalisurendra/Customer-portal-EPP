@@ -187,7 +187,7 @@ const getMetadataByStatusAndType = async (event) => {
       },
     };
 
-    const data = await client.send(new QueryCommand(params));
+    const data = await client.send(new ScanCommand(params));
 
     const items = data.Items.map((item) => unmarshall(item));
 
