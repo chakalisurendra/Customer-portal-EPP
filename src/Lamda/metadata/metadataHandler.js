@@ -24,6 +24,8 @@ const createMetadata = async (event) => {
     }
 
     const nameAndTypeExists = await isNameAndTypeExists(requestBody.type, requestBody.name);
+    console.log(`isNameAndTypeExists nameAndTypeExists : ${nameAndTypeExists}`);
+
     if (nameAndTypeExists) {
       console.log("With Name And Type already metadata exists.");
       response.statusCode = 400;
@@ -178,7 +180,7 @@ const getMetadataByStatusAndType = async (event) => {
 };
 
 const isNameAndTypeExists = async (name, type) => {
-  console.log("in side isNameAndTypeExists");
+  console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
   const params = {
     TableName: process.env.METADATA_TABLE,
     FilterExpression: "#type = :typeValue AND #name = :nameValue",
@@ -193,6 +195,8 @@ const isNameAndTypeExists = async (name, type) => {
   };
 
   const data = await client.send(new ScanCommand(params));
+  console.log(`In side isNameAndTypeExists length : ${data.Items.length}`);
+
   return data.Items.length > 0;
 };
 
