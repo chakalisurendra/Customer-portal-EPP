@@ -174,4 +174,5 @@ const getMetadataIdAndStatus = async (event) => {
 module.exports = {
   createMetadata,
   getMetadata,
+  getMetadataIdAndStatus,
 };

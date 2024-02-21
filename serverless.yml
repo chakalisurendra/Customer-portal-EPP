@@ -133,7 +133,7 @@ functions:
           method: GET
   metadataGetbyIdandStatus:
     handler: src/Lamda/metadata/metadataHandler.getMetadataIdAndStatus
-    name: metadataGet
+    name: metadataGetAll
     memorySize: 128
     timeout: 120
     events:
