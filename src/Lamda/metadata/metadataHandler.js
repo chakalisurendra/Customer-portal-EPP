@@ -155,7 +155,7 @@ const getMetadataByStatusAndType = async (event) => {
       console.log("Successfully retrieved Employee details.");
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
-        data: JSON.stringify(items),
+        data: items,
       });
     }
   } catch (e) {
