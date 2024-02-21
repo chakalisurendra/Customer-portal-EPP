@@ -187,26 +187,49 @@ const getMetadataByStatusAndType = async (event) => {
       },
     };
 
-    const data = await client.send(new ScanCommand(params));
-
-    const items = data.Items.map((item) => unmarshall(item));
-
-    const response = {
-      statusCode: httpStatusCodes.OK,
-      body: JSON.stringify(items),
-    };
-
-    return response;
-  } catch (error) {
-    console.error("Error:", error);
-    return {
-      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
-      body: JSON.stringify({
-        message: "Internal Server Error",
-        error: error.message,
-      }),
-    };
+    const { Item } = await client.send(new ScanCommand(params));
+    console.log({ Item });
+    if (!Item) {
+      console.log("Employee details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.METADATA_NOT_FOUND,
+      });
+    } else {
+      console.log("Successfully retrieved Employee details.");
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
+        data: unmarshall(Item),
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: e.statusCode,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
+      errorMsg: e.message,
+    });
   }
+  return response;
+
+  //  const items = data.Items.map((item) => unmarshall(item));
+
+  //     const response = {
+  //       statusCode: httpStatusCodes.OK,
+  //       body: JSON.stringify(items),
+  //     };
+
+  //     return response;
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     return {
+  //       statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
+  //       body: JSON.stringify({
+  //         message: "Internal Server Error",
+  //         error: error.message,
+  //       }),
+  //     };
+  //   }
 };
 
 module.exports = {
