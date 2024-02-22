@@ -6,6 +6,9 @@ const { httpStatusCodes, httpStatusMessages } = require("../../environment/appco
 const client = new DynamoDBClient();
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
 
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB.DocumentClient();
+
 const createMetadata = async (event) => {
   console.log("Create metadata details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -36,7 +39,7 @@ const createMetadata = async (event) => {
       },
     };
 
-    const data1 = await client.query(params1).promise();
+    const data1 = await dynamodb.query(params1).promise();
 
     // Calculate the size of the response data
     const responseSize = Buffer.byteLength(JSON.stringify(data1));
