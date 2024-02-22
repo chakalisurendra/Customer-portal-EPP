@@ -220,9 +220,12 @@ const isNameAndTypeExists = async (name, type) => {
   };
 
   const data = await client.send(new QueryCommand(params));
-  const items = data.Items.map((item) => unmarshall(item));
 
-  return items.length > 0;
+  if (!data || !data.Items) {
+    console.log("No items found");
+    return true;
+  }
+  return false;
 };
 module.exports = {
   createMetadata,
