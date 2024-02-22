@@ -200,7 +200,7 @@ const isNameAndTypeExists = async (name, type) => {
   const data = await client.send(new ScanCommand(params));
   //const items = data.Items.map((item) => unmarshall(item));
 
-  if (!data || !data.Items || data.Items.length === 0) {
+  if (data.Items.length === 0) {
     console.log("No items found");
     return true;
   }
