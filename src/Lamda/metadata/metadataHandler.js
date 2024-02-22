@@ -184,7 +184,7 @@ const getMetadataByStatusAndType = async (event) => {
 
 const isNameAndTypeExists = async (name, type) => {
   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-  let response = true;
+  //let response = false;
   const params = {
     TableName: process.env.METADATA_TABLE,
     FilterExpression: "#type = :typeValue AND #name = :nameValue",
@@ -207,9 +207,10 @@ const isNameAndTypeExists = async (name, type) => {
   console.log(items.length);
 
   if (items) {
-    response = false;
+    return true;
+  } else {
+    return false;
   }
-  return response;
 };
 module.exports = {
   createMetadata,
