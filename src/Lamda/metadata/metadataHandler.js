@@ -39,7 +39,7 @@ const createMetadata = async (event) => {
       },
     };
 
-        const data = await dynamodb.scan(params1).promise();
+        const data1 = await dynamodb.scan(params1).promise();
 
     // Calculate the size of the response data
     const responseSize = Buffer.byteLength(JSON.stringify(data1));
