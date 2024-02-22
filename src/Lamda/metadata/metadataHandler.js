@@ -182,44 +182,23 @@ const getMetadataByStatusAndType = async (event) => {
   return response;
 };
 
-// const isNameAndTypeExists = async (name, type) => {
-//   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-//   const params = {
-//     TableName: process.env.METADATA_TABLE,
-//     FilterExpression: "#type = :typeValue AND #name = :nameValue",
-//     ExpressionAttributeNames: {
-//       "#type": "type",
-//       "#name": "name",
-//     },
-//     ExpressionAttributeValues: {
-//       ":typeValue": { S: type },
-//       ":nameValue": { S: name },
-//     },
-//   };
-
-//   const data = await client.send(new ScanCommand(params));
-//   const items = data.Items.map((item) => unmarshall(item));
-
-//   return items.length > 0;
-// };
-
 const isNameAndTypeExists = async (name, type) => {
-  console.log(`Inside isNameAndTypeExists, name: ${name}, type: ${type}`);
-
+  console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
   const params = {
     TableName: process.env.METADATA_TABLE,
-    KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
+    FilterExpression: "#type = :typeValue AND #name = :nameValue",
     ExpressionAttributeNames: {
       "#type": "type",
       "#name": "name",
     },
     ExpressionAttributeValues: {
-      ":typeValue": type,
-      ":nameValue": name,
+      ":typeValue": { S: type },
+      ":nameValue": { S: name },
     },
   };
 
-  const data = await client.send(new QueryCommand(params));
+  const data = await client.send(new ScanCommand(params));
+  //const items = data.Items.map((item) => unmarshall(item));
 
   if (!data || !data.Items || data.Items.length === 0) {
     console.log("No items found");
@@ -228,6 +207,33 @@ const isNameAndTypeExists = async (name, type) => {
 
   return true;
 };
+
+// const isNameAndTypeExists = async (name, type) => {
+//   console.log(`Inside isNameAndTypeExists, name: ${name}, type: ${type}`);
+
+//   const params = {
+//     TableName: process.env.METADATA_TABLE,
+//     KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
+//     ExpressionAttributeNames: {
+//       "#type": "type",
+//       "#name": "name",
+//     },
+//     ExpressionAttributeValues: {
+//       ":typeValue": type,
+//       ":nameValue": name,
+//     },
+//   };
+
+//   const data = await client.send(new QueryCommand(params));
+
+//   if (!data || !data.Items || data.Items.length === 0) {
+//     console.log("No items found");
+//     return false;
+//   }
+
+//   return true;
+// };
+
 module.exports = {
   createMetadata,
   getMetadata,
