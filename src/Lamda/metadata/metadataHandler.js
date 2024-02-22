@@ -57,7 +57,7 @@ const createMetadata = async (event) => {
           return 0;
         } else {
           const highestmetadataId = parseInt(sortedItems[0].metadataId.N);
-          console.log("Highest Assignment ID:", highestmetadataId);
+          console.log("Highest metadata ID:", highestmetadataId);
           return highestmetadataId;
         }
       } catch (error) {
@@ -156,13 +156,13 @@ const getMetadataByStatusAndType = async (event) => {
 
     console.log({ items });
     if (!items) {
-      console.log("Employee details not found.");
+      console.log("Metadata details not found.");
       response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
         message: httpStatusMessages.METADATA_NOT_FOUND,
       });
     } else {
-      console.log("Successfully retrieved Employee details.");
+      console.log("Successfully retrieved metadata details.");
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
         data: items,
@@ -181,6 +181,7 @@ const getMetadataByStatusAndType = async (event) => {
 
 const isNameAndTypeExists = async (name, type) => {
   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
+  let response = false;
   const params = {
     TableName: process.env.METADATA_TABLE,
     FilterExpression: "#type = :typeValue AND #name = :nameValue",
@@ -195,9 +196,13 @@ const isNameAndTypeExists = async (name, type) => {
   };
 
   const data = await client.send(new ScanCommand(params));
-  console.log(`In side isNameAndTypeExists length : ${data.Items.length}`);
+  const items = data.Items.map((item) => unmarshall(item));
 
-  return data.Items.length > 0;
+  console.log({ items });
+  if (items) {
+    response = true;
+  }
+  return response;
 };
 
 module.exports = {
