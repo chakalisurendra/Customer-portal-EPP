@@ -105,10 +105,10 @@ const getMetadata = async (event) => {
     const { metadataId } = event.queryStringParameters;
 
     const params = {
-     TableName: process.env.METADATA_TABLE,
+      TableName: process.env.METADATA_TABLE,
       Key: {
-        "metadataId": { N: metadataId } // Assuming metadataId is a number, use { S: metadataId } if it's a string
-      } // Assuming metadataId is the primary key
+        metadataId: { N: metadataId }, // Assuming metadataId is a number, use { S: metadataId } if it's a string
+      }, // Assuming metadataId is the primary key
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
