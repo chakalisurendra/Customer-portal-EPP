@@ -211,6 +211,7 @@ const isNameAndTypeExists = async (name, type) => {
       return true;
     }
   }
+  return false;
   // const params = {
   //   TableName: process.env.METADATA_TABLE,
   //   FilterExpression: "#type = :typeValue AND #name = :nameValue",
