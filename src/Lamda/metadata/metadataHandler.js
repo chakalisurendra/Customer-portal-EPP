@@ -186,53 +186,54 @@ const isNameAndTypeExists = async (name, type) => {
   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
   const params = {
     TableName: process.env.METADATA_TABLE,
-    FilterExpression: "#type = :typeValue AND #name = :nameValue",
+    FilterExpression: "#name = :nameValue",
     ExpressionAttributeNames: {
-      "#type": "type",
       "#name": "name",
     },
     ExpressionAttributeValues: {
-      ":typeValue": { S: type },
       ":nameValue": { S: name },
     },
   };
 
   const data = await client.send(new ScanCommand(params));
-  //const items = data.Items.map((item) => unmarshall(item));
 
-  if (data.Items.length === 0) {
+  if (!data || !data.Items) {
     console.log("No items found");
     return false;
   }
 
-  return true;
+  const items = data.Items.map((item) => unmarshall(item));
+
+  for (const item of items) {
+    // Process each item here
+    const itemType = item.type;
+    if (itemType === type) {
+      return true;
+    }
+  }
+  // const params = {
+  //   TableName: process.env.METADATA_TABLE,
+  //   FilterExpression: "#type = :typeValue AND #name = :nameValue",
+  //   ExpressionAttributeNames: {
+  //     "#type": "type",
+  //     "#name": "name",
+  //   },
+  //   ExpressionAttributeValues: {
+  //     ":typeValue": { S: type },
+  //     ":nameValue": { S: name },
+  //   },
+  // };
+
+  // const data = await client.send(new ScanCommand(params));
+  // //const items = data.Items.map((item) => unmarshall(item));
+
+  // if (data.Items.length === 0) {
+  //   console.log("No items found");
+  //   return false;
+  // }
+
+  // return true;
 };
-
-// const isNameAndTypeExists = async (name, type) => {
-//   console.log(`Inside isNameAndTypeExists, name: ${name}, type: ${type}`);
-
-//   const params = {
-//     TableName: process.env.METADATA_TABLE,
-//     KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
-//     ExpressionAttributeNames: {
-//       "#type": "type",
-//       "#name": "name",
-//     },
-//     ExpressionAttributeValues: {
-//       ":typeValue": type,
-//       ":nameValue": name,
-//     },
-//   };
-
-//   const data = await client.send(new QueryCommand(params));
-
-//   if (!data || !data.Items || data.Items.length === 0) {
-//     console.log("No items found");
-//     return false;
-//   }
-
-//   return true;
-// };
 
 module.exports = {
   createMetadata,
