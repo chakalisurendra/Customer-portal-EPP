@@ -23,9 +23,9 @@ const createMetadata = async (event) => {
       return response;
     }
 
-    const validateParams = {
+    const params1 = {
       TableName: process.env.METADATA_TABLE,
-      FilterExpression: "#type = :typeValue AND #name = :nameValue",
+      KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
       ExpressionAttributeNames: {
         "#type": "type",
         "#name": "name",
@@ -35,44 +35,19 @@ const createMetadata = async (event) => {
         ":nameValue": requestBody.name,
       },
     };
-    const data1 = await client.send(new ScanCommand(validateParams));
 
-    if (!data1 || !data1.Items || data1.Items.length === 0) {
-      console.log(`No metadata found with Name: ${requestBody.name} And type: ${requestBody.type}`);
-      // No metadata found, proceed with creation
-    } else {
-      console.log(`Metadata already exists with Name: ${requestBody.name} And type: ${requestBody.type}`);
+    const data1 = await client.query(params1).promise();
+
+    // Calculate the size of the response data
+    const responseSize = Buffer.byteLength(JSON.stringify(data1));
+    if (responseSize !== 0) {
+      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: `Metadata already exists with Name: ${requestBody.name} And type: ${requestBody.type}`,
+        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
       });
       return response;
     }
-    // const validateItems = data1.Items.map((item) => unmarshall(item));
-
-    // const data1 = await client.send(new ScanCommand(validateParams));
-    // const validateItems = data1.Items.map((item) => unmarshall(item));
-
-    // if (validateItems) {
-    //   console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
-    //   response.statusCode = 400;
-    //   response.body = JSON.stringify({
-    //     message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
-    //   });
-    //   return response;
-    // }
-    // const nameAndTypeExists = await isNameAndTypeExists(requestBody.name, requestBody.type);
-    // console.log(`isNameAndTypeExists nameAndTypeExists : ${nameAndTypeExists}`);
-
-    // if (nameAndTypeExists) {
-    //   console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
-    //   response.statusCode = 400;
-    //   response.body = JSON.stringify({
-    //     message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
-    //   });
-    //   return response;
-    // }
-
     // Get max id
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
