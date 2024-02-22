@@ -221,11 +221,12 @@ const isNameAndTypeExists = async (name, type) => {
 
   const data = await client.send(new QueryCommand(params));
 
-  if (!data || !data.Items) {
+  if (!data || !data.Items || data.Items.length === 0) {
     console.log("No items found");
-    return true;
+    return false;
   }
-  return false;
+
+  return true;
 };
 module.exports = {
   createMetadata,
