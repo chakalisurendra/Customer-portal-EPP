@@ -37,9 +37,8 @@ const createMetadata = async (event) => {
     };
 
     const data1 = await client.send(new ScanCommand(validateParams));
-    const validateItems = data1.Items.map((item) => unmarshall(item));
 
-    if (validateItems) {
+    if (!data1 || !data1.Items) {
       console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
       response.statusCode = 400;
       response.body = JSON.stringify({
@@ -47,6 +46,20 @@ const createMetadata = async (event) => {
       });
       return response;
     }
+
+    // const validateItems = data1.Items.map((item) => unmarshall(item));
+
+    // const data1 = await client.send(new ScanCommand(validateParams));
+    // const validateItems = data1.Items.map((item) => unmarshall(item));
+
+    // if (validateItems) {
+    //   console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
+    //   response.statusCode = 400;
+    //   response.body = JSON.stringify({
+    //     message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
+    //   });
+    //   return response;
+    // }
     // const nameAndTypeExists = await isNameAndTypeExists(requestBody.name, requestBody.type);
     // console.log(`isNameAndTypeExists nameAndTypeExists : ${nameAndTypeExists}`);
 
