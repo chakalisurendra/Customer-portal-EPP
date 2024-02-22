@@ -35,18 +35,19 @@ const createMetadata = async (event) => {
         ":nameValue": requestBody.name,
       },
     };
-
     const data1 = await client.send(new ScanCommand(validateParams));
 
-    if (!data1 || !data1.Items) {
-      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
+    if (!data1 || !data1.Items || data1.Items.length === 0) {
+      console.log(`No metadata found with Name: ${requestBody.name} And type: ${requestBody.type}`);
+      // No metadata found, proceed with creation
+    } else {
+      console.log(`Metadata already exists with Name: ${requestBody.name} And type: ${requestBody.type}`);
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
+        message: `Metadata already exists with Name: ${requestBody.name} And type: ${requestBody.type}`,
       });
       return response;
     }
-
     // const validateItems = data1.Items.map((item) => unmarshall(item));
 
     // const data1 = await client.send(new ScanCommand(validateParams));
