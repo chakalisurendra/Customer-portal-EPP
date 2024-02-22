@@ -129,8 +129,12 @@ functions:
     timeout: 120
     events:
       - http:
-          path: metadata/get/{metadataId}
+          path: metadata/get
           method: GET
+          request:
+            parameters:
+              querystrings:
+                metadataId: true
   getMetadataByStatusAndType:
     handler: src/Lamda/metadata/metadataHandler.getMetadataByStatusAndType
     events:

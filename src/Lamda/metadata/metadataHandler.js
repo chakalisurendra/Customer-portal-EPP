@@ -27,10 +27,10 @@ const createMetadata = async (event) => {
     console.log(`isNameAndTypeExists nameAndTypeExists : ${nameAndTypeExists}`);
 
     if (nameAndTypeExists) {
-      console.log("With Name And Type already metadata exists.");
+      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: "With Name And Type already metadata exists.",
+        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
       });
       return response;
     }
@@ -101,7 +101,9 @@ const getMetadata = async (event) => {
   console.log("Get metadata details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
-    const metadataId = parseInt(event.pathParameters.metadataId); // Convert to number type
+    //const metadataId = parseInt(event.pathParameters.metadataId); // Convert to number type
+    const { metadataId } = event.queryStringParameters;
+
     const params = {
       TableName: process.env.METADATA_TABLE,
       Key: marshall({ metadataId }), // Assuming metadataId is the primary key
