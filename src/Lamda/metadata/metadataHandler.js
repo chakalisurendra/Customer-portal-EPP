@@ -28,7 +28,7 @@ const createMetadata = async (event) => {
 
     const params1 = {
       TableName: process.env.METADATA_TABLE,
-      KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
+      FilterExpression: "#type = :typeValue AND #name = :nameValue",
       ExpressionAttributeNames: {
         "#type": "type",
         "#name": "name",
@@ -39,7 +39,7 @@ const createMetadata = async (event) => {
       },
     };
 
-    const data1 = await dynamodb.query(params1).promise();
+        const data = await dynamodb.scan(params1).promise();
 
     // Calculate the size of the response data
     const responseSize = Buffer.byteLength(JSON.stringify(data1));
