@@ -202,10 +202,10 @@ const isNameAndTypeExists = async (name, type) => {
 
   if (data.Items.length === 0) {
     console.log("No items found");
-    return true;
+    return false;
   }
 
-  return false;
+  return true;
 };
 
 // const isNameAndTypeExists = async (name, type) => {
