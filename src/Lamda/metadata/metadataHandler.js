@@ -182,27 +182,48 @@ const getMetadataByStatusAndType = async (event) => {
   return response;
 };
 
+// const isNameAndTypeExists = async (name, type) => {
+//   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
+//   const params = {
+//     TableName: process.env.METADATA_TABLE,
+//     FilterExpression: "#type = :typeValue AND #name = :nameValue",
+//     ExpressionAttributeNames: {
+//       "#type": "type",
+//       "#name": "name",
+//     },
+//     ExpressionAttributeValues: {
+//       ":typeValue": { S: type },
+//       ":nameValue": { S: name },
+//     },
+//   };
+
+//   const data = await client.send(new ScanCommand(params));
+//   const items = data.Items.map((item) => unmarshall(item));
+
+//   return items.length > 0;
+// };
+
 const isNameAndTypeExists = async (name, type) => {
-  console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
+  console.log(`Inside isNameAndTypeExists, name: ${name}, type: ${type}`);
+
   const params = {
     TableName: process.env.METADATA_TABLE,
-    FilterExpression: "#type = :typeValue AND #name = :nameValue",
+    KeyConditionExpression: "#type = :typeValue AND #name = :nameValue",
     ExpressionAttributeNames: {
       "#type": "type",
       "#name": "name",
     },
     ExpressionAttributeValues: {
-      ":typeValue": { S: type },
-      ":nameValue": { S: name },
+      ":typeValue": type,
+      ":nameValue": name,
     },
   };
 
-  const data = await client.send(new ScanCommand(params));
+  const data = await client.send(new QueryCommand(params));
   const items = data.Items.map((item) => unmarshall(item));
 
   return items.length > 0;
 };
-
 module.exports = {
   createMetadata,
   getMetadata,
