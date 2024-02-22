@@ -106,7 +106,7 @@ const getMetadata = async (event) => {
 
     const params = {
       TableName: process.env.METADATA_TABLE,
-      Key: marshall({ metadataId }), // Assuming metadataId is the primary key
+      Key: marshall({ metadataId: metadataId }), // Assuming metadataId is the primary key
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
