@@ -101,14 +101,13 @@ const getMetadata = async (event) => {
   console.log("Get metadata details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
-    //const metadataId = parseInt(event.pathParameters.metadataId); // Convert to number type
     const { metadataId } = event.queryStringParameters;
 
     const params = {
       TableName: process.env.METADATA_TABLE,
       Key: {
-        metadataId: { N: metadataId }, // Assuming metadataId is a number, use { S: metadataId } if it's a string
-      }, // Assuming metadataId is the primary key
+        metadataId: { N: metadataId },
+      },
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
@@ -176,7 +175,7 @@ const getMetadataByStatusAndType = async (event) => {
     console.error(e);
     response.body = JSON.stringify({
       statusCode: e.statusCode,
-      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA,
       errorMsg: e.message,
     });
   }
@@ -185,7 +184,6 @@ const getMetadataByStatusAndType = async (event) => {
 
 const isNameAndTypeExists = async (name, type) => {
   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-  let response = false;
   const params = {
     TableName: process.env.METADATA_TABLE,
     FilterExpression: "#type = :typeValue AND #name = :nameValue",
@@ -202,11 +200,7 @@ const isNameAndTypeExists = async (name, type) => {
   const data = await client.send(new ScanCommand(params));
   const items = data.Items.map((item) => unmarshall(item));
 
-  console.log({ items });
-  if (items) {
-    response = true;
-  }
-  return response;
+  return items.length > 0;
 };
 
 module.exports = {
