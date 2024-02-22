@@ -23,7 +23,7 @@ const createMetadata = async (event) => {
       return response;
     }
 
-    const nameAndTypeExists = await isNameAndTypeExists(requestBody.type, requestBody.name);
+    const nameAndTypeExists = await isNameAndTypeExists(requestBody.name, requestBody.type);
     console.log(`isNameAndTypeExists nameAndTypeExists : ${nameAndTypeExists}`);
 
     if (nameAndTypeExists) {
