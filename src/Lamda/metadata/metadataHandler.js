@@ -212,10 +212,14 @@ const getMetadataByStatusAndType = async (event) => {
 // };
 
 const isNameAndTypeExists = async (name, type) => {
-  console.log("in side isEmailNotEmployeeIdExists");
+  console.log("inside isNameAndTypeExists");
   const params = {
     TableName: process.env.METADATA_TABLE,
-    FilterExpression: "name = :nameValue AND type = :typeValue",
+    FilterExpression: "#attrName = :nameValue AND #attrType = :typeValue",
+    ExpressionAttributeNames: {
+      "#attrName": "name", // Alias for the reserved keyword "name"
+      "#attrType": "type", // Alias for the attribute "type"
+    },
     ExpressionAttributeValues: {
       ":nameValue": { S: name },
       ":typeValue": { S: type },
