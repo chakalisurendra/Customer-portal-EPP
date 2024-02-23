@@ -6,9 +6,6 @@ const { httpStatusCodes, httpStatusMessages } = require("../../environment/appco
 const client = new DynamoDBClient();
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
 
-const AWS = require("aws-sdk");
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-
 const createMetadata = async (event) => {
   console.log("Create metadata details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -26,31 +23,16 @@ const createMetadata = async (event) => {
       return response;
     }
 
-    const params1 = {
-      TableName: process.env.METADATA_TABLE,
-      FilterExpression: "#type = :typeValue AND #name = :nameValue",
-      ExpressionAttributeNames: {
-        "#type": "type",
-        "#name": "name",
-      },
-      ExpressionAttributeValues: {
-        ":typeValue": requestBody.type,
-        ":nameValue": requestBody.name,
-      },
-    };
-
-        const data1 = await dynamodb.scan(params1).promise();
-
-    // Calculate the size of the response data
-    const responseSize = Buffer.byteLength(JSON.stringify(data1));
-    if (responseSize !== 0) {
-      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
+    const validateNameAndTypeExists = await isNameAndTypeExists(requestBody.name, requestBody.type);
+    if (validateNameAndTypeExists) {
+      console.log("validateNameAndTypeExists already exists.");
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
+        message: "validateNameAndTypeExists already exists.",
       });
       return response;
     }
+
     // Get max id
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
@@ -198,36 +180,52 @@ const getMetadataByStatusAndType = async (event) => {
   return response;
 };
 
+// const isNameAndTypeExists = async (name, type) => {
+//   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
+//   //let response = false;
+//   const params = {
+//     TableName: process.env.METADATA_TABLE,
+//     FilterExpression: "#type = :typeValue AND #name = :nameValue",
+//     ExpressionAttributeNames: {
+//       "#type": "type",
+//       "#name": "name",
+//     },
+//     ExpressionAttributeValues: {
+//       ":typeValue": { S: type },
+//       ":nameValue": { S: name },
+//     },
+//   };
+
+//   const data = await client.send(new ScanCommand(params));
+//   const items = data.Items.map((item) => unmarshall(item));
+//   console.log("length");
+//   console.log({ items });
+//   console.log("length wewr: ");
+
+//   console.log(items.length);
+
+//   if (items) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// };
+
 const isNameAndTypeExists = async (name, type) => {
-  console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-  //let response = false;
+  console.log("in side isEmailNotEmployeeIdExists");
   const params = {
     TableName: process.env.METADATA_TABLE,
-    FilterExpression: "#type = :typeValue AND #name = :nameValue",
-    ExpressionAttributeNames: {
-      "#type": "type",
-      "#name": "name",
-    },
+    FilterExpression: "name = :nameValue AND type :typeValue",
     ExpressionAttributeValues: {
-      ":typeValue": { S: type },
       ":nameValue": { S: name },
+      ":typeValue": { S: type },
     },
   };
-
-  const data = await client.send(new ScanCommand(params));
-  const items = data.Items.map((item) => unmarshall(item));
-  console.log("length");
-  console.log({ items });
-  console.log("length wewr: ");
-
-  console.log(items.length);
-
-  if (items) {
-    return true;
-  } else {
-    return false;
-  }
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
 };
+
 module.exports = {
   createMetadata,
   getMetadata,
