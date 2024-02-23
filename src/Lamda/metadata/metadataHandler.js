@@ -25,10 +25,10 @@ const createMetadata = async (event) => {
 
     const validateNameAndTypeExists = await isNameAndTypeExists(requestBody.name, requestBody.type);
     if (validateNameAndTypeExists) {
-      console.log("validateNameAndTypeExists already exists.");
+      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: "validateNameAndTypeExists already exists.",
+        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
       });
       return response;
     }
@@ -133,7 +133,62 @@ const getMetadata = async (event) => {
   return response;
 };
 
-const getMetadataByStatusAndType = async (event) => {
+const isNameAndTypeExists = async (name, type) => {
+  console.log("inside isNameAndTypeExists");
+  const params = {
+    TableName: process.env.METADATA_TABLE,
+    FilterExpression: "#attrName = :nameValue AND #attrType = :typeValue",
+    ExpressionAttributeNames: {
+      "#attrName": "name",
+      "#attrType": "type",
+    },
+    ExpressionAttributeValues: {
+      ":nameValue": { S: name },
+      ":typeValue": { S: type },
+    },
+  };
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
+};
+
+const getAllMeatadatas = async () => {
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+  try {
+    const { Items } = await client.send(new ScanCommand({ TableName: process.env.METADATA_TABLE })); // Getting table name from the servetless.yml and setting to the TableName
+
+    if (Items.length === 0) {
+      // If there is no employee details found
+      response.statusCode = httpStatusCodes.NOT_FOUND; // Setting the status code to 404
+      response.body = JSON.stringify({
+        message: httpStatusMessages.METADATA_DETAILS_NOT_FOUND,
+      }); // Setting error message
+    } else {
+      const sortedItems = Items.sort((a, b) => a.metadataId.N.localeCompare(b.metadataId.N));
+
+      // Map
+      const metadataList = sortedItems.map((item) => {
+        const metadata = unmarshall(item);
+        return metadata;
+      });
+
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA_DETAILS,
+        data: metadataList,
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA_DETAILS,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
+
+const getMetadataByTypeAndStatus = async (event) => {
   console.log("Get metadata with type and status");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
@@ -154,7 +209,6 @@ const getMetadataByStatusAndType = async (event) => {
 
     const data = await client.send(new ScanCommand(params));
     const items = data.Items.map((item) => unmarshall(item));
-
     console.log({ items });
     if (!items || !items.length > 0) {
       console.log("Metadata details not found.");
@@ -180,27 +234,9 @@ const getMetadataByStatusAndType = async (event) => {
   return response;
 };
 
-const isNameAndTypeExists = async (name, type) => {
-  console.log("inside isNameAndTypeExists");
-  const params = {
-    TableName: process.env.METADATA_TABLE,
-    FilterExpression: "#attrName = :nameValue AND #attrType = :typeValue",
-    ExpressionAttributeNames: {
-      "#attrName": "name",
-      "#attrType": "type",
-    },
-    ExpressionAttributeValues: {
-      ":nameValue": { S: name },
-      ":typeValue": { S: type },
-    },
-  };
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
-
 module.exports = {
   createMetadata,
   getMetadata,
-  getMetadataByStatusAndType,
+  getAllMeatadatas,
+  getMetadataByTypeAndStatus,
 };

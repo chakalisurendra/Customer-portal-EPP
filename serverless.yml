@@ -28,7 +28,16 @@ custom:
   assignmentTableName: assignment-Details-${self:provider.stage}
   assetTableName: asset-Details-${self:provider.stage}
   metadataTableName: metadata
-
+  cors:
+    origin: "*" # Allow requests from any origin
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
 plugins:
   - serverless-iam-roles-per-function
 functions:
@@ -41,6 +50,7 @@ functions:
       - http:
           path: employee/get/{employeeId}
           method: GET
+          cors: true # Enable CORS for this endpoint
   employeeCreate:
     handler: src/Lamda/employee/employeeHandler.createEmployee
     name: employeeCreate
@@ -50,6 +60,7 @@ functions:
       - http:
           path: employee
           method: POST
+          cors: true # Enable CORS for this endpoint
   employeeUpdate:
     handler: src/Lamda/employee/employeeHandler.updateEmployee
     name: employeeUpdate
@@ -59,6 +70,7 @@ functions:
       - http:
           path: employee/{employeeId}
           method: PUT
+          cors: true # Enable CORS for this endpoint
   employeeGetAll:
     handler: src/Lamda/employee/employeeHandler.getAllEmployees
     name: employeeGetAll
@@ -68,6 +80,7 @@ functions:
       - http:
           path: employees
           method: GET
+          cors: true # Enable CORS for this endpoint
   assignmentCreate:
     handler: src/Lamda/assignment/assignmentHandler.createAssignment
     name: assignmentCreate
@@ -77,6 +90,7 @@ functions:
       - http:
           path: assignment
           method: POST
+          cors: true # Enable CORS for this endpoint
   assignmentGet:
     handler: src/Lamda/assignment/assignmentHandler.getAssignmentByEmployeeId
     name: assignmentGet
@@ -86,6 +100,17 @@ functions:
       - http:
           path: assignment/{employeeId}
           method: GET
+          cors: true # Enable CORS for this endpoint
+  assignmentUpdate:
+    handler: src/Lamda/assignment/assignmentHandler.updateAssignment
+    name: assignmentUpdate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: assignment/update/{assignmentId}/employee/{employeeId}
+          method: PUT
+          cors: true # Enable CORS for this endpoint
   assetCreate:
     handler: src/Lamda/asset/assetHandler.createAsset
     name: assetCreate
@@ -95,6 +120,7 @@ functions:
       - http:
           path: asset
           method: POST
+          cors: true # Enable CORS for this endpoint
   assetUpdate:
     handler: src/Lamda/asset/assetHandler.updateAssetDetails
     name: assetUpdate
@@ -102,8 +128,9 @@ functions:
     timeout: 120
     events:
       - http:
-          path: asset/{employeeId}
+          path: asset/{assetId}
           method: PUT
+          cors: true # Enable CORS for this endpoint
   assetGet:
     handler: src/Lamda/asset/assetHandler.getAssetDetails
     name: assetGet
@@ -113,6 +140,7 @@ functions:
       - http:
           path: asset/get/{employeeId}
           method: GET
+          cors: true # Enable CORS for this endpoint
   metadataCreate:
     handler: src/Lamda/metadata/metadataHandler.createMetadata
     name: metadataCreate
@@ -122,6 +150,7 @@ functions:
       - http:
           path: metadata
           method: POST
+          cors: true
   metadataGet:
     handler: src/Lamda/metadata/metadataHandler.getMetadata
     name: metadataGet
@@ -131,12 +160,22 @@ functions:
       - http:
           path: metadata/get
           method: GET
+          cors: true
           request:
             parameters:
               querystrings:
                 metadataId: true
-  getMetadataByStatusAndType:
-    handler: src/Lamda/metadata/metadataHandler.getMetadataByStatusAndType
+  metadataGetAll:
+    handler: src/Lamda/metadata/metadataHandler.getAllMeatadatas
+    name: metadataGetAll
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: metadata/getAll
+          method: GET
+  metadataGetByTypeAndStatus:
+    handler: src/Lamda/metadata/metadataHandler.getMetadataByTypeAndStatus
     events:
       - http:
           path: metadata/getby

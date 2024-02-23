@@ -213,8 +213,6 @@ const validateAssetDetails = (requestBody) => {
   return response;
 };
 
-// =================================================================================
-
 const validateMetadata = (requestBody) => {
   const response = {
     validation: false,
