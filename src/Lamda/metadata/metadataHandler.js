@@ -215,7 +215,7 @@ const isNameAndTypeExists = async (name, type) => {
   console.log("in side isEmailNotEmployeeIdExists");
   const params = {
     TableName: process.env.METADATA_TABLE,
-    FilterExpression: "name = :nameValue AND type :typeValue",
+    FilterExpression: "name = :nameValue AND type = :typeValue",
     ExpressionAttributeValues: {
       ":nameValue": { S: name },
       ":typeValue": { S: type },
