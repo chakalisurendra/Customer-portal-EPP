@@ -4,7 +4,7 @@ provider:
   runtime: nodejs18.x
   stage: dev
   region: ap-south-1
-  environment:
+  eenvironment:
     EMPLOYEE_TABLE: ${self:custom.employeeTableName}
     ASSIGNMENTS_TABLE: ${self:custom.assignmentTableName}
     ASSETS_TABLE: ${self:custom.assetTableName}
@@ -176,6 +176,9 @@ functions:
           method: GET
   metadataGetByTypeAndStatus:
     handler: src/Lamda/metadata/metadataHandler.getMetadataByTypeAndStatus
+    name: metadataGetTypeAndStatus
+    memorySize: 128
+    timeout: 120
     events:
       - http:
           path: metadata/getby
