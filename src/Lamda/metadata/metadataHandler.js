@@ -156,7 +156,7 @@ const getMetadataByStatusAndType = async (event) => {
     const items = data.Items.map((item) => unmarshall(item));
 
     console.log({ items });
-    if (!items) {
+    if (!items || !items.length > 0) {
       console.log("Metadata details not found.");
       response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
@@ -180,45 +180,14 @@ const getMetadataByStatusAndType = async (event) => {
   return response;
 };
 
-// const isNameAndTypeExists = async (name, type) => {
-//   console.log(`In side isNameAndTypeExists name : ${name} type: ${type} `);
-//   //let response = false;
-//   const params = {
-//     TableName: process.env.METADATA_TABLE,
-//     FilterExpression: "#type = :typeValue AND #name = :nameValue",
-//     ExpressionAttributeNames: {
-//       "#type": "type",
-//       "#name": "name",
-//     },
-//     ExpressionAttributeValues: {
-//       ":typeValue": { S: type },
-//       ":nameValue": { S: name },
-//     },
-//   };
-
-//   const data = await client.send(new ScanCommand(params));
-//   const items = data.Items.map((item) => unmarshall(item));
-//   console.log("length");
-//   console.log({ items });
-//   console.log("length wewr: ");
-
-//   console.log(items.length);
-
-//   if (items) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
-
 const isNameAndTypeExists = async (name, type) => {
   console.log("inside isNameAndTypeExists");
   const params = {
     TableName: process.env.METADATA_TABLE,
     FilterExpression: "#attrName = :nameValue AND #attrType = :typeValue",
     ExpressionAttributeNames: {
-      "#attrName": "name", // Alias for the reserved keyword "name"
-      "#attrType": "type", // Alias for the attribute "type"
+      "#attrName": "name",
+      "#attrType": "type",
     },
     ExpressionAttributeValues: {
       ":nameValue": { S: name },
