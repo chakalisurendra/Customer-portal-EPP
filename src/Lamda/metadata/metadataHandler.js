@@ -290,7 +290,7 @@ const updateMetadata = async (event) => {
 
     const params = {
       TableName: process.env.METADATA_TABLE,
-      Key: marshall({ employeeId }),
+      Key: marshall({ metadataId }),
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
