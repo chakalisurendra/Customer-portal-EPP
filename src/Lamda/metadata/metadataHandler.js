@@ -288,9 +288,36 @@ const updateMetadata = async (event) => {
       return response;
     }
 
+    // const params = {
+    //   TableName: process.env.METADATA_TABLE,
+    //   Key: marshall({ metadataId }),
+    //   UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+    //   ExpressionAttributeNames: objKeys.reduce(
+    //     (acc, key, index) => ({
+    //       ...acc,
+    //       [`#key${index}`]: key,
+    //     }),
+    //     {}
+    //   ),
+    //   ExpressionAttributeValues: marshall(
+    //     objKeys.reduce(
+    //       (acc, key, index) => ({
+    //         ...acc,
+    //         [`:value${index}`]: requestBody[key],
+    //       }),
+    //       {}
+    //     )
+    //   ),
+    //   ":updatedDateTime": requestBody.updatedDateTime,
+    // };
+
     const params = {
       TableName: process.env.METADATA_TABLE,
-      Key: marshall({ metadataId }),
+      Key: {
+        metadataId: {
+          N: metadataId,
+        },
+      }, // Ensure metadataId is passed as a number
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
@@ -299,16 +326,17 @@ const updateMetadata = async (event) => {
         }),
         {}
       ),
-      ExpressionAttributeValues: marshall(
-        objKeys.reduce(
-          (acc, key, index) => ({
-            ...acc,
-            [`:value${index}`]: requestBody[key],
-          }),
-          {}
-        )
+      ExpressionAttributeValues: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`:value${index}`]: requestBody[key],
+        }),
+        {
+          ":updatedDateTime": {
+            S: requestBody.updatedDateTime,
+          },
+        }
       ),
-      ":updatedDateTime": requestBody.updatedDateTime,
     };
 
     const updateResult = await client.send(new UpdateItemCommand(params));
