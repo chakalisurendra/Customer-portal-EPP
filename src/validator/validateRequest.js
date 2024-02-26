@@ -115,7 +115,7 @@ const validateAadharNumber = (aadharNumber) => {
     return true; // Allow null or undefined values
   }
   if (typeof requestBody.aadharNumber !== "number") {
-    throw new Error("Account Number must be a number.");
+    return false;
   }
   // const numberPattern = /^\d{12}$/;
   // if (numberPattern.test(aadharNumber)) {
