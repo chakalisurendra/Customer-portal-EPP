@@ -345,12 +345,29 @@ const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
   };
   const command = new ScanCommand(params);
   const data = await client.send(command);
-  response = data.Items.length > 0;
 
-  if (data.Item.metadataId.N === metadataId) {
-    return (response = false);
+  if (data.Items && data.Items.length > 0) {
+    // Check if metadataId matches
+    const matchingItem = data.Items.find((item) => item.metadataId && item.metadataId.N === metadataId);
+
+    if (matchingItem) {
+      console.log(`Found metadataId ${metadataId} in data`);
+      return false; // metadataId found, so return false
+    } else {
+      // metadataId not found, return true
+      return true;
+    }
+  } else {
+    // No items found, return true
+    return true;
   }
-  return response;
+
+  // response = data.Items.length > 0;
+
+  // if (data.Item.metadataId.N === metadataId) {
+  //   return (response = false);
+  // }
+  // return response;
 };
 
 module.exports = {
