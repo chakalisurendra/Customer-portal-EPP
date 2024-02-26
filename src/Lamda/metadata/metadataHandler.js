@@ -249,7 +249,7 @@ const updateMetadata = async (event) => {
     const validateMetadataparams = {
       TableName: process.env.METADATA_TABLE,
       Key: {
-        metadataId: { N: metadataId },
+        metadataId: { N: metadataId }, // Assuming metadataId is a number, hence using 'N'
       },
     };
     const { Item } = await client.send(new GetItemCommand(validateMetadataparams));
@@ -288,36 +288,15 @@ const updateMetadata = async (event) => {
       return response;
     }
 
-    // const params = {
-    //   TableName: process.env.METADATA_TABLE,
-    //   Key: marshall({ metadataId }),
-    //   UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
-    //   ExpressionAttributeNames: objKeys.reduce(
-    //     (acc, key, index) => ({
-    //       ...acc,
-    //       [`#key${index}`]: key,
-    //     }),
-    //     {}
-    //   ),
-    //   ExpressionAttributeValues: marshall(
-    //     objKeys.reduce(
-    //       (acc, key, index) => ({
-    //         ...acc,
-    //         [`:value${index}`]: requestBody[key],
-    //       }),
-    //       {}
-    //     )
-    //   ),
-    //   ":updatedDateTime": requestBody.updatedDateTime,
-    // };
+    const expressionAttributeValues = {};
+    objKeys.forEach((key, index) => {
+      expressionAttributeValues[`:value${index}`] = { S: requestBody[key] };
+    });
+    expressionAttributeValues[":updatedDateTime"] = { S: requestBody.updatedDateTime };
 
     const params = {
       TableName: process.env.METADATA_TABLE,
-      Key: {
-        metadataId: {
-          N: metadataId,
-        },
-      }, // Ensure metadataId is passed as a number
+      Key: { metadataId: { N: metadataId } }, // Ensure metadataId is passed as a number
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
@@ -326,17 +305,7 @@ const updateMetadata = async (event) => {
         }),
         {}
       ),
-      ExpressionAttributeValues: objKeys.reduce(
-        (acc, key, index) => ({
-          ...acc,
-          [`:value${index}`]: requestBody[key],
-        }),
-        {
-          ":updatedDateTime": {
-            S: requestBody.updatedDateTime,
-          },
-        }
-      ),
+      ExpressionAttributeValues: expressionAttributeValues,
     };
 
     const updateResult = await client.send(new UpdateItemCommand(params));
@@ -355,6 +324,127 @@ const updateMetadata = async (event) => {
   }
   return response;
 };
+
+// const updateMetadata = async (event) => {
+//   console.log("Update metadata");
+//   const response = { statusCode: httpStatusCodes.SUCCESS };
+
+//   try {
+//     const requestBody = JSON.parse(event.body);
+//     console.log("Request Body:", requestBody);
+//     const currentDate = Date.now();
+//     const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
+
+//     const { metadataId } = event.queryStringParameters;
+//     const validateMetadataparams = {
+//       TableName: process.env.METADATA_TABLE,
+//       Key: {
+//         metadataId: { N: metadataId },
+//       },
+//     };
+//     const { Item } = await client.send(new GetItemCommand(validateMetadataparams));
+//     console.log({ Item });
+//     if (!Item) {
+//       console.log("Metadata details not found.");
+//       response.statusCode = httpStatusCodes.NOT_FOUND;
+//       response.body = JSON.stringify({
+//         message: httpStatusMessages.METADATA_NOT_FOUND,
+//       });
+//       return response;
+//     }
+
+//     requestBody.updatedDateTime = formattedDate;
+
+//     const objKeys = Object.keys(requestBody).filter((key) => updateMetadataAllowedFields.includes(key));
+//     console.log(`Employee with objKeys ${objKeys} `);
+//     const validationResponse = validateMetadataUpdata(requestBody);
+//     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
+//     if (!validationResponse.validation) {
+//       console.log(validationResponse.validationMessage);
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: validationResponse.validationMessage,
+//       });
+//       return response;
+//     }
+//     const validateNameAndTypeExists = await isNameAndTypeNotIdExists(metadataId, requestBody.name, requestBody.type);
+//     if (validateNameAndTypeExists) {
+//       console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
+//       });
+//       return response;
+//     }
+
+//     // const params = {
+//     //   TableName: process.env.METADATA_TABLE,
+//     //   Key: marshall({ metadataId }),
+//     //   UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+//     //   ExpressionAttributeNames: objKeys.reduce(
+//     //     (acc, key, index) => ({
+//     //       ...acc,
+//     //       [`#key${index}`]: key,
+//     //     }),
+//     //     {}
+//     //   ),
+//     //   ExpressionAttributeValues: marshall(
+//     //     objKeys.reduce(
+//     //       (acc, key, index) => ({
+//     //         ...acc,
+//     //         [`:value${index}`]: requestBody[key],
+//     //       }),
+//     //       {}
+//     //     )
+//     //   ),
+//     //   ":updatedDateTime": requestBody.updatedDateTime,
+//     // };
+
+//     const params = {
+//       TableName: process.env.METADATA_TABLE,
+//       Key: {
+//         metadataId: {
+//           N: metadataId,
+//         },
+//       }, // Ensure metadataId is passed as a number
+//       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+//       ExpressionAttributeNames: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`#key${index}`]: key,
+//         }),
+//         {}
+//       ),
+//       ExpressionAttributeValues: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`:value${index}`]: requestBody[key],
+//         }),
+//         {
+//           ":updatedDateTime": {
+//             S: requestBody.updatedDateTime,
+//           },
+//         }
+//       ),
+//     };
+
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+//     console.log("Successfully updated metadata details.");
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
+//       metadataId: metadataId,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.statusCode = 400;
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+//       errorMsg: e.message,
+//     });
+//   }
+//   return response;
+// };
 
 const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
   console.log("inside isNameAndTypeExists");
