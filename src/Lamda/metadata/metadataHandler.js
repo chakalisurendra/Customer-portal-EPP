@@ -234,6 +234,7 @@ const getMetadataByTypeAndStatus = async (event) => {
   }
   return response;
 };
+
 const updateMetadata = async (event) => {
   console.log("Update metadata");
   const response = { statusCode: httpStatusCodes.SUCCESS };
@@ -291,22 +292,18 @@ const updateMetadata = async (event) => {
     objKeys.forEach((key, index) => {
       expressionAttributeValues[`:value${index}`] = { S: requestBody[key] };
     });
-    expressionAttributeValues[":updatedDateTime"] = { S: requestBody.updatedDateTime };
 
     const params = {
       TableName: process.env.METADATA_TABLE,
       Key: { metadataId: { N: metadataId } }, // Ensure metadataId is passed as a number
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, #updatedDateTime = :updatedDateTime`,
-      ExpressionAttributeNames: {
-        ...objKeys.reduce(
-          (acc, key, index) => ({
-            ...acc,
-            [`#key${index}`]: key,
-          }),
-          {}
-        ),
-        "#updatedDateTime": "updatedDateTime", // Define the attribute name for updatedDateTime
-      },
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+      ExpressionAttributeNames: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`#key${index}`]: key,
+        }),
+        {}
+      ),
       ExpressionAttributeValues: expressionAttributeValues,
     };
 
@@ -326,6 +323,7 @@ const updateMetadata = async (event) => {
   }
   return response;
 };
+
 
 // const updateMetadata = async (event) => {
 //   console.log("Update metadata");
