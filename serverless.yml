@@ -1,10 +1,10 @@
-service: customer-portal-service
+service: customer-portal-services
 provider:
   name: aws
   runtime: nodejs18.x
   stage: dev
   region: ap-south-1
-  eenvironment:
+  environment:
     EMPLOYEE_TABLE: ${self:custom.employeeTableName}
     ASSIGNMENTS_TABLE: ${self:custom.assignmentTableName}
     ASSETS_TABLE: ${self:custom.assetTableName}
