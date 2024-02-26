@@ -1,7 +1,8 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
-const { validateMetadata } = require("../../validator/validateRequest");
+const { validateMetadata, validateMetadataUpdata } = require("../../validator/validateRequest");
+const { updateMetadataAllowedFields } = require("../../validator/validateFields");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const client = new DynamoDBClient();
 const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
@@ -234,10 +235,129 @@ const getMetadataByTypeAndStatus = async (event) => {
   return response;
 };
 
+const updateMetadata = async (event) => {
+  console.log("Update metadata");
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+
+  try {
+    const requestBody = JSON.parse(event.body);
+    console.log("Request Body:", requestBody);
+    const currentDate = Date.now();
+    const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
+
+    const { metadataId } = event.queryStringParameters;
+    const validateMetadataparams = {
+      TableName: process.env.METADATA_TABLE,
+      Key: {
+        metadataId: { N: metadataId },
+      },
+    };
+    const { Item } = await client.send(new GetItemCommand(validateMetadataparams));
+    console.log({ Item });
+    if (!Item) {
+      console.log("Metadata details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.METADATA_NOT_FOUND,
+      });
+      return response;
+    }
+
+    requestBody.updatedDateTime = formattedDate;
+
+    const objKeys = Object.keys(requestBody).filter((key) => updateMetadataAllowedFields.includes(key));
+    console.log(`Employee with objKeys ${objKeys} `);
+    const validationResponse = validateMetadataUpdata(requestBody);
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: validationResponse.validationMessage,
+      });
+      return response;
+    }
+    const validateNameAndTypeExists = await isNameAndTypeNotIdExists(metadataId, requestBody.name, requestBody.type);
+    if (validateNameAndTypeExists) {
+      console.log(`With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: `With Name: ${requestBody.name} And type: ${requestBody.type} already metadata exists.`,
+      });
+      return response;
+    }
+
+    const params = {
+      TableName: process.env.EMPLOYEE_TABLE,
+      Key: marshall({ employeeId }),
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+      ExpressionAttributeNames: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`#key${index}`]: key,
+        }),
+        {}
+      ),
+      ExpressionAttributeValues: marshall(
+        objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`:value${index}`]: requestBody[key],
+          }),
+          {}
+        )
+      ),
+      ":updatedDateTime": requestBody.updatedDateTime,
+    };
+
+    const updateResult = await client.send(new UpdateItemCommand(params));
+    console.log("Successfully updated Employee details.");
+    response.body = JSON.stringify({
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
+      employeeId: employeeId,
+    });
+  } catch (e) {
+    console.error(e);
+    response.statusCode = 400;
+    response.body = JSON.stringify({
+      message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+      employeeId: requestBody.employeeId, // If you want to include employeeId in the response
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
+
+const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
+  console.log("inside isNameAndTypeExists");
+  let response;
+  const params = {
+    TableName: process.env.METADATA_TABLE,
+    FilterExpression: "#attrName = :nameValue AND #attrType = :typeValue",
+    ExpressionAttributeNames: {
+      "#attrName": "name",
+      "#attrType": "type",
+    },
+    ExpressionAttributeValues: {
+      ":nameValue": { S: name },
+      ":typeValue": { S: type },
+    },
+  };
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  response = data.Items.length > 0;
+
+  if (data.Item.metadataId.N === metadataId) {
+    return (response = false);
+  }
+  return response;
+};
 
 module.exports = {
   createMetadata,
   getMetadata,
   getAllMeatadatas,
   getMetadataByTypeAndStatus,
+  updateMetadata,
 };

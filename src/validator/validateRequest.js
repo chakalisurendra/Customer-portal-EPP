@@ -114,12 +114,15 @@ const validateAadharNumber = (aadharNumber) => {
   if (aadharNumber === null || aadharNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  const numberPattern = /^\d{12}$/;
-  if (numberPattern.test(aadharNumber)) {
-    return true;
-  } else {
-    return false;
+  if (typeof requestBody.aadharNumber !== "number") {
+    throw new Error("Account Number must be a number.");
   }
+  // const numberPattern = /^\d{12}$/;
+  // if (numberPattern.test(aadharNumber)) {
+  //   return true;
+  // } else {
+  //   return false;
+  // }
 };
 
 const validatePassportNumber = (passportNumber) => {
@@ -237,9 +240,25 @@ const validateMetadata = (requestBody) => {
   return response;
 };
 
+const validateMetadataUpdata = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  if (!validateStatus(requestBody.status)) {
+    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    return response;
+  }
+
+  response.validation = true;
+  return response;
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
   validateMetadata,
+  validateMetadataUpdata,
 };

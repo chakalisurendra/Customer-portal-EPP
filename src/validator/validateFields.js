@@ -27,9 +27,11 @@ const updateEmployeeAllowedFields = [
   "department",
   "IsAbsconded",
   "status",
-  "updatedDateTime"
+  "updatedDateTime",
 ];
 
+const updateMetadataAllowedFields = ["name", "type", "status", "updatedDateTime"];
 module.exports = {
   updateEmployeeAllowedFields,
+  updateMetadataAllowedFields,
 };

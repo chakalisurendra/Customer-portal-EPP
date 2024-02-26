@@ -188,6 +188,20 @@ functions:
               querystrings:
                 type: true
                 status: true
+  metadataUpdate:
+    handler: src/Lamda/metadata/metadataHandler.updateMetadata
+    name: metadataUpdate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: metadata/update
+          method: PUT
+          cors: true # Enable CORS for this endpoint
+          request:
+            parameters:
+              querystrings:
+                metadataId: true
 resources:
   Resources:
     EmployeeTable:
