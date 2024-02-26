@@ -289,7 +289,7 @@ const updateMetadata = async (event) => {
     }
 
     const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
+      TableName: process.env.METADATA_TABLE,
       Key: marshall({ employeeId }),
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
@@ -312,17 +312,16 @@ const updateMetadata = async (event) => {
     };
 
     const updateResult = await client.send(new UpdateItemCommand(params));
-    console.log("Successfully updated Employee details.");
+    console.log("Successfully updated metadata details.");
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
-      employeeId: employeeId,
+      metadataId: metadataId,
     });
   } catch (e) {
     console.error(e);
     response.statusCode = 400;
     response.body = JSON.stringify({
       message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
-      employeeId: requestBody.employeeId, // If you want to include employeeId in the response
       errorMsg: e.message,
     });
   }
