@@ -234,6 +234,7 @@ const getMetadataByTypeAndStatus = async (event) => {
   return response;
 };
 
+
 module.exports = {
   createMetadata,
   getMetadata,
