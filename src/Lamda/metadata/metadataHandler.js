@@ -297,13 +297,16 @@ const updateMetadata = async (event) => {
       TableName: process.env.METADATA_TABLE,
       Key: { metadataId: { N: metadataId } }, // Ensure metadataId is passed as a number
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, #updatedDateTime = :updatedDateTime`,
-      ExpressionAttributeNames: objKeys.reduce(
-        (acc, key, index) => ({
-          ...acc,
-          [`#key${index}`]: key,
-        }),
-        {}
-      ),
+      ExpressionAttributeNames: {
+        ...objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`#key${index}`]: key,
+          }),
+          {}
+        ),
+        "#updatedDateTime": "updatedDateTime", // Define the attribute name for updatedDateTime
+      },
       ExpressionAttributeValues: expressionAttributeValues,
     };
 
