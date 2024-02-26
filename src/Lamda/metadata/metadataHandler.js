@@ -358,10 +358,8 @@ const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
       return true;
     }
   } else {
-    // No items found, return true
-    return true;
+    return false;
   }
-
   // response = data.Items.length > 0;
 
   // if (data.Item.metadataId.N === metadataId) {
