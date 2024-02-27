@@ -350,6 +350,25 @@ const getAllEmployees = async () => {
         if (employee.hasOwnProperty("password")) {
           employee.password = null;
         }
+        const assignmentParams = {
+          TableName: process.env.ASSIGNMENT_TABLE,
+          KeyConditionExpression: "employeeId = :empId",
+          ExpressionAttributeValues: {
+            ":empId": {
+              S: employee.employeeId,
+            },
+          },
+        };
+        try {
+          const assignmentData = await;
+          client.send(new QueryCommand(assignmentParams));
+          if (assignmentData.Items.length > 0) {
+            employee.designation = assignmentData.Items[0].designation.S;
+          }
+        } catch (err) {
+          console.error("Error fetching designation:", err);
+          // Handle error fetching designation
+        }
         return employee;
       });
 
