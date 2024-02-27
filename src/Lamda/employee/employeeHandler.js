@@ -342,7 +342,7 @@ const getAllEmployees = async () => {
         message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
       }); // Setting error message
     } else {
-      const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.N) - parseInt(b.employeeId.N));
+      const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.S) - parseInt(b.employeeId.S));
 
       // Map and set "password" field to null
       const employeesData = sortedItems.map((item) => {
