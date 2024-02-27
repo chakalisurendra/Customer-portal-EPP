@@ -10,7 +10,12 @@ const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //forma
 
 const createEmployee = async (event) => {
   console.log("Create employee details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const requestBody = JSON.parse(event.body);
 
@@ -32,18 +37,20 @@ const createEmployee = async (event) => {
     }
 
     // Fetch the highest highestSerialNumber from the DynamoDB table
-    // const highestSerialNumber = await getHighestSerialNumber();
-    // const nextSerialNumber = highestSerialNumber !== undefined ? highestSerialNumber + 1 : 1;
+    const highestSerialNumber = await getHighestSerialNumber();
+    console.log("Highest Serial Number:", highestSerialNumber);
+    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Item: marshall({
+        serialNumber: nextSerialNumber,
         employeeId: requestBody.employeeId,
         firstName: requestBody.firstName,
         lastName: requestBody.lastName,
         dateOfBirth: requestBody.dateOfBirth,
         officeEmailAddress: requestBody.officeEmailAddress,
-        branchOffice: requestBody.branchOffice,
+        //branchOffice: requestBody.branchOffice,
         password: requestBody.password || null,
         gender: requestBody.gender || null,
         ssnNumber: requestBody.ssnNumber || null,
@@ -58,7 +65,7 @@ const createEmployee = async (event) => {
         contactNumber: requestBody.contactNumber || null,
         joiningDate: requestBody.joiningDate || null,
         emergencyContactPerson: requestBody.emergencyContactPerson || null,
-        designation: requestBody.designation || null,
+        //designation: requestBody.designation || null,
         emergencyContactNumber: requestBody.emergencyContactNumber || null,
         resignedDate: requestBody.resignedDate || null,
         relievedDate: requestBody.relievedDate || null,
@@ -70,6 +77,98 @@ const createEmployee = async (event) => {
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
+
+    const requiredAssignmentFields = ["designation", "branchOffice"];
+    if (!requiredAssignmentFields.every((field) => requestBody[field])) {
+      throw new Error("Required Assignment Fields are missing.");
+    }
+
+    // Set onsite based on branchOffice
+    let onsite = "No"; // Default value
+    if (requestBody.branchOffice === "San Antonio, USA") {
+      onsite = "Yes";
+    }
+    if (requestBody.branchOffice === null || !["San Antonio, USA", "Bangalore, INDIA"].includes(requestBody.branchOffice)) {
+      throw new Error("Incorrect BranchOffice");
+    }
+    if (
+      requestBody.designation === null ||
+      ![
+        "Software Engineer Trainee",
+        "Software Engineer",
+        "Senior Software Engineer",
+        "Testing Engineer Trainee",
+        "Testing Engineer",
+        "Senior Testing Engineer",
+        "Tech Lead",
+        "Testing Lead",
+        "Manager",
+        "Project Manager",
+        "Senior Manager",
+        "Analyst",
+        "Senior Analyst",
+        "Architect",
+        "Senior Architect",
+        "Solution Architect",
+        "Scrum Master",
+        "Data Engineer",
+      ].includes(requestBody.designation)
+    ) {
+      throw new Error("Incorrect Designation!");
+    }
+
+    const highestSerialNumber1 = await getHighestSerialNumber();
+    console.log("Highest Serial Number:", highestSerialNumber1);
+    const nextSerialNumber1 = highestSerialNumber !== null ? parseInt(highestSerialNumber1) + 1 : 1;
+    async function getHighestSerialNumber() {
+      const params = {
+        TableName: process.env.ASSIGNMENTS_TABLE,
+        ProjectionExpression: "assignmentId",
+        Limit: 100, // Increase the limit to retrieve more items for sorting
+      };
+
+      try {
+        const result = await client.send(new ScanCommand(params));
+
+        // Sort the items in descending order based on assignmentId
+        const sortedItems = result.Items.sort((a, b) => {
+          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
+        });
+
+        console.log("Sorted Items:", sortedItems); // Log the sorted items
+
+        if (sortedItems.length === 0) {
+          return 0; // If no records found, return null
+        } else {
+          const highestAssignmentId = parseInt(sortedItems[0].assignmentId.N);
+          console.log("Highest Assignment ID:", highestAssignmentId);
+          return highestAssignmentId;
+        }
+      } catch (error) {
+        console.error("Error retrieving highest serial number:", error);
+        throw error; // Propagate the error up the call stack
+      }
+    }
+
+    const assignmentParams = {
+      TableName: process.env.ASSIGNMENTS_TABLE, // Use ASSIGNMENTS_TABLE environment variable
+      Item: marshall({
+        assignmentId: nextSerialNumber1,
+        employeeId: requestBody.employeeId,
+        branchOffice: requestBody.branchOffice,
+        designation: requestBody.designation,
+        onsite: onsite,
+        department: requestBody.department || null,
+        framework: requestBody.framework || null,
+        coreTechnology: requestBody.coreTechnology || null,
+        reportingManager: requestBody.reportingManager || null,
+        billableResource: requestBody.billableResource || null,
+        createdDateTime: formattedDate,
+      }),
+    };
+
+    params.Item.assignmentId = nextSerialNumber1;
+    const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
       createResult,
@@ -88,7 +187,12 @@ const createEmployee = async (event) => {
 
 const updateEmployee = async (event) => {
   console.log("Update employee details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
 
   try {
     const requestBody = JSON.parse(event.body);
@@ -184,7 +288,12 @@ const updateEmployee = async (event) => {
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
@@ -217,7 +326,12 @@ const getEmployee = async (event) => {
 };
 
 const getAllEmployees = async () => {
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const { Items } = await client.send(new ScanCommand({ TableName: process.env.EMPLOYEE_TABLE })); // Getting table name from the servetless.yml and setting to the TableName
 
@@ -228,7 +342,7 @@ const getAllEmployees = async () => {
         message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
       }); // Setting error message
     } else {
-      const sortedItems = Items.sort((a, b) => a.employeeId.S.localeCompare(b.employeeId.S));
+      const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.N) - parseInt(b.employeeId.N));
 
       // Map and set "password" field to null
       const employeesData = sortedItems.map((item) => {
@@ -297,27 +411,35 @@ const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
   return data.Items.length > 0;
 };
 
-// async function getHighestSerialNumber() {
-//   const params = {
-//     TableName: process.env.EMPLOYEE_TABLE,
-//     ProjectionExpression: 'serialNumber',
-//     Limit: 1,
-//     ScanIndexForward: false, // Sort in descending order to get the highest serial number first
-//   };
+async function getHighestSerialNumber() {
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    ProjectionExpression: "serialNumber",
+    Limit: 100, // Increase the limit to retrieve more items for sorting
+  };
 
-//   try {
-//     const result = await client.send(new ScanCommand(params));
-//     if (result.Items.length === 0) {
-//       return undefined; // If no records found, return undefined
-//     } else {
-//       // Parse and return the highest serial number without incrementing
-//       return parseInt(result.Items[0].serialNumber.N);
-//     }
-//   } catch (error) {
-//     console.error("Error retrieving highest serial number:", error);
-//     throw error; // Propagate the error up the call stack
-//   }
-// }
+  try {
+    const result = await client.send(new ScanCommand(params));
+
+    // Sort the items in descending order based on assignmentId
+    const sortedItems = result.Items.sort((a, b) => {
+      return parseInt(b.serialNumber.N) - parseInt(a.serialNumber.N);
+    });
+
+    console.log("Sorted Items:", sortedItems); // Log the sorted items
+
+    if (sortedItems.length === 0) {
+      return 0; // If no records found, return null
+    } else {
+      const highestSerialNumber = parseInt(sortedItems[0].serialNumber.N);
+      console.log("Highest Assignment ID:", highestSerialNumber);
+      return highestSerialNumber;
+    }
+  } catch (error) {
+    console.error("Error retrieving highest serial number:", error);
+    throw error; // Propagate the error up the call stack
+  }
+}
 
 module.exports = {
   createEmployee,

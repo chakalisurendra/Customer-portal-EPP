@@ -37,6 +37,8 @@ const httpStatusMessages = {
   FAILED_TO_RETRIEVE_METADATA_DETAILS: "Failed to retrieve Metadata Details.",
   SUCCESSFULLY_RETRIEVED_METADATA_DETAILS: "Successfully retrieved metadata.",
   METADATA_DETAILS_NOT_FOUND: "Metadata details not found.",
+  FAILED_TO_UPDATE_METADATA: "Failed to update metadata.",
+  SUCCESSFULLY_UPDATED_METADATA: "Successfully updated metadat.",
 };
 
 module.exports = {

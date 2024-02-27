@@ -114,15 +114,12 @@ const validateAadharNumber = (aadharNumber) => {
   if (aadharNumber === null || aadharNumber === undefined) {
     return true; // Allow null or undefined values
   }
-  if (typeof requestBody.aadharNumber !== "number") {
+  const numberPattern = /^\d{12}$/;
+  if (numberPattern.test(aadharNumber)) {
+    return true;
+  } else {
     return false;
   }
-  // const numberPattern = /^\d{12}$/;
-  // if (numberPattern.test(aadharNumber)) {
-  //   return true;
-  // } else {
-  //   return false;
-  // }
 };
 
 const validatePassportNumber = (passportNumber) => {

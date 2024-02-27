@@ -478,7 +478,7 @@ const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
   } else {
     return false;
   }
-  // response = data.Items.length > 0;
+
 
   // if (data.Item.metadataId.N === metadataId) {
   //   return (response = false);
