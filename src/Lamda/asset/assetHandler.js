@@ -315,7 +315,7 @@ const getAllAssetDetails = async () => {
         message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
       });
     } else {
-      const sortedItems = Items.sort((a, b) => a.assetId.N.localeCompare(b.assetId.N));
+      const sortedItems = Items.sort((a, b) => parseInt(a.assetId.N) - parseInt(b.assetId.N));
       const assetList = sortedItems.map((item) => {
         const asset = unmarshall(item);
         return asset;
