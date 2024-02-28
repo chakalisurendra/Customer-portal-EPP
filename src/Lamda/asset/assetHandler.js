@@ -1,4 +1,4 @@
-const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const { validateAssetDetails } = require("../../validator/validateRequest");
@@ -8,7 +8,12 @@ const formattedDate = moment().format("MM-DD-YYYY HH:mm:ss");
 
 const createAsset = async (event) => {
   console.log("Create asset details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const requestBody = JSON.parse(event.body);
 
@@ -120,7 +125,7 @@ const isEmployeeIdExistsInAssets = async (assignTo) => {
     },
     ProjectionExpression: "assignTo",
   };
-  
+
   const command = new ScanCommand(params);
   const data = await client.send(command);
   return data.Items.length > 0;
@@ -137,46 +142,58 @@ const isAssetIdExists = async (assetId) => {
 };
 
 const updateAssetDetails = async (event) => {
+  console.log("inside the asset update  details");
+  let response;
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+  };
+
   try {
     const requestBody = JSON.parse(event.body);
-    const employeeId = event.pathParameters.employeeId;
+    const assetId = event.pathParameters.assetId;
 
-    // Scan DynamoDB to find the asset details based on the employeeId
-    const params = {
+    // Get asset details from DynamoDB based on assetId
+    const getParams = {
       TableName: process.env.ASSETS_TABLE,
-      FilterExpression: "employeeId = :eId",
-      ExpressionAttributeValues: {
-        ":eId": { S: employeeId },
+      Key: {
+        assetId: { N: assetId },
       },
-      ProjectionExpression: "employeeId",
     };
 
-    const command = new ScanCommand(params);
-    const asset = await client.send(command);
+    const getCommand = new GetItemCommand(getParams);
+    const assetResult = await client.send(getCommand);
 
-    if (!asset) {
-      return {
+    // If asset not found
+    if (!assetResult.Item) {
+      response = {
         statusCode: 404,
+        headers,
         body: JSON.stringify({
-          message: "No assets found for the specified employeeId",
+          message: "Asset not found for the specified assetId",
         }),
       };
+      return response;
+    }
+
+    const assignedTOExist = await isAssignedToExists(requestBody.assignTo, assetId);
+    if (assignedTOExist) {
+      throw new Error(`The specified 'assignTo' ${requestBody.assignTo} is already assigned with an asset ID `);
     }
 
     // Update the asset with the new values
-    const currentDateTime = moment().toISOString();
     const updateParams = {
       TableName: process.env.ASSETS_TABLE,
       Key: {
-        assetId: asset.assetId,
+        assetId: { N: assetId },
       },
-      UpdateExpression: "SET assetsType = :assetsType, serialNumber = :serialNumber, #st = :status, updatedDateTime = :updatedDateTime",
-      ExpressionAttributeValues: {
+      UpdateExpression: "SET assetsType = :assetsType, serialNumber = :serialNumber, assignTo = :assignTo, #st = :status, updatedDateTime = :updatedDateTime",
+      ExpressionAttributeValues: marshall({
         ":assetsType": requestBody.assetsType,
         ":serialNumber": requestBody.serialNumber,
         ":status": requestBody.status,
-        ":updatedDateTime": currentDateTime,
-      },
+        ":assignTo": requestBody.assignTo || null,
+        ":updatedDateTime": formattedDate,
+      }),
       ExpressionAttributeNames: {
         "#st": "status",
       },
@@ -185,23 +202,57 @@ const updateAssetDetails = async (event) => {
 
     const updateCommand = new UpdateItemCommand(updateParams);
     const updatedAsset = await client.send(updateCommand);
+    console.log("Successfully updated asset.");
 
-    return {
+    response = {
       statusCode: httpStatusCodes.SUCCESS,
-      body: JSON.stringify(updatedAsset.Attributes),
+      headers,
+      body: JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSSET_DETAILS,
+        updatedAsset: unmarshall(updatedAsset.Attributes),
+      }),
     };
   } catch (error) {
     console.error("Error updating asset details:", error);
-    return {
-      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
-      body: JSON.stringify({ message: "Failed to update asset details" }),
+    response = {
+      statusCode: httpStatusCodes.BAD_REQUEST,
+      headers,
+      body: JSON.stringify({
+        message: httpStatusMessages.FAILED_TO_UPDATE_ASSSET_DETAILS,
+        errorMsg: error.message,
+        errorStack: error.stack,
+      }),
     };
   }
+
+  return response;
+};
+
+// Check if the email address already exists
+const isAssignedToExists = async (employeeId, assetId) => {
+  const params = {
+    TableName: process.env.ASSETS_TABLE,
+    FilterExpression: "assignTo = :assign AND assetId <> :assetId",
+    ExpressionAttributeValues: {
+      ":assign": { S: employeeId },
+      ":assetId": { N: assetId.toString() }, // Convert assetId to string if needed
+    },
+    ProjectionExpression: "assignTo",
+  };
+
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
 };
 
 const getAssetDetails = async (event) => {
   console.log("Get asset details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
     if (!employeeId) {
@@ -254,8 +305,40 @@ const getAssetDetails = async (event) => {
   return response;
 };
 
+const getAllAssetDetails = async () => {
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+  try {
+    const { Items } = await client.send(new ScanCommand({ TableName: process.env.ASSETS_TABLE }));
+    if (Items.length === 0) {
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
+      });
+    } else {
+      const sortedItems = Items.sort((a, b) => a.assetId.N.localeCompare(b.assetId.N));
+      const assetList = sortedItems.map((item) => {
+        const asset = unmarshall(item);
+        return asset;
+      });
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
+        data: assetList,
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSET_INFORMATION,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
+
 module.exports = {
   createAsset,
   updateAssetDetails,
   getAssetDetails,
+  getAllAssetDetails,
 };

@@ -141,6 +141,15 @@ functions:
           path: asset/get/{employeeId}
           method: GET
           cors: true # Enable CORS for this endpoint
+  assetGetAll:
+    handler: src/Lamda/asset/assetHandler.getAllAssetDetails
+    name: assetGetAll
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: asset/getAll
+          method: GET
   metadataCreate:
     handler: src/Lamda/metadata/metadataHandler.createMetadata
     name: metadataCreate
