@@ -336,9 +336,55 @@ const getAllAssetDetails = async () => {
   return response;
 };
 
+const getAllAssetDetails1 = async (event) => {
+  const response = { statusCode: httpStatusCodes.SUCCESS };
+  try {
+    const { pageNo, pageSize, sortBy, sortOrder } = event.queryStringParameters;
+
+    const params = {
+      TableName: process.env.ASSETS_TABLE,
+      Limit: pageSize, // Limiting the number of items per page
+      ExclusiveStartKey: undefined, // Initialize ExclusiveStartKey to start from the beginning
+    };
+    if (sortBy && sortOrder) {
+      params.ExpressionAttributeNames = { "#sortKey": sortBy };
+      params.ExpressionAttributeValues = { ":sortOrder": sortOrder };
+      params.ScanIndexForward = sortOrder.toUpperCase() === "ASC";
+      params.KeyConditionExpression = "#sortKey = :sortOrder";
+    }
+    const { Items, LastEvaluatedKey } = await client.send(new ScanCommand(params));
+
+    if (Items.length === 0) {
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.ASSET_INFORMATION_NOT_FOUND,
+      });
+    } else {
+      const assetList = Items.map((item) => {
+        const asset = unmarshall(item);
+        return asset;
+      });
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
+        data: assetList,
+        lastEvaluatedKey: LastEvaluatedKey, // Return the last evaluated key for pagination
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    response.body = JSON.stringify({
+      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSET_INFORMATION,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
+
 module.exports = {
   createAsset,
   updateAssetDetails,
   getAssetDetails,
   getAllAssetDetails,
+  getAllAssetDetails1,
 };

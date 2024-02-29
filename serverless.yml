@@ -151,6 +151,23 @@ functions:
           path: asset/getAll
           method: GET
           cors: true # Enable CORS for this endpoint
+  assetGetAllPagenation:
+    handler: src/Lamda/asset/assetHandler.getAllAssetDetails1
+    name: assetGetAllPagenation
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: asset/getAll
+          method: GET
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                pageNo: true
+                pageSize: true
+                sortBy: true
+                sortOrder: true
   metadataCreate:
     handler: src/Lamda/metadata/metadataHandler.createMetadata
     name: metadataCreate
