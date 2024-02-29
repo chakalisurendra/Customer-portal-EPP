@@ -344,7 +344,7 @@ const getAllAssetDetails1 = async (event) => {
     const params = {
       TableName: process.env.ASSETS_TABLE,
       Limit: pageSize,
-      ExclusiveStartKey: undefined, 
+      ExclusiveStartKey: undefined,
     };
     if (sortBy && sortOrder) {
       params.ExpressionAttributeNames = { "#sortKey": sortBy };
@@ -364,11 +364,14 @@ const getAllAssetDetails1 = async (event) => {
         const asset = unmarshall(item);
         return asset;
       });
-      response.body = JSON.stringify({
+      const responseBody = {
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSET_INFORMATION,
         data: assetList,
-        lastEvaluatedKey: LastEvaluatedKey, 
-      });
+      };
+      if (LastEvaluatedKey) {
+        responseBody.lastEvaluatedKey = LastEvaluatedKey;
+      }
+      response.body = JSON.stringify(responseBody);
     }
   } catch (e) {
     console.error(e);
