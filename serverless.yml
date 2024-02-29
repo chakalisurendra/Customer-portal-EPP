@@ -158,7 +158,7 @@ functions:
     timeout: 120
     events:
       - http:
-          path: asset/getAll
+          path: asset/assetGetAllPagenation
           method: GET
           cors: true
           request:
