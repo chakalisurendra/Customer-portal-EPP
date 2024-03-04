@@ -208,10 +208,16 @@ const getMetadataByTypeAndStatus = async (event) => {
       },
     };
 
-    const data = await client.send(new ScanCommand(params));
-    const items = data.Items.map((item) => unmarshall(item));
-    console.log({ items });
-    if (!items || !items.length > 0) {
+    const { Items } = await client.send(new ScanCommand(params));
+
+    const sortedItems = Items.sort((a, b) => parseInt(a.metadataId.N) - parseInt(b.metadataId.N));
+    const metadataList = sortedItems.map((item) => {
+      const metadata = unmarshall(item);
+      return metadata;
+    });
+
+    console.log({ metadataList });
+    if (!metadataList || !metadataList.length > 0) {
       console.log("Metadata details not found.");
       response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
@@ -221,7 +227,7 @@ const getMetadataByTypeAndStatus = async (event) => {
       console.log("Successfully retrieved metadata details.");
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_METADATA,
-        data: items,
+        data: metadataList,
       });
     }
   } catch (e) {
@@ -323,7 +329,6 @@ const updateMetadata = async (event) => {
   }
   return response;
 };
-
 
 // const updateMetadata = async (event) => {
 //   console.log("Update metadata");
@@ -478,7 +483,6 @@ const isNameAndTypeNotIdExists = async (metadataId, name, type) => {
   } else {
     return false;
   }
-
 
   // if (data.Item.metadataId.N === metadataId) {
   //   return (response = false);
