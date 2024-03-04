@@ -24,8 +24,8 @@ provider:
         - !GetAtt AssetTable.Arn
         - !GetAtt MetadataTable.Arn
 custom:
-  employeeTableName: employee-Details-${self:provider.stage}
-  assignmentTableName: assignment-Details-${self:provider.stage}
+  employeeTableName: employee-Details
+  assignmentTableName: assignment-Details
   assetTableName: asset-Details-${self:provider.stage}
   metadataTableName: metadata
   cors:

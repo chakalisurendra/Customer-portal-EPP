@@ -194,7 +194,6 @@ const getMetadataByTypeAndStatus = async (event) => {
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
     const { type, status } = event.queryStringParameters;
-
     const params = {
       TableName: process.env.METADATA_TABLE,
       FilterExpression: "#type = :typeValue AND #status = :statusValue",
@@ -255,7 +254,7 @@ const updateMetadata = async (event) => {
     const validateMetadataparams = {
       TableName: process.env.METADATA_TABLE,
       Key: {
-        metadataId: { N: metadataId }, // Assuming metadataId is a number, hence using 'N'
+        metadataId: { N: metadataId }, 
       },
     };
     const { Item } = await client.send(new GetItemCommand(validateMetadataparams));
