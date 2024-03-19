@@ -29,7 +29,6 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
-
     const id = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     const newEmployeeId = String(id);
     console.log("employee autoIncreamentId : ", newEmployeeId);
@@ -68,12 +67,10 @@ const createEmployee = async (event) => {
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
-
     const requiredAssignmentFields = ["designation", "branchOffice"];
     if (!requiredAssignmentFields.every((field) => requestBody[field])) {
       throw new Error("Required Assignment Fields are missing.");
     }
-
     let onsite = "No";
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";

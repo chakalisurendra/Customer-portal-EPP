@@ -13,19 +13,20 @@ const autoIncreamentId = async (tableName1, id) => {
 
   try {
     const result = await client.send(new ScanCommand(params));
-    console.log("DynamoDB Result:", result.Items.length);
+    console.log("DynamoDB Result:", id," ", result.Items.length);
+    console.log("DynamoDB Result2 :", id," ", result.Items[0].length);
+
     if (result.Items.length === 0) {
       return 1;
     } else {
       let incrementIdObj;
       let increamentId;
-
       if ("employeeId" === id) {
-        incrementIdObj = unmarshall(result.Items[0].employeeId);
+        incrementIdObj = result.Items[0].employeeId;
         console.log("employeeId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
-        incrementIdObj = result.Items[0].assignmentId;  
+        incrementIdObj = result.Items[0].assignmentId;
         console.log("assignmentId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
       }
