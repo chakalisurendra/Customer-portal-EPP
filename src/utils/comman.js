@@ -19,13 +19,16 @@ const autoIncreamentId = async (tableName1, id) => {
       return 1;
     } else {
       let incrementIdObj;
+      let increamentId;
+
       if ("employeeId" === id) {
         incrementIdObj = unmarshall(result.Items[0].employeeId);
+        console.log("employeeId from DynamoDB:", incrementIdObj);
+        increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
-        incrementIdObj = unmarshall(result.Items[0].assignmentId);
+        console.log("assignmentId from DynamoDB:", incrementIdObj);
+        increamentId = unmarshall(result.Items[0].assignmentId);
       }
-      console.log("ID from DynamoDB:", incrementIdObj);
-      const increamentId = parseInt(incrementIdObj.N);
       console.log("Parsed ID:", increamentId);
       const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
       return nextSerialNumber;
