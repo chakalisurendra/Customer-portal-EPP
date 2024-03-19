@@ -181,12 +181,12 @@ const createEmployee = async (event) => {
       }),
     };
 
-    params.Item.assignmentId = nextSerialNumber1;
+    params.Item.assignmentId = newAssignmentId;
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
       employeeId: newEmployeeId,
-      assignmentId: nextSerialNumber1,
+      assignmentId: newAssignmentId,
     });
   } catch (e) {
     console.error(e);
