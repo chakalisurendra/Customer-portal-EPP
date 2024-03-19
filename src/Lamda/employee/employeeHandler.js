@@ -54,7 +54,7 @@ const createEmployee = async (event) => {
     //let id = autoIncreamentId(requestParams.tableName, requestParams.id);
     const id = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     const newEmployeeId = String(id);
-    console.log("autoIncreamentId : ", id);
+    console.log("employee autoIncreamentId : ", newEmployeeId);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Item: marshall({
@@ -129,42 +129,45 @@ const createEmployee = async (event) => {
       throw new Error("Incorrect Designation!");
     }
 
-    const highestSerialNumber1 = await getHighestSerialNumber();
-    console.log("Highest Serial Number:", highestSerialNumber1);
-    const nextSerialNumber1 = highestSerialNumber !== null ? parseInt(highestSerialNumber1) + 1 : 1;
-    async function getHighestSerialNumber() {
-      const params = {
-        TableName: process.env.ASSIGNMENTS_TABLE,
-        ProjectionExpression: "assignmentId",
-        Limit: 100,
-      };
+    // const highestSerialNumber1 = await getHighestSerialNumber();
+    // console.log("Highest Serial Number:", highestSerialNumber1);
+    // const nextSerialNumber1 = highestSerialNumber !== null ? parseInt(highestSerialNumber1) + 1 : 1;
+    // async function getHighestSerialNumber() {
+    //   const params = {
+    //     TableName: process.env.ASSIGNMENTS_TABLE,
+    //     ProjectionExpression: "assignmentId",
+    //     Limit: 100,
+    //   };
 
-      try {
-        const result = await client.send(new ScanCommand(params));
+    //   try {
+    //     const result = await client.send(new ScanCommand(params));
 
-        const sortedItems = result.Items.sort((a, b) => {
-          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
-        });
+    //     const sortedItems = result.Items.sort((a, b) => {
+    //       return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
+    //     });
 
-        console.log("Sorted Items:", sortedItems);
+    //     console.log("Sorted Items:", sortedItems);
 
-        if (sortedItems.length === 0) {
-          return 0;
-        } else {
-          const highestAssignmentId = parseInt(sortedItems[0].assignmentId.N);
-          console.log("Highest Assignment ID:", highestAssignmentId);
-          return highestAssignmentId;
-        }
-      } catch (error) {
-        console.error("Error retrieving highest serial number:", error);
-        throw error;
-      }
-    }
+    //     if (sortedItems.length === 0) {
+    //       return 0;
+    //     } else {
+    //       const highestAssignmentId = parseInt(sortedItems[0].assignmentId.N);
+    //       console.log("Highest Assignment ID:", highestAssignmentId);
+    //       return highestAssignmentId;
+    //     }
+    //   } catch (error) {
+    //     console.error("Error retrieving highest serial number:", error);
+    //     throw error;
+    //   }
+    // }
+
+    const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
+    console.log("newAssignmentId autoIncreamentId : ", newAssignmentId);
 
     const assignmentParams = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
-        assignmentId: nextSerialNumber1,
+        assignmentId: newAssignmentId,
         employeeId: newEmployeeId,
         branchOffice: requestBody.branchOffice,
         designation: requestBody.designation,

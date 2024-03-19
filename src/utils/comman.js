@@ -8,7 +8,7 @@ const autoIncreamentId = async (tableName1, id) => {
   const params = {
     TableName: tableName1,
     ProjectionExpression: id,
-    Limit: 1,
+    Limit: 1000,
     ScanIndexForward: false,
   };
 
@@ -18,7 +18,12 @@ const autoIncreamentId = async (tableName1, id) => {
     if (result.Items.length === 0) {
       return 1;
     } else {
-      const incrementIdObj = unmarshall(result.Items[0].employeeId);
+      let incrementIdObj;
+      if ("employeeId" === id) {
+        incrementIdObj = unmarshall(result.Items[0].employeeId);
+      } else if ("assignmentId" === id) {
+        incrementIdObj = unmarshall(result.Items[0].assignmentId);
+      }
       console.log("ID from DynamoDB:", incrementIdObj);
       const increamentId = parseInt(incrementIdObj.N);
       console.log("Parsed ID:", increamentId);
