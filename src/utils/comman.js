@@ -3,8 +3,8 @@ const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
 
-
 const autoIncreamentId = async (tableName1, id) => {
+  //const id = event.id;
   const params = {
     TableName: tableName1,
     ProjectionExpression: id,
@@ -14,28 +14,23 @@ const autoIncreamentId = async (tableName1, id) => {
 
   try {
     const result = await client.send(new ScanCommand(params));
-    console.log("DynamoDB Result:", result);
+    console.log("DynamoDB Result:", result.Items.length);
     if (result.Items.length === 0) {
       return 1;
     } else {
       let incrementIdObj;
       let increamentId;
 
-      // Handle unmarshalling based on attribute id
-      if (id === "employeeId") {
+      if ("employeeId" === id) {
         incrementIdObj = unmarshall(result.Items[0].employeeId);
-      } else if (id === "assignmentId") {
-        incrementIdObj = unmarshall(result.Items[0].assignmentId);
-      }
-
-      if (incrementIdObj) {
+        console.log("employeeId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
-      } else {
-        increamentId = 0; // Default value if incrementIdObj is null
+      } else if ("assignmentId" === id) {
+        console.log("assignmentId from DynamoDB:", incrementIdObj);
+        increamentId = unmarshall(result.Items[0].assignmentId);
       }
-
       console.log("Parsed ID:", increamentId);
-      const nextSerialNumber = increamentId + 1;
+      const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
       return nextSerialNumber;
     }
   } catch (error) {
@@ -47,44 +42,3 @@ const autoIncreamentId = async (tableName1, id) => {
 module.exports = {
   autoIncreamentId,
 };
-
-
-// const autoIncreamentId = async (tableName1, id) => {
-//   //const id = event.id;
-//   const params = {
-//     TableName: tableName1,
-//     ProjectionExpression: id,
-//     Limit: 1000,
-//     ScanIndexForward: false,
-//   };
-
-//   try {
-//     const result = await client.send(new ScanCommand(params));
-//     console.log("DynamoDB Result:", result);
-//     if (result.Items.length === 0) {
-//       return 1;
-//     } else {
-//       let incrementIdObj;
-//       let increamentId;
-
-//       if ("employeeId" === id) {
-//         incrementIdObj = unmarshall(result.Items[0].employeeId);
-//         console.log("employeeId from DynamoDB:", incrementIdObj);
-//         increamentId = parseInt(incrementIdObj.N);
-//       } else if ("assignmentId" === id) {
-//         console.log("assignmentId from DynamoDB:", incrementIdObj);
-//         increamentId = unmarshall(result.Items[0].assignmentId);
-//       }
-//       console.log("Parsed ID:", increamentId);
-//       const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
-//       return nextSerialNumber;
-//     }
-//   } catch (error) {
-//     console.error("Error retrieving highest serial number:", error);
-//     throw error;
-//   }
-// };
-
-// module.exports = {
-//   autoIncreamentId,
-// };
