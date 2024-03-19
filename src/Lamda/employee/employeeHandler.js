@@ -5,7 +5,7 @@ const client = new DynamoDBClient();
 const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
 const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-const { autoIncreamentId, autoIncreamentId } = require("../../utils/comman");
+const { autoIncreamentId } = require("../../utils/comman");
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
 
@@ -20,9 +20,9 @@ const createEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
 
-    // if (!validateEmployeeDetails(requestBody)) {
-    //   throw new Error("Required fields are missing.");
-    // }
+    if (!validateEmployeeDetails(requestBody)) {
+      throw new Error("Required fields are missing.");
+    }
 
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
     if (employeeIdExists) {
