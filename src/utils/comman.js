@@ -16,7 +16,7 @@ const autoIncreamentId = async (tableName1, id) => {
     const result = await client.send(new ScanCommand(params));
     console.log("DynamoDB Result:", result);
     if (result.Items.length === 0) {
-      return 0;
+      return 1;
     } else {
       const incrementIdObj = unmarshall(result.Items[0].employeeId);
       console.log("ID from DynamoDB:", incrementIdObj);
