@@ -3,10 +3,10 @@ const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
 
-const autoIncreamentId = async (event) => {
-  const id = event.id;
+const autoIncreamentId = async (tableName1, id) => {
+  //const id = event.id;
   const params = {
-    TableName: event.tableName,
+    TableName: tableName1,
     ProjectionExpression: id,
     Limit: 1,
     ScanIndexForward: false,

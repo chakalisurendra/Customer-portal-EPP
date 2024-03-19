@@ -51,7 +51,7 @@ const createEmployee = async (event) => {
       tableName: process.env.EMPLOYEE_TABLE,
       id: "employeeId",
     };
-    let id = autoIncreamentId(requestParams);
+    let id = autoIncreamentId(requestParams.tableName, requestParams.id);
     console.log("autoIncreamentId : ", id);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
@@ -84,7 +84,7 @@ const createEmployee = async (event) => {
         updatedDateTime: null,
         department: requestBody.department || null,
         aadhaarNumber: requestBody.aadhaarNumber || null,
-        status: active,
+        status: "active",
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
