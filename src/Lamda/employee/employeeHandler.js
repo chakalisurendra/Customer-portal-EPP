@@ -53,12 +53,12 @@ const createEmployee = async (event) => {
     // };
     //let id = autoIncreamentId(requestParams.tableName, requestParams.id);
     const id = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
-
+    const newEmployeeId = String(id);
     console.log("autoIncreamentId : ", id);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Item: marshall({
-        employeeId: id,
+        employeeId: newEmployeeId,
         firstName: requestBody.firstName,
         lastName: requestBody.lastName,
         dateOfBirth: requestBody.dateOfBirth,
@@ -165,7 +165,7 @@ const createEmployee = async (event) => {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
         assignmentId: nextSerialNumber1,
-        employeeId: requestBody.employeeId,
+        employeeId: newEmployeeId,
         branchOffice: requestBody.branchOffice,
         designation: requestBody.designation,
         onsite: onsite,
@@ -182,7 +182,7 @@ const createEmployee = async (event) => {
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
-      employeeId: id,
+      employeeId: newEmployeeId,
       assignmentId: nextSerialNumber1,
     });
   } catch (e) {
