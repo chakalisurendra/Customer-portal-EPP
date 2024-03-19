@@ -14,7 +14,7 @@ const autoIncreamentId = async (tableName1, id) => {
   try {
     const result = await client.send(new ScanCommand(params));
     console.log("DynamoDB Result:", id," ", result.Items.length);
-    console.log("DynamoDB Result2 :", id," ", result.Items[0].length);
+    console.log("DynamoDB Result2 :", id," ", Object.keys(result.Items[0]).length);
 
     if (result.Items.length === 0) {
       return 1;
@@ -22,7 +22,7 @@ const autoIncreamentId = async (tableName1, id) => {
       let incrementIdObj;
       let increamentId;
       if ("employeeId" === id) {
-        incrementIdObj = result.Items[0].employeeId;
+        incrementIdObj = Object.keys(result.Items[0]).length;
         console.log("employeeId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
