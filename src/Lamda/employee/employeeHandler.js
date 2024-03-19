@@ -167,7 +167,8 @@ const createEmployee = async (event) => {
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
-      createResult,
+      employeeId: id,
+      assignmentId: nextSerialNumber1,
     });
   } catch (e) {
     console.error(e);

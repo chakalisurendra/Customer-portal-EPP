@@ -1,11 +1,11 @@
 const validateEmployeeDetails = (requestBody) => {
-  const { employeeId, firstName, lastName, dateOfBirth, officeEmailAddress, branchOffice } = requestBody;
+  const { firstName, lastName, dateOfBirth, officialEmailId, branchOffice } = requestBody;
 
   // Check if required fields are missing
-  if (!employeeId || !firstName || !lastName || !dateOfBirth || !officeEmailAddress || !branchOffice) {
+  if (!employeeId || !firstName || !lastName || !dateOfBirth || !officialEmailId || !branchOffice) {
     return false;
-  } else if (!officeEmailAddress.endsWith("hyniva.com")) {
-    throw new Error('Invalid officeEmailAddress domain. It should end with "hyniva.com".');
+  } else if (!officialEmailId.endsWith("hyniva.com")) {
+    throw new Error('Invalid officialEmailId domain. It should end with "hyniva.com".');
   }
   // You can add more specific validation logic for each field if needed
   return true;
@@ -42,7 +42,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     response.validationMessage = `Invalid Passport Number it will allow 8 to 12 digits, Example "AWTY12345678"`;
     return response;
   }
-  if (!validateOfficeEmailAddress(requestBody.officeEmailAddress)) {
+  if (!validateOfficialEmailId(requestBody.officialEmailId)) {
     response.validationMessage = "Invalid Office Email Address it will allow @hyniva.com";
     return response;
   }
@@ -134,12 +134,12 @@ const validatePassportNumber = (passportNumber) => {
   }
 };
 
-const validateOfficeEmailAddress = (officeEmailAddress) => {
-  if (officeEmailAddress === null || officeEmailAddress === undefined) {
+const validateOfficialEmailId = (officialEmailId) => {
+  if (officialEmailId === null || officialEmailId === undefined) {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
-  return emailPattern.test(officeEmailAddress);
+  return emailPattern.test(officialEmailId);
 };
 
 const validateEmailAddress = (emailAddress) => {
