@@ -288,12 +288,7 @@ const updateEmployee = async (event) => {
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
-  const response = {
-    statusCode: httpStatusCodes.SUCCESS,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
+  const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
@@ -309,15 +304,32 @@ const getEmployee = async (event) => {
       });
     } else {
       console.log("Successfully retrieved Employee details.");
+
+      // Fetch assignments for the current employee
+      const employeeId = event.pathParameters.employeeId;
+      const assignmentsParams = {
+        TableName: process.env.ASSIGNMENTS_TABLE,
+        FilterExpression: "employeeId = :employeeId",
+        ExpressionAttributeValues: {
+          ":employeeId": { S: employeeId },
+        },
+      };
+      const assignmentsCommand = new ScanCommand(assignmentsParams);
+      const { Items: assignmentItems } = await client.send(assignmentsCommand);
+
+      const employeeData = unmarshall(Item);
+      // Attach assignments to the employee object
+      employeeData.assignments = assignmentItems.map(unmarshall);
+
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEE_DETAILS,
-        data: unmarshall(Item),
+        data: employeeData,
       });
     }
   } catch (e) {
     console.error(e);
     response.body = JSON.stringify({
-      statusCode: e.statusCode,
+      statusCode: e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR,
       message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
       errorMsg: e.message,
     });
@@ -333,10 +345,10 @@ const getAllEmployees = async () => {
     },
   };
   try {
-    const { Items } = await client.send(new ScanCommand({ TableName: process.env.EMPLOYEE_TABLE })); // Getting table name from the servetless.yml and setting to the TableName
+    const { Items } = await client.send(new ScanCommand({ TableName: process.env.EMPLOYEE_TABLE })); // Getting table name from the serverless.yml and setting to the TableName
 
     if (Items.length === 0) {
-      // If there is no employee details found
+      // If there are no employee details found
       response.statusCode = httpStatusCodes.NOT_FOUND; // Setting the status code to 404
       response.body = JSON.stringify({
         message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
@@ -345,32 +357,36 @@ const getAllEmployees = async () => {
       const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.S) - parseInt(b.employeeId.S));
 
       // Map and set "password" field to null
-      const employeesData = sortedItems.map((item) => {
-        const employee = unmarshall(item);
-        if (employee.hasOwnProperty("password")) {
-          employee.password = null;
-        }
-        const assignmentParams = {
-          TableName: process.env.ASSIGNMENT_TABLE,
-          KeyConditionExpression: "employeeId = :empId",
-          ExpressionAttributeValues: {
-            ":empId": {
-              S: employee.employeeId,
-            },
-          },
-        };
-        try {
-          const assignmentData = await;
-          client.send(new QueryCommand(assignmentParams));
-          if (assignmentData.Items.length > 0) {
-            employee.designation = assignmentData.Items[0].designation.S;
+      const employeesData = await Promise.all(
+        sortedItems.map(async (item) => {
+          const employee = unmarshall(item);
+          if (employee.hasOwnProperty("password")) {
+            employee.password = null;
           }
-        } catch (err) {
-          console.error("Error fetching designation:", err);
-          // Handle error fetching designation
-        }
-        return employee;
-      });
+
+          // Fetch assignments for the current employee
+          try {
+            const employeeId1 = employee.employeeId; // Added missing 'const' keyword
+            const params = {
+              TableName: process.env.ASSIGNMENTS_TABLE,
+              FilterExpression: "employeeId = :employeeId",
+              ExpressionAttributeValues: {
+                ":employeeId": { S: employeeId1 }, // Assuming employeeId is a string, adjust accordingly if not
+              },
+            };
+            const command = new ScanCommand(params);
+            const { Items } = await client.send(command); // Changed assignmentResult to Items
+
+            // Attach assignments to the employee object
+            employee.assignments = Items.map(unmarshall); // Changed assignmentResult to Items
+          } catch (error) {
+            console.error("Error fetching assignments:", error);
+            throw error; // re-throwing the error to be caught by the outer catch block
+          }
+
+          return employee;
+        })
+      );
 
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS,

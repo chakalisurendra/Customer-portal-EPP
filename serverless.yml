@@ -9,6 +9,7 @@ provider:
     ASSIGNMENTS_TABLE: ${self:custom.assignmentTableName}
     ASSETS_TABLE: ${self:custom.assetTableName}
     METADATA_TABLE: ${self:custom.metadataTableName}
+    PAY_ROLL: ${self:custom.payRollTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -23,11 +24,13 @@ provider:
         - !GetAtt AssignmentTable.Arn
         - !GetAtt AssetTable.Arn
         - !GetAtt MetadataTable.Arn
+        - !GetAtt PayRollTable.Arn
 custom:
   employeeTableName: employee-Details
   assignmentTableName: assignment-Details
   assetTableName: asset-Details-${self:provider.stage}
   metadataTableName: metadata
+  payRollTableName: payRoll
   cors:
     origin: "*" # Allow requests from any origin
     headers:
@@ -229,6 +232,16 @@ functions:
             parameters:
               querystrings:
                 metadataId: true
+  payRollCreate:
+    handler: src/Lamda/payRoll/payRollHandler.createPayRoll
+    name: payRollCreate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: payRoll
+          method: POST
+          cors: true
 resources:
   Resources:
     EmployeeTable:
@@ -293,6 +306,19 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: metadataId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    PayRollTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.payRollTableName}
+        AttributeDefinitions:
+          - AttributeName: payRollId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: payRollId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

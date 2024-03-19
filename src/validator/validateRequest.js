@@ -252,10 +252,35 @@ const validateMetadataUpdata = (requestBody) => {
   return response;
 };
 
+const validateFinalSettlement = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  const { employeeId, panNumber, bonus, unpaidSalary, variablePay, unavailedLeaves, leaveEncashment } = requestBody;
+  const requiredProperties = ["panNumber", "employeeId", "basicPay", "bonus", "variablePay", "enCashment","unpaidSalary", "unavailedLeaves", "leaveEncashment", "type"];
+
+  for (const property of requiredProperties) {
+    if (!requestBody[property] || requestBody[property] === "") {
+      response.validationMessage = `${property} is required`;
+      return response;
+    }
+  }
+  if (!validateStatus(requestBody.status)) {
+    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    return response;
+  }
+
+  response.validation = true;
+  return response;
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
   validateMetadata,
   validateMetadataUpdata,
+  validateFinalSettlement,
 };
