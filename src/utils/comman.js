@@ -27,7 +27,8 @@ const autoIncreamentId = async (tableName1, id) => {
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
         console.log("assignmentId from DynamoDB:", incrementIdObj);
-        increamentId = result.Items[0].assignmentId;
+        incrementIdObj = result.Items[0].assignmentId;
+        increamentId = parseInt(incrementIdObj.N);
       }
       console.log("Parsed ID:", increamentId);
       const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
