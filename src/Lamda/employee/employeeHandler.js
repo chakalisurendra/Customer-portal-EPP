@@ -1,13 +1,39 @@
-const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+// const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+// const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
+// const moment = require("moment");
+// const client = new DynamoDBClient();
+// const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
+// const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
+// const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
+// const { autoIncreamentId } = require("../../utils/comman");
+// const currentDate = Date.now(); // get the current date and time in milliseconds
+// const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
+
+const {
+  DynamoDBClient,
+  PutItemCommand,
+  UpdateItemCommand,
+  DeleteItemCommand,
+  GetItemCommand,
+  ScanCommand,
+} = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
-const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
-const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
+const {
+  validateEmployeeDetails,
+  validateUpdateEmployeeDetails,
+} = require("../../validator/validateRequest");
 const { autoIncreamentId } = require("../../utils/comman");
-const currentDate = Date.now(); // get the current date and time in milliseconds
-const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
+const {
+  updateEmployeeAllowedFields,
+} = require("../../validator/validateFields");
+const {
+  httpStatusCodes,
+  httpStatusMessages,
+} = require("../../environment/appconfig");
+const currentDate = Date.now();
+const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
 
 const createEmployee = async (event) => {
   console.log("Create employee details");
@@ -68,7 +94,7 @@ const createEmployee = async (event) => {
         relievedDate: requestBody.relievedDate || null,
         leaveStructure: requestBody.leaveStructure || null,
         createdDateTime: formattedDate,
-        updatedDateTime: requestBody.updatedDateTime || null,
+        updatedDateTime: null,
         department: requestBody.department || null,
         aadhaarNumber: requestBody.aadhaarNumber || null,
         status: active,
