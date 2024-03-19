@@ -20,9 +20,9 @@ const createEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
 
-    if (!validateEmployeeDetails(requestBody)) {
-      throw new Error("Required fields are missing.");
-    }
+    // if (!validateEmployeeDetails(requestBody)) {
+    //   throw new Error("Required fields are missing.");
+    // }
 
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
     if (employeeIdExists) {
