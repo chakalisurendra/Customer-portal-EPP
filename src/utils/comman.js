@@ -4,7 +4,6 @@ const moment = require("moment");
 const client = new DynamoDBClient();
 
 const autoIncreamentId = async (tableName1, id) => {
-  //const id = event.id;
   const params = {
     TableName: tableName1,
     ProjectionExpression: id,
@@ -22,12 +21,12 @@ const autoIncreamentId = async (tableName1, id) => {
       let increamentId;
 
       if ("employeeId" === id) {
-        incrementIdObj = result.Items[0].employeeId;
+        incrementIdObj = unmarshall(result.Items[0].employeeId);
         console.log("employeeId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
+        incrementIdObj = result.Items[0].assignmentId;  
         console.log("assignmentId from DynamoDB:", incrementIdObj);
-        incrementIdObj = result.Items[0].assignmentId;
         increamentId = parseInt(incrementIdObj.N);
       }
       console.log("Parsed ID:", increamentId);

@@ -1,14 +1,3 @@
-// const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
-// const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
-// const moment = require("moment");
-// const client = new DynamoDBClient();
-// const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
-// const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
-// const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-// const { autoIncreamentId } = require("../../utils/comman");
-// const currentDate = Date.now(); // get the current date and time in milliseconds
-// const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
-
 const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
@@ -35,23 +24,12 @@ const createEmployee = async (event) => {
       throw new Error("Required fields are missing.");
     }
 
-    // const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-    // if (employeeIdExists) {
-    //   console.log("EmployeeId already exists.");
-    //   throw new Error("EmployeeId already exists.");
-    // }
-
     const emailExists = await isEmailExists(requestBody.officialEmailId);
     if (emailExists) {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
 
-    // const requestParams = {
-    //   tableName: process.env.EMPLOYEE_TABLE,
-    //   id: "employeeId",
-    // };
-    //let id = autoIncreamentId(requestParams.tableName, requestParams.id);
     const id = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     const newEmployeeId = String(id);
     console.log("employee autoIncreamentId : ", newEmployeeId);
