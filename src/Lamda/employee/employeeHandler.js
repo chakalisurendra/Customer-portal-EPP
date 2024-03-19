@@ -9,29 +9,14 @@
 // const currentDate = Date.now(); // get the current date and time in milliseconds
 // const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
 
-const {
-  DynamoDBClient,
-  PutItemCommand,
-  UpdateItemCommand,
-  DeleteItemCommand,
-  GetItemCommand,
-  ScanCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const {
-  validateEmployeeDetails,
-  validateUpdateEmployeeDetails,
-} = require("../../validator/validateRequest");
+const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
 const { autoIncreamentId } = require("../../utils/comman");
-const {
-  updateEmployeeAllowedFields,
-} = require("../../validator/validateFields");
-const {
-  httpStatusCodes,
-  httpStatusMessages,
-} = require("../../environment/appconfig");
+const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
+const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now();
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
 
@@ -50,13 +35,15 @@ const createEmployee = async (event) => {
       throw new Error("Required fields are missing.");
     }
 
-    const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
-    if (employeeIdExists) {
-      throw new Error("EmployeeId already exists.");
-    }
+    // const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
+    // if (employeeIdExists) {
+    //   console.log("EmployeeId already exists.");
+    //   throw new Error("EmployeeId already exists.");
+    // }
 
     const emailExists = await isEmailExists(requestBody.officialEmailId);
     if (emailExists) {
+      console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
 
@@ -429,6 +416,7 @@ const getAllEmployees = async () => {
 
 // Function to check if employeeId already exists
 const isEmployeeIdExists = async (employeeId) => {
+  console.log("isEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
     Key: { employeeId: { S: employeeId } },
@@ -439,6 +427,7 @@ const isEmployeeIdExists = async (employeeId) => {
 };
 
 const isEmailExists = async (emailAddress) => {
+  console.log("isEmailExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
     FilterExpression: "officialEmailId = :email",
