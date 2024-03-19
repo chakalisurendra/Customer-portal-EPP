@@ -22,12 +22,12 @@ const autoIncreamentId = async (tableName1, id) => {
       let increamentId;
 
       if ("employeeId" === id) {
-        incrementIdObj = unmarshall(result.Items[0].employeeId);
+        incrementIdObj = result.Items[0].employeeId;
         console.log("employeeId from DynamoDB:", incrementIdObj);
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
         console.log("assignmentId from DynamoDB:", incrementIdObj);
-        increamentId = unmarshall(result.Items[0].assignmentId);
+        increamentId = result.Items[0].assignmentId;
       }
       console.log("Parsed ID:", increamentId);
       const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
