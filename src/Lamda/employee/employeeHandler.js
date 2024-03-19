@@ -5,6 +5,7 @@ const client = new DynamoDBClient();
 const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
 const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
+const { autoIncreamentId, autoIncreamentId } = require("../../utils/comman");
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss"); //formating date
 
@@ -19,38 +20,34 @@ const createEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
 
-    // Check for required fields
     if (!validateEmployeeDetails(requestBody)) {
       throw new Error("Required fields are missing.");
     }
 
-    // Check if the employeeId already exists
     const employeeIdExists = await isEmployeeIdExists(requestBody.employeeId);
     if (employeeIdExists) {
       throw new Error("EmployeeId already exists.");
     }
 
-    // Check if the email address already exists
-    const emailExists = await isEmailExists(requestBody.officeEmailAddress);
+    const emailExists = await isEmailExists(requestBody.officialEmailId);
     if (emailExists) {
       throw new Error("Email address already exists.");
     }
 
-    // Fetch the highest highestSerialNumber from the DynamoDB table
-    const highestSerialNumber = await getHighestSerialNumber();
-    console.log("Highest Serial Number:", highestSerialNumber);
-    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
-
+    const requestParams = {
+      tableName: process.env.EMPLOYEE_TABLE,
+      id: "employeeId",
+    };
+    let id = autoIncreamentId(requestParams);
+    console.log("autoIncreamentId : ", id);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Item: marshall({
-        serialNumber: nextSerialNumber,
-        employeeId: requestBody.employeeId,
+        employeeId: id,
         firstName: requestBody.firstName,
         lastName: requestBody.lastName,
         dateOfBirth: requestBody.dateOfBirth,
-        officeEmailAddress: requestBody.officeEmailAddress,
-        //branchOffice: requestBody.branchOffice,
+        officialEmailId: requestBody.officialEmailId,
         password: requestBody.password || null,
         gender: requestBody.gender || null,
         ssnNumber: requestBody.ssnNumber || null,
@@ -65,7 +62,7 @@ const createEmployee = async (event) => {
         contactNumber: requestBody.contactNumber || null,
         joiningDate: requestBody.joiningDate || null,
         emergencyContactPerson: requestBody.emergencyContactPerson || null,
-        //designation: requestBody.designation || null,
+        panNumber: requestBody.panNumber || null,
         emergencyContactNumber: requestBody.emergencyContactNumber || null,
         resignedDate: requestBody.resignedDate || null,
         relievedDate: requestBody.relievedDate || null,
@@ -74,6 +71,7 @@ const createEmployee = async (event) => {
         updatedDateTime: requestBody.updatedDateTime || null,
         department: requestBody.department || null,
         aadhaarNumber: requestBody.aadhaarNumber || null,
+        status: active,
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
@@ -83,8 +81,7 @@ const createEmployee = async (event) => {
       throw new Error("Required Assignment Fields are missing.");
     }
 
-    // Set onsite based on branchOffice
-    let onsite = "No"; // Default value
+    let onsite = "No";
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
     }
@@ -124,21 +121,20 @@ const createEmployee = async (event) => {
       const params = {
         TableName: process.env.ASSIGNMENTS_TABLE,
         ProjectionExpression: "assignmentId",
-        Limit: 100, // Increase the limit to retrieve more items for sorting
+        Limit: 100,
       };
 
       try {
         const result = await client.send(new ScanCommand(params));
 
-        // Sort the items in descending order based on assignmentId
         const sortedItems = result.Items.sort((a, b) => {
           return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
         });
 
-        console.log("Sorted Items:", sortedItems); // Log the sorted items
+        console.log("Sorted Items:", sortedItems);
 
         if (sortedItems.length === 0) {
-          return 0; // If no records found, return null
+          return 0;
         } else {
           const highestAssignmentId = parseInt(sortedItems[0].assignmentId.N);
           console.log("Highest Assignment ID:", highestAssignmentId);
@@ -146,12 +142,12 @@ const createEmployee = async (event) => {
         }
       } catch (error) {
         console.error("Error retrieving highest serial number:", error);
-        throw error; // Propagate the error up the call stack
+        throw error;
       }
     }
 
     const assignmentParams = {
-      TableName: process.env.ASSIGNMENTS_TABLE, // Use ASSIGNMENTS_TABLE environment variable
+      TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
         assignmentId: nextSerialNumber1,
         employeeId: requestBody.employeeId,
@@ -235,12 +231,12 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const officeEmailAddressExists = await isEmailNotEmployeeIdExists(requestBody.officeEmailAddress, employeeId);
-    if (officeEmailAddressExists) {
-      console.log("officeEmailAddress already exists.");
+    const officialEmailIdExists = await isEmailNotEmployeeIdExists(requestBody.officialEmailId, employeeId);
+    if (officialEmailIdExists) {
+      console.log("officialEmailId already exists.");
       response.statusCode = 400;
       response.body = JSON.stringify({
-        message: "officeEmailAddress already exists.",
+        message: "officialEmailId already exists.",
       });
       return response;
     }
@@ -418,11 +414,11 @@ const isEmployeeIdExists = async (employeeId) => {
 const isEmailExists = async (emailAddress) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officeEmailAddress = :email",
+    FilterExpression: "officialEmailId = :email",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
     },
-    ProjectionExpression: "officeEmailAddress",
+    ProjectionExpression: "officialEmailId",
   };
 
   const command = new ScanCommand(params);
@@ -434,12 +430,12 @@ const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
   console.log("in side isEmailNotEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
+    FilterExpression: "officialEmailId = :email AND employeeId <> :id",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
       ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
     },
-    ProjectionExpression: "officeEmailAddress",
+    ProjectionExpression: "officialEmailId",
   };
   const command = new ScanCommand(params);
   const data = await client.send(command);
