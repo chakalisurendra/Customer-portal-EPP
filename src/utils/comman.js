@@ -18,7 +18,7 @@ const autoIncreamentId = async (event) => {
     if (result.Items.length === 0) {
       return 0;
     } else {
-      const incrementIdObj = result.Items[0].id;
+      const incrementIdObj = result.Items[0].employeeId;
       console.log("ID from DynamoDB:", incrementIdObj);
       const increamentId = parseInt(incrementIdObj.N);
       console.log("Parsed ID:", increamentId);
