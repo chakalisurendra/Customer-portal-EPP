@@ -1,3 +1,7 @@
+const moment = require("moment");
+const currentDate = Date.now();
+const formattedDate = moment(currentDate).format("MM-DD-YYYY");
+
 const validateEmployeeDetails = (requestBody) => {
   const response = {
     validation: false,
@@ -190,8 +194,7 @@ const validateCurrentDate = (date) => {
   if (date === null || date === undefined) {
     return true;
   }
-  const currentDate = Date.now();
-  const formattedDate = moment(currentDate).format("MM-DD-YYYY");
+
   console.log("before :", date);
   const inputDate = new Date(date);
   console.log("after :", inputDate);
