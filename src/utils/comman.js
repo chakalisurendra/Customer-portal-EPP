@@ -66,14 +66,18 @@ const autoIncreamentId = async (tableName1, id) => {
           return parseInt(b.employeeId.N) - parseInt(a.employeeId.N);
         });
         incrementIdObj = sortedItems[0];
-        console.log("employeeId from DynamoDB:", incrementIdObj);
+        console.log("employeeId from DynamoDB 00:", incrementIdObj);
+        console.log("employeeId from DynamoDB:", incrementIdObj.N);
+        console.log("employeeId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
         const sortedItems = result.Items.sort((a, b) => {
-          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N); 
+          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
         });
         incrementIdObj = sortedItems[0];
         console.log("assignmentId from DynamoDB:", incrementIdObj);
+        console.log("assignmentId from DynamoDB 00:", incrementIdObj.N);
+        console.log("assignmentId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
         increamentId = parseInt(incrementIdObj.N);
       }
       console.log("Parsed ID:", increamentId);
