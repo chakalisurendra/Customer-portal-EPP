@@ -29,8 +29,7 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
-    const id = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
-    const newEmployeeId = String(id);
+    const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     console.log("employee autoIncreamentId : ", newEmployeeId);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,

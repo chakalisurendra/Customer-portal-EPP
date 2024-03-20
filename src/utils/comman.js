@@ -70,7 +70,7 @@ const autoIncreamentId = async (tableName1, id) => {
         increamentId = parseInt(incrementIdObj.N);
       } else if ("assignmentId" === id) {
         const sortedItems = result.Items.sort((a, b) => {
-          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
+          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N); 
         });
         incrementIdObj = sortedItems[0];
         console.log("assignmentId from DynamoDB:", incrementIdObj);

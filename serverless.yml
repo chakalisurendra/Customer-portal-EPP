@@ -250,7 +250,7 @@ resources:
         TableName: ${self:custom.employeeTableName}
         AttributeDefinitions:
           - AttributeName: employeeId
-            AttributeType: S
+            AttributeType: N
         KeySchema:
           - AttributeName: employeeId
             KeyType: HASH
