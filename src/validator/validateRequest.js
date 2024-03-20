@@ -1,14 +1,41 @@
-const validateEmployeeDetails = (requestBody) => {
-  const { firstName, lastName, dateOfBirth, officialEmailId, branchOffice } = requestBody;
+const currentDate = Date.now();
+const formattedDate = moment(currentDate).format("MM-DD-YYYY");
 
-  // Check if required fields are missing
-  if (!firstName || !lastName || !dateOfBirth || !officialEmailId || !branchOffice) {
-    return false;
-  } else if (!officialEmailId.endsWith("hyniva.com")) {
-    throw new Error('Invalid officialEmailId domain. It should end with "hyniva.com".');
+const validateEmployeeDetails = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+  const requiredProperties = ["firstName", "lastName", "dateOfBirth", "officialEmailId", "branchOffice", "designation"];
+
+  for (const property of requiredProperties) {
+    if (!requestBody[property] || requestBody[property] === "") {
+      response.validationMessage = `${property} is required`;
+      return response;
+    }
   }
-  // You can add more specific validation logic for each field if needed
-  return true;
+  if (!requestBody.officialEmailId.endsWith("hyniva.com")) {
+    response.validationMessage = `Invalid officialEmailId domain. It should end with "hyniva.com".`;
+    return response;
+  }
+
+  if (!validateDate(requestBody.resignedDate)) {
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  } else if (!validateCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `resignedDate should be current date or past date"`;
+    return response;
+  }
+  // if (!validateDate(requestBody.relievedDate)) {
+  //   response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
+  //   return response;
+  // }
+  // if (!validateDate(requestBody.dateOfBirth)) {
+  //   response.validationMessage = `dateOfBirth should be in format \"MM-DD-YYYY\"`;
+  //   return response;
+  // }
+  response.validation = true;
+  return response;
 };
 const validateUpdateEmployeeDetails = (requestBody) => {
   console.log("validateUpdateEmployeeDetails method");
@@ -162,6 +189,25 @@ const validateDate = (date) => {
   }
 };
 
+const validateCurrentDate = (date) => {
+  if (date === null || date === undefined) {
+    return true;
+  }
+  console.log("before :", date);
+  const inputDate = new Date(date);
+  console.log("after :", inputDate);
+  if (isNaN(inputDate.getTime())) {
+    console.log("isNaN :", inputDate);
+    return false;
+  }
+
+  if (inputDate <= formattedDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
     return true; // Allow null or undefined values
@@ -259,7 +305,7 @@ const validateFinalSettlement = (requestBody) => {
   };
 
   const { employeeId, panNumber, bonus, unpaidSalary, variablePay, unavailedLeaves, leaveEncashment } = requestBody;
-  const requiredProperties = ["panNumber", "employeeId", "basicPay", "bonus", "variablePay", "enCashment","unpaidSalary", "unavailedLeaves", "leaveEncashment", "type"];
+  const requiredProperties = ["panNumber", "employeeId", "basicPay", "bonus", "variablePay", "enCashment", "unpaidSalary", "unavailedLeaves", "leaveEncashment", "type"];
 
   for (const property of requiredProperties) {
     if (!requestBody[property] || requestBody[property] === "") {

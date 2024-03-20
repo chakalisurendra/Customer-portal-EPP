@@ -20,8 +20,16 @@ const createEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
 
-    if (!validateEmployeeDetails(requestBody)) {
-      throw new Error("Required fields are missing.");
+    const validationResponse = validateEmployeeDetails(requestBody);
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        ErrorMessage: validationResponse.validationMessage,
+      });
+      return response;
     }
 
     const emailExists = await isEmailExists(requestBody.officialEmailId);
@@ -30,7 +38,7 @@ const createEmployee = async (event) => {
       throw new Error("Email address already exists.");
     }
     const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
-    console.log("employee autoIncreamentId : ", newEmployeeId);
+    console.log("new employee id : ", newEmployeeId);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Item: marshall({
@@ -58,18 +66,16 @@ const createEmployee = async (event) => {
         resignedDate: requestBody.resignedDate || null,
         relievedDate: requestBody.relievedDate || null,
         leaveStructure: requestBody.leaveStructure || null,
-        createdDateTime: formattedDate,
-        updatedDateTime: null,
         department: requestBody.department || null,
         aadhaarNumber: requestBody.aadhaarNumber || null,
         status: "active",
+        isAbsconded: "No",
+        createdDateTime: formattedDate,
+        updatedDateTime: null,
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
-    const requiredAssignmentFields = ["designation", "branchOffice"];
-    if (!requiredAssignmentFields.every((field) => requestBody[field])) {
-      throw new Error("Required Assignment Fields are missing.");
-    }
+
     let onsite = "No";
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
@@ -103,38 +109,6 @@ const createEmployee = async (event) => {
       throw new Error("Incorrect Designation!");
     }
 
-    // const highestSerialNumber1 = await getHighestSerialNumber();
-    // console.log("Highest Serial Number:", highestSerialNumber1);
-    // const nextSerialNumber1 = highestSerialNumber !== null ? parseInt(highestSerialNumber1) + 1 : 1;
-    // async function getHighestSerialNumber() {
-    //   const params = {
-    //     TableName: process.env.ASSIGNMENTS_TABLE,
-    //     ProjectionExpression: "assignmentId",
-    //     Limit: 100,
-    //   };
-
-    //   try {
-    //     const result = await client.send(new ScanCommand(params));
-
-    //     const sortedItems = result.Items.sort((a, b) => {
-    //       return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
-    //     });
-
-    //     console.log("Sorted Items:", sortedItems);
-
-    //     if (sortedItems.length === 0) {
-    //       return 0;
-    //     } else {
-    //       const highestAssignmentId = parseInt(sortedItems[0].assignmentId.N);
-    //       console.log("Highest Assignment ID:", highestAssignmentId);
-    //       return highestAssignmentId;
-    //     }
-    //   } catch (error) {
-    //     console.error("Error retrieving highest serial number:", error);
-    //     throw error;
-    //   }
-    // }
-
     const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
     console.log("newAssignmentId autoIncreamentId : ", newAssignmentId);
 
@@ -152,15 +126,17 @@ const createEmployee = async (event) => {
         reportingManager: requestBody.reportingManager || null,
         billableResource: requestBody.billableResource || null,
         createdDateTime: formattedDate,
+        updateDateTime: null,
       }),
     };
-
     params.Item.assignmentId = newAssignmentId;
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
-      employeeId: newEmployeeId,
-      assignmentId: newAssignmentId,
+      data: {
+        employeeId: newEmployeeId,
+        assignmentId: newAssignmentId,
+      },
     });
   } catch (e) {
     console.error(e);
@@ -421,21 +397,21 @@ const isEmailExists = async (emailAddress) => {
   return data.Items.length > 0;
 };
 
-const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
-  console.log("in side isEmailNotEmployeeIdExists");
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officialEmailId = :email AND employeeId <> :id",
-    ExpressionAttributeValues: {
-      ":email": { S: emailAddress },
-      ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
-    },
-    ProjectionExpression: "officialEmailId",
-  };
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
+// const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
+//   console.log("in side isEmailNotEmployeeIdExists");
+//   const params = {
+//     TableName: process.env.EMPLOYEE_TABLE,
+//     FilterExpression: "officialEmailId = :email AND employeeId <> :id",
+//     ExpressionAttributeValues: {
+//       ":email": { S: emailAddress },
+//       ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
+//     },
+//     ProjectionExpression: "officialEmailId",
+//   };
+//   const command = new ScanCommand(params);
+//   const data = await client.send(command);
+//   return data.Items.length > 0;
+// };
 
 async function getHighestSerialNumber() {
   const params = {

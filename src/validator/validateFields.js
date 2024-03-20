@@ -25,7 +25,7 @@ const updateEmployeeAllowedFields = [
   "relievedDate",
   "leaveStructure",
   "department",
-  "IsAbsconded",
+  "isAbsconded",
   "status",
   "updatedDateTime",
 ];
