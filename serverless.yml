@@ -265,7 +265,7 @@ resources:
           - AttributeName: assignmentId
             AttributeType: N
           - AttributeName: employeeId
-            AttributeType: S
+            AttributeType: N
         KeySchema:
           - AttributeName: assignmentId
             KeyType: HASH
