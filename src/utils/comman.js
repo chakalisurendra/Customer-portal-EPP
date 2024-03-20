@@ -61,26 +61,47 @@ const autoIncreamentId = async (tableName1, id) => {
     } else {
       let incrementIdObj;
       let increamentId;
+
       if ("employeeId" === id) {
-        const sortedItems = result.Items.sort((a, b) => {
-          return parseInt(b.employeeId.N) - parseInt(a.employeeId.N);
-        });
-        incrementIdObj = sortedItems[0];
-        console.log("employeeId from DynamoDB 00:", incrementIdObj);
-        console.log("employeeId from DynamoDB:", incrementIdObj.N);
-        console.log("employeeId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
-        increamentId = parseInt(incrementIdObj.N);
-      } else if ("assignmentId" === id) {
-        const sortedItems = result.Items.sort((a, b) => {
-          return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
-        });
-      
-        incrementIdObj = sortedItems[0];
-        console.log("assignmentId from DynamoDB:", incrementIdObj);
-        console.log("assignmentId from DynamoDB 00:", incrementIdObj.N);
-        console.log("assignmentId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
-        increamentId = parseInt(incrementIdObj.N);
+        const sortedItems = result.Items.filter((item) => item.employeeId && !isNaN(item.employeeId.N));
+        if (sortedItems.length > 0) {
+          sortedItems.sort((a, b) => parseInt(b.employeeId.N) - parseInt(a.employeeId.N));
+          incrementIdObj = sortedItems[0];
+          increamentId = parseInt(incrementIdObj.employeeId.N);
+        } else {
+          increamentId = 0;
+        }
+      } else  if ("assignmentId" === id) {
+        const sortedItems = result.Items.filter((item) => item.assignmentId && !isNaN(item.assignmentId.N));
+        if (sortedItems.length > 0) {
+          sortedItems.sort((a, b) => parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N));
+          incrementIdObj = sortedItems[0];
+          increamentId = parseInt(incrementIdObj.assignmentId.N);
+        } else {
+          increamentId = 0;
+        }
       }
+
+      // if ("employeeId" === id) {
+      //   const sortedItems = result.Items.sort((a, b) => {
+      //     return parseInt(b.employeeId.N) - parseInt(a.employeeId.N);
+      //   });
+      //   incrementIdObj = sortedItems[0];
+      //   console.log("employeeId from DynamoDB 00:", incrementIdObj);
+      //   console.log("employeeId from DynamoDB:", incrementIdObj.N);
+      //   console.log("employeeId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
+      //   increamentId = parseInt(incrementIdObj.N);
+      // } else if ("assignmentId" === id) {
+      //   const sortedItems = result.Items.sort((a, b) => {
+      //     return parseInt(b.assignmentId.N) - parseInt(a.assignmentId.N);
+      //   });
+
+      //   incrementIdObj = sortedItems[0];
+      //   console.log("assignmentId from DynamoDB:", incrementIdObj);
+      //   console.log("assignmentId from DynamoDB 00:", incrementIdObj.N);
+      //   console.log("assignmentId from DynamoDB 1212 :", parseInt(incrementIdObj.N));
+      //   increamentId = parseInt(incrementIdObj.N);
+      // }
       console.log("Parsed ID:", increamentId);
       const nextSerialNumber = increamentId !== null ? parseInt(increamentId) + 1 : 1;
       return nextSerialNumber;
