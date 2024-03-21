@@ -264,7 +264,7 @@ const validateFeatureAndCurrentDate = (date) => {
 };
 
 const validatePanNumber = (panNumber) => {
-  if (panNumber === null || panNumber === undefined || date === "") {
+  if (panNumber === null || panNumber === undefined || panNumber === "") {
     return true; // Allow null or undefined values
   }
   const panRegex = /^[A-Z]{5}\d{4}[A-Z]$/;
