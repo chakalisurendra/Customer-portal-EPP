@@ -75,50 +75,18 @@ const createEmployee = async (event) => {
       }),
     };
     const createResult = await client.send(new PutItemCommand(params));
-
     let onsite = "No";
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
     }
-    if (requestBody.branchOffice === null || !["San Antonio, USA", "Bangalore, INDIA"].includes(requestBody.branchOffice)) {
-      throw new Error("Incorrect BranchOffice");
-    }
-    if (
-      requestBody.designation === null ||
-      ![
-        "Software Engineer Trainee",
-        "Software Engineer",
-        "Senior Software Engineer",
-        "Testing Engineer Trainee",
-        "Testing Engineer",
-        "Senior Testing Engineer",
-        "Tech Lead",
-        "Testing Lead",
-        "Manager",
-        "Project Manager",
-        "Senior Manager",
-        "Analyst",
-        "Senior Analyst",
-        "Architect",
-        "Senior Architect",
-        "Solution Architect",
-        "Scrum Master",
-        "Data Engineer",
-      ].includes(requestBody.designation)
-    ) {
-      throw new Error("Incorrect Designation!");
-    }
-
     const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
-    console.log("newAssignmentId autoIncreamentId : ", newAssignmentId);
-
     const assignmentParams = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
         assignmentId: newAssignmentId,
         employeeId: newEmployeeId,
-        branchOffice: requestBody.branchOffice,
-        designation: requestBody.designation,
+        branchOffice: requestBody.branchOffice || null,
+        designation: requestBody.designation || null,
         onsite: onsite,
         department: requestBody.department || null,
         framework: requestBody.framework || null,
@@ -129,7 +97,6 @@ const createEmployee = async (event) => {
         updateDateTime: null,
       }),
     };
-    params.Item.assignmentId = newAssignmentId;
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
@@ -162,9 +129,7 @@ const updateEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const currentDate = Date.now();
-    const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
-    const employeeId = event.pathParameters ? event.pathParameters.employeeId : null;
+    const employeeId = event.pathParameters.employeeId;
     if (!employeeId) {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
@@ -183,8 +148,6 @@ const updateEmployee = async (event) => {
       });
       return response;
     }
-
-    requestBody.updatedDateTime = formattedDate;
 
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
@@ -210,6 +173,10 @@ const updateEmployee = async (event) => {
       return response;
     }
 
+    if (requestBody.isAbsconded === "Yes") {
+      requestBody.status = "inactive";
+    }
+
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: marshall({ employeeId }),
@@ -230,7 +197,7 @@ const updateEmployee = async (event) => {
           {}
         )
       ),
-      ":updatedDateTime": requestBody.updatedDateTime,
+      ":updatedDateTime": formattedDate,
     };
 
     const updateResult = await client.send(new UpdateItemCommand(params));

@@ -51,9 +51,13 @@ functions:
     timeout: 120
     events:
       - http:
-          path: employee/get/{employeeId}
+          path: employee/{employeeId}
           method: GET
-          cors: true # Enable CORS for this endpoint
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                employeeId: true
   employeeCreate:
     handler: src/Lamda/employee/employeeHandler.createEmployee
     name: employeeCreate
@@ -73,7 +77,11 @@ functions:
       - http:
           path: employee/{employeeId}
           method: PUT
-          cors: true # Enable CORS for this endpoint
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                employeeId: true
   employeeGetAll:
     handler: src/Lamda/employee/employeeHandler.getAllEmployees
     name: employeeGetAll
@@ -323,4 +331,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-

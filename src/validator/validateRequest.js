@@ -49,11 +49,19 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateFeatureAndCurrentDate(requestBody.relievedDate)) {
-    response.validationMessage = `Resigned date is valid (current or past)`;
+    response.validationMessage = `relievedDate is valid (current or past)`;
     return response;
   }
   if (!validatePanNumber(requestBody.panNumber)) {
     response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
+    return response;
+  }
+  if (!validateBranchOffice(requestBody.branchOffice)) {
+    (response.validationMessage = "Invalid is Branch Office. Is Branch Office should be either San Antonio, USA"), "Bangalore, INDIA.";
+    return response;
+  }
+  if (!validateDesignation(requestBody.designation)) {
+    response.validationMessage = "Invalid is designation";
     return response;
   }
   response.validation = true;
@@ -83,7 +91,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     response.validationMessage = "Invalid SSN Number it will allow only 9 digits, it will not allow Alphabets";
     return response;
   }
-  if (!validateAadharNumber(requestBody.aadharNumber)) {
+  if (!validateAadharNumber(requestBody.aadhaarNumber)) {
     response.validationMessage = "Invalid Aadhar Number it will allow only 12 digits, it will not allow Alphabets";
     return response;
   }
@@ -149,6 +157,14 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   }
   if (!validatePanNumber(requestBody.panNumber)) {
     response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
+    return response;
+  }
+  if (!validateBranchOffice(requestBody.branchOffice)) {
+    response.validationMessage = `Invalid is Branch Office. Is Branch Office should be either "San Antonio, USA", "Bangalore, INDIA"`;
+    return response;
+  }
+  if (!validateDesignation(requestBody.designation)) {
+    response.validationMessage = "Invalid is designation";
     return response;
   }
   response.validation = true;
@@ -288,6 +304,41 @@ const validateStatus = (status) => {
   }
   return ["active", "inactive"].includes(status);
 };
+
+const validateBranchOffice = (branchOffice) => {
+  if (branchOffice === null || branchOffice === undefined) {
+    return true; // Allow null or undefined values
+  }
+  return ["San Antonio, USA", "Bangalore, INDIA"].includes(branchOffice);
+};
+
+const validateDesignation = (designation) => {
+  if (designation === null || designation === undefined) {
+    return true; // Allow null or undefined values
+  }
+  return [
+    "Software Engineer Trainee",
+    "Software Engineer",
+    "Senior Software Engineer",
+    "Testing Engineer Trainee",
+    "Testing Engineer",
+    "Senior Testing Engineer",
+    "Tech Lead",
+    "Testing Lead",
+    "Manager",
+    "Project Manager",
+    "Senior Manager",
+    "Analyst",
+    "Senior Analyst",
+    "Architect",
+    "Senior Architect",
+    "Solution Architect",
+    "Scrum Master",
+    "Data Engineer",
+  ].includes(designation);
+};
+
+designation;
 
 const validateGender = (gender) => {
   if (gender === null || gender === undefined) {
