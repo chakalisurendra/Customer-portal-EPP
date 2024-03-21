@@ -338,8 +338,6 @@ const validateDesignation = (designation) => {
   ].includes(designation);
 };
 
-designation;
-
 const validateGender = (gender) => {
   if (gender === null || gender === undefined) {
     return true; // Allow null or undefined values
