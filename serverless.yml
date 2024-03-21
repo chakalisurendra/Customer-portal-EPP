@@ -233,7 +233,7 @@ functions:
               querystrings:
                 metadataId: true
   payRollCreate:
-    handler: src/Lamda/payRoll/payRollHandler.createPayRoll
+    handler: src/Lamda/payRoll/payRollHandler.createPayroll
     name: payRollCreate
     memorySize: 128
     timeout: 120
