@@ -276,7 +276,7 @@ const validatePanNumber = (panNumber) => {
 };
 
 const validateRelievedDate = (resignedDate, relievedDate) => {
-  if (relievedDate === null || relievedDate === undefined || date === "") {
+  if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
     return true;
   }
   const currentDate = new Date();
