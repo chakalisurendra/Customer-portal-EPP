@@ -220,7 +220,7 @@ const validateEmailAddress = (emailAddress) => {
 };
 
 const validateDate = (date) => {
-  if (date === null || date === undefined) {
+  if (date === null || date === undefined || date === "") {
     return true;
   }
   const datePattern = /^\d{2}-\d{2}-\d{4}$/;
