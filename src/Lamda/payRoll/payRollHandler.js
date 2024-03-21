@@ -1,22 +1,11 @@
-const {
-  DynamoDBClient,
-  PutItemCommand,
-  UpdateItemCommand,
-  DeleteItemCommand,
-  GetItemCommand,
-  ScanCommand,
-  QueryCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand, QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const {
-  httpStatusCodes,
-  httpStatusMessages,
-} = require("../../environment/appconfig");
+const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss"); // formatting date
- 
+
 const createPayroll = async (event) => {
   console.log("Create employee details");
   const response = {
@@ -28,55 +17,59 @@ const createPayroll = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
- 
+
     // Check for required fields
-    const requiredFields = [
-      "panNumber",
-      "employeeId",
-    ];
+    const requiredFields = ["panNumber", "employeeId"];
     if (!requiredFields.every((field) => requestBody[field])) {
       throw new Error("Required fields are missing.");
     }
- 
+
     const validatePanNumber = (panNumber) => {
       const panRegex = /^[A-Z]{5}\d{4}[A-Z]$/;
       return panRegex.test(panNumber);
-  };
- 
-  if (!validatePanNumber(requestBody.panNumber)) {
-    throw new Error("Invalid PAN Number. PAN Number should be in the format ABCDE1234F.");
-}
- 
-const numericFields = [
-"basicPay",
-"HRA",
-"medicalAllowances",
-"conveyances",
-"otherEarnings",
-"bonus",
-"variablePay",
-"enCashment",
-"incomeTax",
-"professionalTax",
-"providentFund"
-];
- 
-for (const field of numericFields) {
-if (requestBody[field] !== undefined || requestBody[field] !== null ) {
-    if (requestBody[field] === '' || typeof requestBody[field] == 'string') {
-        throw new Error(`${field} must be a non-null non-empty number if provided.`);
+    };
+
+    if (!validatePanNumber(requestBody.panNumber)) {
+      throw new Error("Invalid PAN Number. PAN Number should be in the format ABCDE1234F.");
     }
-}
-}
-    const totalEarnings = requestBody.basicPay + requestBody.HRA + requestBody.medicalAllowances + requestBody.conveyances + requestBody.otherEarnings + requestBody.bonus + requestBody.variablePay + requestBody.enCashment;
+
+    const numericFields = [
+      "basicPay",
+      "HRA",
+      "medicalAllowances",
+      "conveyances",
+      "otherEarnings",
+      "bonus",
+      "variablePay",
+      "enCashment",
+      "incomeTax",
+      "professionalTax",
+      "providentFund",
+    ];
+
+    for (const field of numericFields) {
+      if (requestBody[field] !== undefined || requestBody[field] !== null) {
+        if (requestBody[field] === "" || typeof requestBody[field] == "string") {
+          throw new Error(`${field} must be a non-null non-empty number if provided.`);
+        }
+      }
+    }
+    const totalEarnings =
+      requestBody.basicPay +
+      requestBody.HRA +
+      requestBody.medicalAllowances +
+      requestBody.conveyances +
+      requestBody.otherEarnings +
+      requestBody.bonus +
+      requestBody.variablePay +
+      requestBody.enCashment;
     const totalDeductions = requestBody.incomeTax + requestBody.professionalTax + requestBody.providentFund;
     const totalNetPay = totalEarnings - totalDeductions;
- 
+
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
- 
-    const nextSerialNumber =
-      highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+
+    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
     async function getHighestSerialNumber() {
       const params = {
         TableName: process.env.PAY_ROLL,
@@ -84,7 +77,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
         Limit: 1,
         ScanIndexForward: false, // Sort in descending order to get the highest serial number first
       };
- 
+
       try {
         const result = await client.send(new ScanCommand(params));
         console.log("DynamoDB Result:", result); // Add this line to see the DynamoDB response
@@ -103,15 +96,13 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
         throw error; // Propagate the error up the call stack
       }
     }
- 
+
     // Check if an assignment already exists for the employee
-    const existingPayroll = await getPayrollByPanNumber(
-      requestBody.panNumber, requestBody.employeeId
-    );
+    const existingPayroll = await getPayrollByPanNumber(requestBody.panNumber, requestBody.employeeId);
     if (existingPayroll) {
       throw new Error("A payroll already exists for this Pan Number or Employee ID.");
-  }
- 
+    }
+
     async function getPayrollByPanNumber(panNumber, employeeId) {
       const params = {
         TableName: process.env.PAY_ROLL,
@@ -121,7 +112,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
           ":employeeId": { S: employeeId },
         },
       };
- 
+
       try {
         const result = await client.send(new ScanCommand(params));
         return result.Items.length > 0;
@@ -130,7 +121,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
         throw error;
       }
     }
- 
+
     const checkEmployeeExistence = async (employeeId) => {
       const params = {
         TableName: process.env.EMPLOYEE_TABLE,
@@ -138,7 +129,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
           employeeId: employeeId,
         }),
       };
- 
+
       try {
         const result = await client.send(new GetItemCommand(params));
         if (!result.Item) {
@@ -149,8 +140,8 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
         throw error;
       }
     };
-    await checkEmployeeExistence(requestBody.employeeId);
- 
+    await checkEmployeeExistence(parseInt(requestBody.employeeId));
+
     const params = {
       TableName: process.env.PAY_ROLL,
       Item: marshall({
@@ -158,24 +149,24 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
         employeeId: requestBody.employeeId,
         panNumber: requestBody.panNumber,
         basicPay: requestBody.basicPay || null,
-        HRA : requestBody.HRA || null,
-        medicalAllowances : requestBody.medicalAllowances || null,
-        conveyances : requestBody.conveyances || null,
-        otherEarnings : requestBody.otherEarnings || null,
+        HRA: requestBody.HRA || null,
+        medicalAllowances: requestBody.medicalAllowances || null,
+        conveyances: requestBody.conveyances || null,
+        otherEarnings: requestBody.otherEarnings || null,
         bonus: requestBody.bonus || null,
         variablePay: requestBody.variablePay || null,
         enCashment: requestBody.enCashment || null,
         earnings: totalEarnings,
-        incomeTax : requestBody.incomeTax || null,
-        professionalTax : requestBody.professionalTax || null,
-        providentFund : requestBody.providentFund || null,
+        incomeTax: requestBody.incomeTax || null,
+        professionalTax: requestBody.professionalTax || null,
+        providentFund: requestBody.providentFund || null,
         deductions: totalDeductions,
         netPay: totalNetPay,
         createdDateTime: formattedDate,
         updatedDateTime: null,
       }),
     };
- 
+
     const createResult = await client.send(new PutItemCommand(params));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_PAYROLL_DETAILS,
@@ -192,7 +183,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
   }
   return response;
 };
- 
+
 module.exports = {
   createPayroll,
 };
