@@ -22,9 +22,11 @@ const validateEmployeeDetails = (requestBody) => {
 
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
-    if (!validateCurrentDate(requestBody.resignedDate)) {
-      response.validationMessage = `resignedDate should be current date or past date"`;
-    }
+
+    return response;
+  }
+  if (!validateCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `resignedDate should be current date or past date"`;
     return response;
   }
   // if (!validateDate(requestBody.relievedDate)) {
@@ -199,10 +201,10 @@ const validateCurrentDate = (date) => {
   console.log("formattedDate :", formattedDate);
 
   if (date >= formattedDate) {
-      console.log("formattedDate true:");
+    console.log("formattedDate true:");
     return true;
   } else {
-      console.log("formattedDate false:");
+    console.log("formattedDate false:");
 
     return false;
   }
