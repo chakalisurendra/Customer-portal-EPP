@@ -275,6 +275,37 @@ const validatePanNumber = (panNumber) => {
   }
 };
 
+// const validateRelievedDate = (resignedDate, relievedDate) => {
+//   if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
+//     return true;
+//   }
+//   if (resignedDate === null || resignedDate === undefined || resignedDate === "") {
+//     return false;
+//   }
+//   const currentDate = new Date();
+//   // const resignedDate1 = new Date(resignedDate);
+//   // const relievedDate1 = new Date(relievedDate);
+
+//     const resignedDateParts = resignedDate.split("-");
+//   const relievedDateParts = relievedDate.split("-");
+  
+//   const resignedDate1 = new Date(`${resignedDateParts[2]}-${resignedDateParts[0]}-${resignedDateParts[1]}`);
+//   const relievedDate1 = new Date(`${relievedDateParts[2]}-${relievedDateParts[0]}-${relievedDateParts[1]}`);
+  
+//   if (isNaN(relievedDate1.getTime())) {
+//     return false;
+//   }
+//   if (isNaN(resignedDate1.getTime())) {
+//     return false;
+//   }
+//   if (relievedDate1 <= resignedDate1 || resignedDate1 <= currentDate) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// };
+
+
 const validateRelievedDate = (resignedDate, relievedDate) => {
   if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
     return true;
@@ -282,11 +313,9 @@ const validateRelievedDate = (resignedDate, relievedDate) => {
   if (resignedDate === null || resignedDate === undefined || resignedDate === "") {
     return false;
   }
+  
   const currentDate = new Date();
-  // const resignedDate1 = new Date(resignedDate);
-  // const relievedDate1 = new Date(relievedDate);
-
-    const resignedDateParts = resignedDate.split("-");
+  const resignedDateParts = resignedDate.split("-");
   const relievedDateParts = relievedDate.split("-");
   
   const resignedDate1 = new Date(`${resignedDateParts[2]}-${resignedDateParts[0]}-${resignedDateParts[1]}`);
@@ -298,12 +327,14 @@ const validateRelievedDate = (resignedDate, relievedDate) => {
   if (isNaN(resignedDate1.getTime())) {
     return false;
   }
+  
   if (relievedDate1 <= resignedDate1 || resignedDate1 <= currentDate) {
     return true;
   } else {
     return false;
   }
 };
+
 
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
