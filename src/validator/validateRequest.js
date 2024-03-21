@@ -221,17 +221,12 @@ const validateEmailAddress = (emailAddress) => {
 
 const validateDate = (date) => {
   if (date === null || date === undefined) {
-    console.log("value is true ", date);
-    return true; // Allow null or undefined values
+    return true;
   }
   const datePattern = /^\d{2}-\d{2}-\d{4}$/;
   if (datePattern.test(date)) {
-    console.log("value is true ", date);
-
     return true;
   } else {
-    console.log("value is false ", date);
-
     return false;
   }
 };
