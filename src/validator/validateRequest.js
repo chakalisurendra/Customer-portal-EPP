@@ -48,10 +48,10 @@ const validateEmployeeDetails = (requestBody) => {
     response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  // if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
-  //   response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
-  //   return response;
-  // }
+  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
+    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+    return response;
+  }
   if (!validatePanNumber(requestBody.panNumber)) {
     response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
     return response;
@@ -143,10 +143,10 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  // if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
-  //   response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
-  //   return response;
-  // }
+  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
+    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+    return response;
+  }
   if (!validatePanNumber(requestBody.panNumber)) {
     response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
     return response;
@@ -263,37 +263,37 @@ const validateFeatureAndCurrentDate = (date) => {
   }
 };
 
-const validatePanNumber = (aadharNumber) => {
-  if (aadharNumber === null || aadharNumber === undefined) {
+const validatePanNumber = (panNumber) => {
+  if (panNumber === null || panNumber === undefined || date === "") {
     return true; // Allow null or undefined values
   }
   const panRegex = /^[A-Z]{5}\d{4}[A-Z]$/;
-  if (panRegex.test(aadharNumber)) {
+  if (panRegex.test(panNumber)) {
     return true;
   } else {
     return false;
   }
 };
 
-// const validateRelievedDate = (resignedDate, relievedDate) => {
-//   if (relievedDate === null || relievedDate === undefined) {
-//     return true;
-//   }
-//   const currentDate = new Date();
-//   const resignedDate1 = new Date(resignedDate);
-//   const relievedDate1 = new Date(relievedDate);
-//   if (isNaN(relievedDate1.getTime())) {
-//     return false;
-//   }
-//   if (isNaN(resignedDate1.getTime())) {
-//     return false;
-//   }
-//   if (relievedDate1 >= resignedDate1 || resignedDate1 >= currentDate) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
+const validateRelievedDate = (resignedDate, relievedDate) => {
+  if (relievedDate === null || relievedDate === undefined || date === "") {
+    return true;
+  }
+  const currentDate = new Date();
+  const resignedDate1 = new Date(resignedDate);
+  const relievedDate1 = new Date(relievedDate);
+  if (isNaN(relievedDate1.getTime())) {
+    return false;
+  }
+  if (isNaN(resignedDate1.getTime())) {
+    return false;
+  }
+  if (relievedDate1 >= resignedDate1 || resignedDate1 >= currentDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
