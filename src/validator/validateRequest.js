@@ -1,6 +1,6 @@
-const moment = require("moment");
-const currentDate = Date.now();
-const formattedDate = moment(currentDate).format("MM-DD-YYYY");
+// const moment = require("moment");
+// const currentDate = Date.now();
+// const formattedDate = moment(currentDate).format("MM-DD-YYYY");
 
 const validateEmployeeDetails = (requestBody) => {
   const response = {
@@ -20,23 +20,42 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
 
+  if (!validateDate(requestBody.dateOfBirth)) {
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  }
+  if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
+    response.validationMessage = `Date Of Birth is valid (current or past)`;
+    return response;
+  }
+  if (!validateDate(requestBody.joiningDate)) {
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  }
+  if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
+    response.validationMessage = `Resigned date is valid (current or past)`;
+    return response;
+  }
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
-
     return response;
   }
-  if (!validateCurrentDate(requestBody.resignedDate)) {
-    response.validationMessage = `resignedDate should be current date or past date"`;
+  if (!validateFeatureAndCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `Resigned date is valid (current or past)`;
     return response;
   }
-  // if (!validateDate(requestBody.relievedDate)) {
-  //   response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
-  //   return response;
-  // }
-  // if (!validateDate(requestBody.dateOfBirth)) {
-  //   response.validationMessage = `dateOfBirth should be in format \"MM-DD-YYYY\"`;
-  //   return response;
-  // }
+  if (!validateDate(requestBody.relievedDate)) {
+    response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  }
+  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
+    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+    return response;
+  }
+  if (!validatePanNumber(requestBody.panNumber)) {
+    response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
+    return response;
+  }
   response.validation = true;
   return response;
 };
@@ -96,20 +115,40 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     response.validationMessage = "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
     return response;
   }
+  if (!validateDate(requestBody.dateOfBirth)) {
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  }
+  if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
+    response.validationMessage = `Date Of Birth is valid (current or past)`;
+    return response;
+  }
   if (!validateDate(requestBody.joiningDate)) {
-    response.validationMessage = `joiningDate should be in format \"MM-DD-YYYY\"`;
+    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    return response;
+  }
+  if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
+    response.validationMessage = `Resigned date is valid (current or past)`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
+  if (!validateFeatureAndCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `Resigned date is valid (current or past)`;
+    return response;
+  }
   if (!validateDate(requestBody.relievedDate)) {
     response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  if (!validateDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `dateOfBirth should be in format \"MM-DD-YYYY\"`;
+  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
+    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+    return response;
+  }
+  if (!validatePanNumber(requestBody.panNumber)) {
+    response.validationMessage = `Invalid PAN Number. PAN Number should be in the format ABCDE1234F`;
     return response;
   }
   response.validation = true;
@@ -192,45 +231,69 @@ const validateDate = (date) => {
   }
 };
 
-
-const validateCurrentDate = (date) => {
+const validatePastAndCurrentDate = (date) => {
   if (date === null || date === undefined) {
-    return true; // Null or undefined date is considered valid
+    return true;
   }
-
-  // Convert the date strings to Date objects
-  const currentDate = new Date(); // Current date
-  const inputDate = new Date(date); // Provided date
-
-  // Check if input date is valid
+  const currentDate = new Date();
+  const inputDate = new Date(date);
   if (isNaN(inputDate.getTime())) {
-    return false; // Invalid date
+    return false;
   }
-
-  // Compare the dates
   if (inputDate <= currentDate) {
-    return true; // Input date is valid (current or future)
+    return true;
   } else {
-    return false; // Input date is in the past
+    return false;
   }
 };
-// const validateCurrentDate = (date) => {
-//   if (date === null || date === undefined) {
-//     return true;
-//   }
 
-//   console.log("before :", date);
-//   console.log("formattedDate :", formattedDate);
+const validateFeatureAndCurrentDate = (date) => {
+  if (date === null || date === undefined) {
+    return true;
+  }
+  const currentDate = new Date();
+  const inputDate = new Date(date);
+  if (isNaN(inputDate.getTime())) {
+    return false;
+  }
+  if (inputDate >= currentDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
-//   if (date >= formattedDate) {
-//     console.log("formattedDate true:");
-//     return true;
-//   } else {
-//     console.log("formattedDate false:");
+const validatePanNumber = (aadharNumber) => {
+  if (aadharNumber === null || aadharNumber === undefined) {
+    return true; // Allow null or undefined values
+  }
+  const panRegex = /^[A-Z]{5}\d{4}[A-Z]$/;
+  if (panRegex.test(aadharNumber)) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
-//     return false;
-//   }
-// };
+const validateRelievedDate = (resignedDate, relievedDate) => {
+  if (relievedDate === null || relievedDate === undefined) {
+    return true;
+  }
+  const currentDate = new Date();
+  const resignedDate = new Date(resignedDate);
+  const relievedDate = new Date(relievedDate);
+  if (isNaN(relievedDate.getTime())) {
+    return false;
+  }
+  if (isNaN(resignedDate.getTime())) {
+    return false;
+  }
+  if (relievedDate >= resignedDate || resignedDate >= currentDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
