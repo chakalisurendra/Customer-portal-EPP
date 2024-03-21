@@ -21,7 +21,7 @@ const validateEmployeeDetails = (requestBody) => {
   }
 
   if (!validateDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    response.validationMessage = `Date Of Birth  should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
@@ -29,11 +29,11 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateDate(requestBody.joiningDate)) {
-    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    response.validationMessage = `joiningDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
-    response.validationMessage = `Resigned date is valid (current or past)`;
+    response.validationMessage = `joiningDate is valid (current or past)`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
@@ -116,7 +116,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    response.validationMessage = `Date Of Birth should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
@@ -124,11 +124,11 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateDate(requestBody.joiningDate)) {
-    response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
+    response.validationMessage = `joiningDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
-    response.validationMessage = `Resigned date is valid (current or past)`;
+    response.validationMessage = `joiningDate is valid (current or past)`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
@@ -136,7 +136,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateFeatureAndCurrentDate(requestBody.resignedDate)) {
-    response.validationMessage = `Resigned date is valid (current or past)`;
+    response.validationMessage = `resignedDate is valid (current or past)`;
     return response;
   }
   if (!validateDate(requestBody.relievedDate)) {
@@ -280,15 +280,15 @@ const validateRelievedDate = (resignedDate, relievedDate) => {
     return true;
   }
   const currentDate = new Date();
-  const resignedDate = new Date(resignedDate);
+  const resignedDate1 = new Date(resignedDate);
   const relievedDate = new Date(relievedDate);
   if (isNaN(relievedDate.getTime())) {
     return false;
   }
-  if (isNaN(resignedDate.getTime())) {
+  if (isNaN(resignedDate1.getTime())) {
     return false;
   }
-  if (relievedDate >= resignedDate || resignedDate >= currentDate) {
+  if (relievedDate >= resignedDate1 || resignedDate1 >= currentDate) {
     return true;
   } else {
     return false;
