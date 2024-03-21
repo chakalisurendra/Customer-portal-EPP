@@ -232,7 +232,7 @@ const validateDate = (date) => {
 };
 
 const validatePastAndCurrentDate = (date) => {
-  if (date === null || date === undefined) {
+  if (date === null || date === undefined || date === "") {
     return true;
   }
   const currentDate = new Date();
@@ -248,7 +248,7 @@ const validatePastAndCurrentDate = (date) => {
 };
 
 const validateFeatureAndCurrentDate = (date) => {
-  if (date === null || date === undefined) {
+  if (date === null || date === undefined || date === "") {
     return true;
   }
   const currentDate = new Date();
