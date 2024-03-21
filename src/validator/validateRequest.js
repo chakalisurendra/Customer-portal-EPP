@@ -196,16 +196,16 @@ const validateCurrentDate = (date) => {
   }
 
   console.log("before :", date);
-  const inputDate = new Date(date);
-  console.log("after :", inputDate);
+  // const inputDate = new Date(date);
+  // console.log("after :", inputDate);
   console.log("formattedDate :", formattedDate);
 
-  if (isNaN(inputDate.getTime())) {
-    console.log("isNaN :", inputDate);
+  if (isNaN(date.getTime())) {
+    console.log("isNaN :", date);
     return false;
   }
 
-  if (inputDate <= formattedDate) {
+  if (date <= formattedDate) {
     return true;
   } else {
     return false;
