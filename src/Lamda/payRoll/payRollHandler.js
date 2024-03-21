@@ -79,7 +79,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
       highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
     async function getHighestSerialNumber() {
       const params = {
-        TableName: process.env.PAYROLL_TABLE,
+        TableName: process.env.PAY_ROLL,
         ProjectionExpression: "payrollId",
         Limit: 1,
         ScanIndexForward: false, // Sort in descending order to get the highest serial number first
@@ -114,7 +114,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
  
     async function getPayrollByPanNumber(panNumber, employeeId) {
       const params = {
-        TableName: process.env.PAYROLL_TABLE,
+        TableName: process.env.PAY_ROLL,
         FilterExpression: "panNumber = :panNumber OR employeeId = :employeeId",
         ExpressionAttributeValues: {
           ":panNumber": { S: panNumber }, // panNumber is a string
@@ -152,7 +152,7 @@ if (requestBody[field] !== undefined || requestBody[field] !== null ) {
     await checkEmployeeExistence(requestBody.employeeId);
  
     const params = {
-      TableName: process.env.PAYROLL_TABLE,
+      TableName: process.env.PAY_ROLL,
       Item: marshall({
         payrollId: nextSerialNumber,
         employeeId: requestBody.employeeId,

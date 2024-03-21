@@ -196,13 +196,15 @@ const validateCurrentDate = (date) => {
   }
 
   console.log("before :", date);
-  // const inputDate = new Date(date);
-  // console.log("after :", inputDate);
   console.log("formattedDate :", formattedDate);
 
   if (date <= formattedDate) {
+      console.log("formattedDate true:");
+
     return true;
   } else {
+      console.log("formattedDate false:");
+
     return false;
   }
 };
