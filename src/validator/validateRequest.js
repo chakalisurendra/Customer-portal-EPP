@@ -198,6 +198,8 @@ const validateCurrentDate = (date) => {
   console.log("before :", date);
   const inputDate = new Date(date);
   console.log("after :", inputDate);
+  console.log("formattedDate :", formattedDate);
+
   if (isNaN(inputDate.getTime())) {
     console.log("isNaN :", inputDate);
     return false;
