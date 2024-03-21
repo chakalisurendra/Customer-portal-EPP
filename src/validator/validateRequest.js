@@ -22,9 +22,9 @@ const validateEmployeeDetails = (requestBody) => {
 
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
-    return response;
-  } else if (!validateCurrentDate(requestBody.resignedDate)) {
-    response.validationMessage = `resignedDate should be current date or past date"`;
+    if (!validateCurrentDate(requestBody.resignedDate)) {
+      response.validationMessage = `resignedDate should be current date or past date"`;
+    }
     return response;
   }
   // if (!validateDate(requestBody.relievedDate)) {
@@ -199,11 +199,6 @@ const validateCurrentDate = (date) => {
   // const inputDate = new Date(date);
   // console.log("after :", inputDate);
   console.log("formattedDate :", formattedDate);
-
-  if (isNaN(date.getTime())) {
-    console.log("isNaN :", date);
-    return false;
-  }
 
   if (date <= formattedDate) {
     return true;
