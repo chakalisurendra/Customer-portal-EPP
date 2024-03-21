@@ -192,23 +192,45 @@ const validateDate = (date) => {
   }
 };
 
+
 const validateCurrentDate = (date) => {
   if (date === null || date === undefined) {
-    return true;
+    return true; // Null or undefined date is considered valid
   }
 
-  console.log("before :", date);
-  console.log("formattedDate :", formattedDate);
+  // Convert the date strings to Date objects
+  const currentDate = new Date(); // Current date
+  const inputDate = new Date(date); // Provided date
 
-  if (date >= formattedDate) {
-    console.log("formattedDate true:");
-    return true;
+  // Check if input date is valid
+  if (isNaN(inputDate.getTime())) {
+    return false; // Invalid date
+  }
+
+  // Compare the dates
+  if (inputDate <= currentDate) {
+    return true; // Input date is valid (current or future)
   } else {
-    console.log("formattedDate false:");
-
-    return false;
+    return false; // Input date is in the past
   }
 };
+// const validateCurrentDate = (date) => {
+//   if (date === null || date === undefined) {
+//     return true;
+//   }
+
+//   console.log("before :", date);
+//   console.log("formattedDate :", formattedDate);
+
+//   if (date >= formattedDate) {
+//     console.log("formattedDate true:");
+//     return true;
+//   } else {
+//     console.log("formattedDate false:");
+
+//     return false;
+//   }
+// };
 
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
