@@ -48,8 +48,8 @@ const validateEmployeeDetails = (requestBody) => {
     response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
-    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+  if (!validateFeatureAndCurrentDate(requestBody.relievedDate)) {
+    response.validationMessage = `Resigned date is valid (current or past)`;
     return response;
   }
   if (!validatePanNumber(requestBody.panNumber)) {
@@ -274,109 +274,6 @@ const validatePanNumber = (panNumber) => {
     return false;
   }
 };
-
-// const validateRelievedDate = (resignedDate, relievedDate) => {
-//   if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
-//     return true;
-//   }
-//   if (resignedDate === null || resignedDate === undefined || resignedDate === "") {
-//     return false;
-//   }
-//   const currentDate = new Date();
-//   // const resignedDate1 = new Date(resignedDate);
-//   // const relievedDate1 = new Date(relievedDate);
-
-//     const resignedDateParts = resignedDate.split("-");
-//   const relievedDateParts = relievedDate.split("-");
-
-//   const resignedDate1 = new Date(`${resignedDateParts[2]}-${resignedDateParts[0]}-${resignedDateParts[1]}`);
-//   const relievedDate1 = new Date(`${relievedDateParts[2]}-${relievedDateParts[0]}-${relievedDateParts[1]}`);
-
-//   if (isNaN(relievedDate1.getTime())) {
-//     return false;
-//   }
-//   if (isNaN(resignedDate1.getTime())) {
-//     return false;
-//   }
-//   if (relievedDate1 <= resignedDate1 || resignedDate1 <= currentDate) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
-
-
-const validateRelievedDate = (resignedDate, relievedDate) => {
-  // Check if relievedDate is empty
-  if (!relievedDate) {
-    return true;
-  }
-
-  // Check if resignedDate is empty or invalid
-  if (!resignedDate || isNaN(new Date(resignedDate))) {
-    return false;
-  }
-
-  // Parse dates
-  const resignedDateObj = new Date(resignedDate);
-  const relievedDateObj = new Date(relievedDate);
-
-  // Compare dates
-  return relievedDateObj < resignedDateObj;
-};
-
-// const validateRelievedDate = (resignedDate, relievedDate) => {
-//   if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
-//     return true;
-//   }
-//   if (resignedDate === null || resignedDate === undefined || resignedDate === "") {
-//     return false;
-//   }
-  
-//   const currentDate = new Date();
-//   const resignedDateParts = resignedDate.split("-");
-//   const relievedDateParts = relievedDate.split("-");
-  
-//   const resignedDate1 = new Date(`${resignedDateParts[2]}-${resignedDateParts[0]}-${resignedDateParts[1]}`);
-//   const relievedDate1 = new Date(`${relievedDateParts[2]}-${relievedDateParts[0]}-${relievedDateParts[1]}`);
-  
-//   if (isNaN(relievedDate1.getTime()) || isNaN(resignedDate1.getTime())) {
-//     return false;
-//   }
-  
-//   if (relievedDate1 < resignedDate1 || resignedDate1 > currentDate) {
-//     return false;
-//   } else {
-//     return true;
-//   }
-// };
-
-
-// const validateRelievedDate = (resignedDate, relievedDate) => {
-//   if (relievedDate === null || relievedDate === undefined || relievedDate === "") {
-//     return true;
-//   }
-//   if (resignedDate === null || resignedDate === undefined || resignedDate === "") {
-//     return false;
-//   }
-
-//   const currentDate = new Date();
-//   const resignedDateParts = resignedDate.split("-");
-//   const relievedDateParts = relievedDate.split("-");
-
-//   const resignedDate1 = new Date(`${resignedDateParts[2]}-${resignedDateParts[0]}-${resignedDateParts[1]}`);
-//   const relievedDate1 = new Date(`${relievedDateParts[2]}-${relievedDateParts[0]}-${relievedDateParts[1]}`);
-
-//   if (isNaN(relievedDate1.getTime()) || isNaN(resignedDate1.getTime())) {
-//     return false;
-//   }
-
-//   if (relievedDate1 <= resignedDate1 || resignedDate1 > currentDate) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
 
 const validateIsAbsconded = (isAbsconded) => {
   if (isAbsconded === null || isAbsconded === undefined) {
