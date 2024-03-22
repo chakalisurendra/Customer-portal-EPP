@@ -139,7 +139,7 @@ const updateEmployee = async (event) => {
 
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId }),
+      Key: marshall({ employeeId: employeeId }),
     };
     const { Item } = await client.send(new GetItemCommand(getItemParams));
     if (!Item) {
@@ -181,7 +181,7 @@ const updateEmployee = async (event) => {
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId }),
+      Key: marshall({ employeeId: employeeId }),
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
