@@ -339,13 +339,13 @@ const validateDesignation = (designation) => {
 };
 
 const validateGender = (gender) => {
-  if (gender === null || gender === undefined) {
+  if (gender === null || gender === undefined || gender === "") {
     return true; // Allow null or undefined values
   }
   return ["male", "female"].includes(gender);
 };
 const validatemaritalStatus = (maritalStatus) => {
-  if (maritalStatus === null || maritalStatus === undefined) {
+  if (maritalStatus === null || maritalStatus === undefined || maritalStatus === "") {
     return true; // Allow null or undefined values
   }
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
