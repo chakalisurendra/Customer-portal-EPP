@@ -139,7 +139,7 @@ const updateEmployee = async (event) => {
 
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId: employeeId }),
+      Key: { employeeId: { N: employeeId } },
     };
     const { Item } = await client.send(new GetItemCommand(getItemParams));
     if (!Item) {
@@ -181,7 +181,7 @@ const updateEmployee = async (event) => {
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId: employeeId }),
+      Key: { employeeId: { N: employeeId } },
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
@@ -227,7 +227,7 @@ const getEmployee = async (event) => {
 
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId: employeeId }),
+      Key: { employeeId: { N: employeeId } },
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
@@ -344,7 +344,7 @@ const isEmployeeIdExists = async (employeeId) => {
   console.log("isEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    Key: { employeeId: { S: employeeId } },
+    Key: { employeeId: { N: employeeId } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
   // If Item is not null, employeeId exists
