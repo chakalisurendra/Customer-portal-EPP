@@ -129,7 +129,9 @@ const updateEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const { employeeId } = event.queryStringParameters;
+    //const { employeeId } = event.queryStringParameters;
+    const employeeId = event.queryStringParameters && event.queryStringParameters.employeeId;
+
     if (!employeeId) {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
