@@ -332,3 +332,5 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
+
+
