@@ -367,21 +367,21 @@ const isEmailExists = async (emailAddress) => {
   return data.Items.length > 0;
 };
 
-// const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
-//   console.log("in side isEmailNotEmployeeIdExists");
-//   const params = {
-//     TableName: process.env.EMPLOYEE_TABLE,
-//     FilterExpression: "officialEmailId = :email AND employeeId <> :id",
-//     ExpressionAttributeValues: {
-//       ":email": { S: emailAddress },
-//       ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
-//     },
-//     ProjectionExpression: "officialEmailId",
-//   };
-//   const command = new ScanCommand(params);
-//   const data = await client.send(command);
-//   return data.Items.length > 0;
-// };
+const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
+  console.log("in side isEmailNotEmployeeIdExists");
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    FilterExpression: "officialEmailId = :email AND employeeId <> :id",
+    ExpressionAttributeValues: {
+      ":email": { S: emailAddress },
+      ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
+    },
+    ProjectionExpression: "officialEmailId",
+  };
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
+};
 
 async function getHighestSerialNumber() {
   const params = {
