@@ -51,7 +51,7 @@ functions:
     timeout: 120
     events:
       - http:
-          path: employee/{employeeId}
+          path: employee
           method: GET
           cors: true
           request:
@@ -75,7 +75,7 @@ functions:
     timeout: 120
     events:
       - http:
-          path: employee/{employeeId}
+          path: employee
           method: PUT
           cors: true
           request:
