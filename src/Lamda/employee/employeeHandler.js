@@ -129,7 +129,7 @@ const updateEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const employeeId = event.pathParameters.employeeId;
+    const { employeeId } = event.queryStringParameters;
     if (!employeeId) {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
@@ -221,9 +221,11 @@ const getEmployee = async (event) => {
   console.log("Get employee details");
   const response = { statusCode: httpStatusCodes.SUCCESS };
   try {
+    const { employeeId } = event.queryStringParameters;
+
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: marshall({ employeeId: event.pathParameters.employeeId }),
+      Key: marshall({ employeeId: employeeId }),
     };
     const { Item } = await client.send(new GetItemCommand(params));
     console.log({ Item });
