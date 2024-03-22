@@ -151,7 +151,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     response.validationMessage = `relievedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  if (!validateRelievedDate(requestBody.resignedDate, requestBody.relievedDate)) {
+  if (!validateRelievedDate(requestBody.relievedDate)) {
     response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
     return response;
   }
