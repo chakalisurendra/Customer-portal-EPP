@@ -172,7 +172,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
 };
 
 const validatePhone = (phoneNumber) => {
-  if (phoneNumber === null || phoneNumber === undefined) {
+  if (phoneNumber === null || phoneNumber === undefined || phoneNumber === "") {
     return true;
   }
   const phoneNumberPattern = /^\d{10,16}$/;
@@ -184,7 +184,7 @@ const validatePhone = (phoneNumber) => {
 };
 
 const validateSsnNumber = (ssnNumber) => {
-  if (ssnNumber === null || ssnNumber === undefined) {
+  if (ssnNumber === null || ssnNumber === undefined || ssnNumber === "") {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^\d{9}$/;
@@ -196,7 +196,7 @@ const validateSsnNumber = (ssnNumber) => {
 };
 
 const validateAadharNumber = (aadharNumber) => {
-  if (aadharNumber === null || aadharNumber === undefined) {
+  if (aadharNumber === null || aadharNumber === undefined || aadharNumber === "") {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^\d{12}$/;
@@ -208,7 +208,7 @@ const validateAadharNumber = (aadharNumber) => {
 };
 
 const validatePassportNumber = (passportNumber) => {
-  if (passportNumber === null || passportNumber === undefined) {
+  if (passportNumber === null || passportNumber === undefined || passportNumber === "") {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^[A-Z]{4}\d{8}$/;
@@ -220,7 +220,7 @@ const validatePassportNumber = (passportNumber) => {
 };
 
 const validateOfficialEmailId = (officialEmailId) => {
-  if (officialEmailId === null || officialEmailId === undefined) {
+  if (officialEmailId === null || officialEmailId === undefined|| officialEmailId === "") {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
@@ -228,7 +228,7 @@ const validateOfficialEmailId = (officialEmailId) => {
 };
 
 const validateEmailAddress = (emailAddress) => {
-  if (emailAddress === null || emailAddress === undefined) {
+  if (emailAddress === null || emailAddress === undefined || emailAddress === "") {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -292,28 +292,28 @@ const validatePanNumber = (panNumber) => {
 };
 
 const validateIsAbsconded = (isAbsconded) => {
-  if (isAbsconded === null || isAbsconded === undefined) {
+  if (isAbsconded === null || isAbsconded === undefined || isAbsconded === "") {
     return true; // Allow null or undefined values
   }
   return ["Yes", "No"].includes(isAbsconded);
 };
 
 const validateStatus = (status) => {
-  if (status === null || status === undefined) {
+  if (status === null || status === undefined || status === "") {
     return true; // Allow null or undefined values
   }
   return ["active", "inactive"].includes(status);
 };
 
 const validateBranchOffice = (branchOffice) => {
-  if (branchOffice === null || branchOffice === undefined) {
+  if (branchOffice === null || branchOffice === undefined || branchOffice === "") {
     return true; // Allow null or undefined values
   }
   return ["San Antonio, USA", "Bangalore, INDIA"].includes(branchOffice);
 };
 
 const validateDesignation = (designation) => {
-  if (designation === null || designation === undefined) {
+  if (designation === null || designation === undefined  || designation === "") {
     return true; // Allow null or undefined values
   }
   return [
