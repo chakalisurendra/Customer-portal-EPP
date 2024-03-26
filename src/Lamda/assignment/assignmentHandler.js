@@ -62,10 +62,10 @@ const updateAssignment = async (event) => {
       }
     });
 
-    const key = marshall({
-      assignmentId: assignmentId,
-      employeeId: employeeId,
-    });
+    const key = {
+      assignmentId: { N: assignmentId },
+      employeeId: { N: employeeId },
+    };
 
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
