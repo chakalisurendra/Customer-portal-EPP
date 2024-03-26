@@ -86,6 +86,7 @@ const createEmployee = async (event) => {
         assignmentId: newAssignmentId,
         employeeId: newEmployeeId,
         branchOffice: requestBody.branchOffice || null,
+        role: requestBody.role || null,
         designation: requestBody.designation || null,
         onsite: onsite,
         department: requestBody.department || null,
