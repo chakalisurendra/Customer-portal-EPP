@@ -303,7 +303,7 @@ resources:
         TableName: ${self:custom.assetTableName}
         AttributeDefinitions:
           - AttributeName: assetId
-            AttributeType: S
+            AttributeType: N
         KeySchema:
           - AttributeName: assetId
             KeyType: HASH
