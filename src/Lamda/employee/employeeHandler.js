@@ -1,11 +1,26 @@
-const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBClient,
+  PutItemCommand,
+  UpdateItemCommand,
+  DeleteItemCommand,
+  GetItemCommand,
+  ScanCommand,
+} = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
-const { autoIncreamentId } = require("../../utils/comman");
-const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
-const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
+const {
+  validateEmployeeDetails,
+  validateUpdateEmployeeDetails,
+} = require("../../validator/validateRequest");
+const { autoIncreamentId, pagination } = require("../../utils/comman");
+const {
+  updateEmployeeAllowedFields,
+} = require("../../validator/validateFields");
+const {
+  httpStatusCodes,
+  httpStatusMessages,
+} = require("../../environment/appconfig");
 const currentDate = Date.now();
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
 
@@ -21,7 +36,9 @@ const createEmployee = async (event) => {
     const requestBody = JSON.parse(event.body);
 
     const validationResponse = validateEmployeeDetails(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    console.log(
+      `valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `
+    );
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -37,7 +54,10 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
-    const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
+    const newEmployeeId = await autoIncreamentId(
+      process.env.EMPLOYEE_TABLE,
+      "employeeId"
+    );
     console.log("new employee id : ", newEmployeeId);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
@@ -79,7 +99,10 @@ const createEmployee = async (event) => {
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
     }
-    const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
+    const newAssignmentId = await autoIncreamentId(
+      process.env.ASSIGNMENTS_TABLE,
+      "assignmentId"
+    );
     const assignmentParams = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
@@ -97,7 +120,9 @@ const createEmployee = async (event) => {
         updateDateTime: null,
       }),
     };
-    const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
+    const createAssignmentResult = await client.send(
+      new PutItemCommand(assignmentParams)
+    );
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
       data: {
@@ -130,7 +155,8 @@ const updateEmployee = async (event) => {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
     //const { employeeId } = event.queryStringParameters;
-    const employeeId = event.queryStringParameters && event.queryStringParameters.employeeId;
+    const employeeId =
+      event.queryStringParameters && event.queryStringParameters.employeeId;
 
     if (!employeeId) {
       console.log("Employee Id is required");
@@ -151,10 +177,14 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
+    const objKeys = Object.keys(requestBody).filter((key) =>
+      updateEmployeeAllowedFields.includes(key)
+    );
     console.log(`Employee with objKeys ${objKeys} `);
     const validationResponse = validateUpdateEmployeeDetails(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    console.log(
+      `valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `
+    );
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -165,7 +195,10 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const officialEmailIdExists = await isEmailNotEmployeeIdExists(requestBody.officialEmailId, employeeId);
+    const officialEmailIdExists = await isEmailNotEmployeeIdExists(
+      requestBody.officialEmailId,
+      employeeId
+    );
     if (officialEmailIdExists) {
       console.log("officialEmailId already exists.");
       response.statusCode = 400;
@@ -182,7 +215,9 @@ const updateEmployee = async (event) => {
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+      UpdateExpression: `SET ${objKeys
+        .map((_, index) => `#key${index} = :value${index}`)
+        .join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
           ...acc,
@@ -221,7 +256,12 @@ const updateEmployee = async (event) => {
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+   const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    }
+  };
   try {
     const { employeeId } = event.queryStringParameters;
 
@@ -241,12 +281,11 @@ const getEmployee = async (event) => {
       console.log("Successfully retrieved Employee details.");
 
       // Fetch assignments for the current employee
-      const employeeId = event.pathParameters.employeeId;
       const assignmentsParams = {
         TableName: process.env.ASSIGNMENTS_TABLE,
         FilterExpression: "employeeId = :employeeId",
         ExpressionAttributeValues: {
-          ":employeeId": { S: employeeId },
+          ":employeeId": { N: employeeId },
         },
       };
       const assignmentsCommand = new ScanCommand(assignmentsParams);
@@ -272,94 +311,68 @@ const getEmployee = async (event) => {
   return response;
 };
 
-const getAllEmployees = async () => {
+const getAllEmployees = async (event) => {
+  console.log("Get all employees");
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
+      'Access-Control-Allow-Origin': '*',
+    }
   };
+  const { pageNo, pageSize } = event.queryStringParameters;
   try {
-    const { Items } = await client.send(new ScanCommand({ TableName: process.env.EMPLOYEE_TABLE })); // Getting table name from the serverless.yml and setting to the TableName
-
-    if (Items.length === 0) {
-      // If there are no employee details found
-      response.statusCode = httpStatusCodes.NOT_FOUND; // Setting the status code to 404
+    const params = {
+      TableName: process.env.EMPLOYEE_TABLE,
+    };
+    const { Items } = await client.send(new ScanCommand(params));
+    Items.sort((a, b) => parseInt(a.employeeId.N) - parseInt(b.employeeId.N));
+    console.log({ Items });
+    if (!Items || Items.length === 0) {
+      console.log("No employees found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
-      }); // Setting error message
+        message: httpStatusMessages.EMPLOYEES_DETAILS_NOT_FOUND,
+      });
     } else {
-      const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.S) - parseInt(b.employeeId.S));
-
-      // Map and set "password" field to null
-      const employeesData = await Promise.all(
-        sortedItems.map(async (item) => {
-          const employee = unmarshall(item);
-          if (employee.hasOwnProperty("password")) {
-            employee.password = null;
-          }
-
-          // Fetch assignments for the current employee
-          try {
-            const employeeId1 = employee.employeeId; // Added missing 'const' keyword
-            const params = {
-              TableName: process.env.ASSIGNMENTS_TABLE,
-              FilterExpression: "employeeId = :employeeId",
-              ExpressionAttributeValues: {
-                ":employeeId": { S: employeeId1 }, // Assuming employeeId is a string, adjust accordingly if not
-              },
-            };
-            const command = new ScanCommand(params);
-            const { Items } = await client.send(command); // Changed assignmentResult to Items
-
-            // Attach assignments to the employee object
-            employee.assignments = Items.map(unmarshall); // Changed assignmentResult to Items
-          } catch (error) {
-            console.error("Error fetching assignments:", error);
-            throw error; // re-throwing the error to be caught by the outer catch block
-          }
-
-          return employee;
-        })
-      );
-
+      console.log("Successfully retrieved all employees.");
+      const sanitizedItems = Items.map(item => {
+        const sanitizedItem = { ...item };
+        delete sanitizedItem.password; // Assuming password field is called 'password'
+        return sanitizedItem;
+      });
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS,
-        data: employeesData,
+        data: pagination(sanitizedItems.map(item => unmarshall(item)), pageNo, pageSize),
       });
     }
   } catch (e) {
     console.error(e);
     response.body = JSON.stringify({
-      statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR,
-      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
+      statusCode: e.statusCode,
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEES_DETAILS,
       errorMsg: e.message,
     });
   }
   return response;
 };
 
-// Function to check if employeeId already exists
 const isEmployeeIdExists = async (employeeId) => {
-  console.log("isEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
     Key: { employeeId: { N: employeeId } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
-  // If Item is not null, employeeId exists
   return !!Item;
 };
 
 const isEmailExists = async (emailAddress) => {
-  console.log("isEmailExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officialEmailId = :email",
+    FilterExpression: "officeEmailAddress = :email",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
     },
-    ProjectionExpression: "officialEmailId",
+    ProjectionExpression: "officeEmailAddress",
   };
 
   const command = new ScanCommand(params);
@@ -371,47 +384,17 @@ const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
   console.log("in side isEmailNotEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officialEmailId = :email AND employeeId <> :id",
+    FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
     ExpressionAttributeValues: {
       ":email": { S: emailAddress },
-      ":id": { S: employeeId }, // Assuming employeeId is a string, adjust if needed
+      ":id": { N: employeeId },
     },
-    ProjectionExpression: "officialEmailId",
+    ProjectionExpression: "officeEmailAddress",
   };
   const command = new ScanCommand(params);
   const data = await client.send(command);
   return data.Items.length > 0;
 };
-
-async function getHighestSerialNumber() {
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    ProjectionExpression: "serialNumber",
-    Limit: 100, // Increase the limit to retrieve more items for sorting
-  };
-
-  try {
-    const result = await client.send(new ScanCommand(params));
-
-    // Sort the items in descending order based on assignmentId
-    const sortedItems = result.Items.sort((a, b) => {
-      return parseInt(b.serialNumber.N) - parseInt(a.serialNumber.N);
-    });
-
-    console.log("Sorted Items:", sortedItems); // Log the sorted items
-
-    if (sortedItems.length === 0) {
-      return 0; // If no records found, return null
-    } else {
-      const highestSerialNumber = parseInt(sortedItems[0].serialNumber.N);
-      console.log("Highest Assignment ID:", highestSerialNumber);
-      return highestSerialNumber;
-    }
-  } catch (error) {
-    console.error("Error retrieving highest serial number:", error);
-    throw error; // Propagate the error up the call stack
-  }
-}
 
 module.exports = {
   createEmployee,
