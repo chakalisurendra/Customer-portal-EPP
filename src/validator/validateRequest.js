@@ -57,7 +57,7 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateBranchOffice(requestBody.branchOffice)) {
-    (response.validationMessage = "Invalid is Branch Office. Is Branch Office should be either San Antonio, USA"), "Bangalore, INDIA.";
+    response.validationMessage = `Invalid is Branch Office. Is Branch Office should be either San Antonio, USA, Bangalore, INDIA`;
     return response;
   }
   if (!validateDesignation(requestBody.designation)) {
@@ -220,7 +220,7 @@ const validatePassportNumber = (passportNumber) => {
 };
 
 const validateOfficialEmailId = (officialEmailId) => {
-  if (officialEmailId === null || officialEmailId === undefined|| officialEmailId === "") {
+  if (officialEmailId === null || officialEmailId === undefined || officialEmailId === "") {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
@@ -313,7 +313,7 @@ const validateBranchOffice = (branchOffice) => {
 };
 
 const validateDesignation = (designation) => {
-  if (designation === null || designation === undefined  || designation === "") {
+  if (designation === null || designation === undefined || designation === "") {
     return true; // Allow null or undefined values
   }
   return [
@@ -438,6 +438,48 @@ const validateFinalSettlement = (requestBody) => {
   return response;
 };
 
+const validateAssignment = (requestBody) => {
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  if (!validateDepartment(requestBody.department)) {
+    response.validationMessage = "Invalid department. Department should be either 'IT' or 'Non-IT' or 'Sales'";
+    return response;
+  }
+  if (!validateDesignation(requestBody.designation)) {
+    response.validationMessage = "Invalid is designation";
+    return response;
+  }
+   if (!validateRole(requestBody.role)) {
+    response.validationMessage = "Invalid is role";
+    return response;
+  }
+   if (!validateBranchOffice(requestBody.branchOffice)) {
+    response.validationMessage = `Invalid is Branch Office. Is Branch Office should be either San Antonio, USA, Bangalore, INDIA`;
+    return response;
+  }
+  response.validation = true;
+  return response;
+};
+
+const validateDepartment = (department) => {
+  if (department === null || department === undefined || department === "") {
+    return true; // Allow null or undefined values
+  }
+  return ["IT", "Non-IT","Sales"].includes(department);
+};
+
+const validateRole = (role) => {
+  if (role === null || role === undefined || role === "") {
+    return true; // Allow null or undefined values
+  }
+  return ["hr", "manager", "employee", "contractor", "accountant"].includes(
+    designatiovn
+  );
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
@@ -445,4 +487,5 @@ module.exports = {
   validateMetadata,
   validateMetadataUpdata,
   validateFinalSettlement,
+  validateAssignment,
 };

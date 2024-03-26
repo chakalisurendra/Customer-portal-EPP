@@ -1,26 +1,11 @@
-const {
-  DynamoDBClient,
-  PutItemCommand,
-  UpdateItemCommand,
-  DeleteItemCommand,
-  GetItemCommand,
-  ScanCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const {
-  validateEmployeeDetails,
-  validateUpdateEmployeeDetails,
-} = require("../../validator/validateRequest");
+const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
 const { autoIncreamentId, pagination } = require("../../utils/comman");
-const {
-  updateEmployeeAllowedFields,
-} = require("../../validator/validateFields");
-const {
-  httpStatusCodes,
-  httpStatusMessages,
-} = require("../../environment/appconfig");
+const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
+const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now();
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
 
@@ -36,9 +21,7 @@ const createEmployee = async (event) => {
     const requestBody = JSON.parse(event.body);
 
     const validationResponse = validateEmployeeDetails(requestBody);
-    console.log(
-      `valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `
-    );
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -54,10 +37,7 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
-    const newEmployeeId = await autoIncreamentId(
-      process.env.EMPLOYEE_TABLE,
-      "employeeId"
-    );
+    const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     console.log("new employee id : ", newEmployeeId);
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
@@ -99,10 +79,7 @@ const createEmployee = async (event) => {
     if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
     }
-    const newAssignmentId = await autoIncreamentId(
-      process.env.ASSIGNMENTS_TABLE,
-      "assignmentId"
-    );
+    const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
     const assignmentParams = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
@@ -120,9 +97,7 @@ const createEmployee = async (event) => {
         updateDateTime: null,
       }),
     };
-    const createAssignmentResult = await client.send(
-      new PutItemCommand(assignmentParams)
-    );
+    const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
       data: {
@@ -155,8 +130,7 @@ const updateEmployee = async (event) => {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
     //const { employeeId } = event.queryStringParameters;
-    const employeeId =
-      event.queryStringParameters && event.queryStringParameters.employeeId;
+    const employeeId = event.queryStringParameters && event.queryStringParameters.employeeId;
 
     if (!employeeId) {
       console.log("Employee Id is required");
@@ -177,14 +151,10 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const objKeys = Object.keys(requestBody).filter((key) =>
-      updateEmployeeAllowedFields.includes(key)
-    );
+    const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
     const validationResponse = validateUpdateEmployeeDetails(requestBody);
-    console.log(
-      `valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `
-    );
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -195,10 +165,7 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const officialEmailIdExists = await isEmailNotEmployeeIdExists(
-      requestBody.officialEmailId,
-      employeeId
-    );
+    const officialEmailIdExists = await isEmailNotEmployeeIdExists(requestBody.officialEmailId, employeeId);
     if (officialEmailIdExists) {
       console.log("officialEmailId already exists.");
       response.statusCode = 400;
@@ -215,9 +182,7 @@ const updateEmployee = async (event) => {
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
-      UpdateExpression: `SET ${objKeys
-        .map((_, index) => `#key${index} = :value${index}`)
-        .join(", ")}`,
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
           ...acc,
@@ -256,11 +221,11 @@ const updateEmployee = async (event) => {
 
 const getEmployee = async (event) => {
   console.log("Get employee details");
-   const response = {
+  const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   };
   try {
     const { employeeId } = event.queryStringParameters;
@@ -316,8 +281,8 @@ const getAllEmployees = async (event) => {
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   };
   const { pageNo, pageSize } = event.queryStringParameters;
   try {
@@ -335,14 +300,18 @@ const getAllEmployees = async (event) => {
       });
     } else {
       console.log("Successfully retrieved all employees.");
-      const sanitizedItems = Items.map(item => {
+      const sanitizedItems = Items.map((item) => {
         const sanitizedItem = { ...item };
         delete sanitizedItem.password; // Assuming password field is called 'password'
         return sanitizedItem;
       });
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS,
-        data: pagination(sanitizedItems.map(item => unmarshall(item)), pageNo, pageSize),
+        data: pagination(
+          sanitizedItems.map((item) => unmarshall(item)),
+          pageNo,
+          pageSize
+        ),
       });
     }
   } catch (e) {

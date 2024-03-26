@@ -1,29 +1,116 @@
 const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand, QueryCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall } = require("@aws-sdk/util-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-const currentDate = Date.now(); // get the current date and time in milliseconds
-const formattedDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss"); // formatting date
+const { validateAssignment } = require("../../validator/validateRequest");
+const currentDate = Date.now();
+const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
+
+const updateAssignment = async (event) => {
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+
+  try {
+    const requestBody = JSON.parse(event.body);
+    const { employeeId, assignmentId } = event.queryStringParameters;
+    if (!assignmentId) {
+      throw new Error("assignmentId is required");
+    }
+    if (!employeeId) {
+      throw new Error("employeeId is required");
+    }
+    const validationResponse = validateAssignment(requestBody);
+    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
+    if (!validationResponse.validation) {
+      console.log(validationResponse.validationMessage);
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        ErrorMessage: validationResponse.validationMessage,
+      });
+      return response;
+    }
+
+    let updateExpression = "SET updatedDateTime = :updatedDateTime";
+    const expressionAttributeValues = {
+      ":updatedDateTime": formattedDate,
+    };
+
+    if (requestBody.branchOffice === "San Antonio, USA") {
+      requestBody.onsite = "Yes";
+    } else if (requestBody.branchOffice === "Bangalore, INDIA") {
+      requestBody.onsite = "No";
+    }
+
+    if (!requestBody.assignedProject || requestBody.assignedProject.trim() === "") {
+      requestBody.billableResource = "No";
+    } else {
+      requestBody.billableResource = "Yes";
+    }
+
+    const allowedFields = ["branchOffice", "department", "designation", "coreTechnology", "framework", "reportingManager", "billableResource", "assignedProject", "onsite"];
+
+    allowedFields.forEach((field) => {
+      if (requestBody[field] !== undefined) {
+        updateExpression += `, ${field} = :${field}`;
+        expressionAttributeValues[`:${field}`] = requestBody[field];
+      }
+    });
+
+    const key = marshall({
+      assignmentId: assignmentId,
+      employeeId: employeeId,
+    });
+
+    const params = {
+      TableName: process.env.ASSIGNMENTS_TABLE,
+      Key: key,
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: marshall(expressionAttributeValues),
+    };
+
+    await client.send(new UpdateItemCommand(params));
+
+    response.body = JSON.stringify({
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
+    });
+  } catch (e) {
+    console.error(e);
+    response.statusCode = 400;
+    response.body = JSON.stringify({
+      message: httpStatusMessages.FAILED_TO_UPDATE_ASSIGNMENT_DETAILS,
+      errorMsg: e.message,
+    });
+  }
+  return response;
+};
 
 const createAssignment = async (event) => {
-  console.log("Create employee details");
-  const response = { statusCode: httpStatusCodes.SUCCESS };
+  console.log("inside the Create employee assignment details");
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
 
-    // Check for required fields
     const requiredFields = ["employeeId", "department", "designation", "branchOffice", "coreTechnology", "billableResource"];
     if (!requiredFields.every((field) => requestBody[field])) {
       throw new Error("Required fields are missing.");
     }
-    // Set onsite based on branchOffice
-    let onsite = "No"; // Default value
-    if (requestBody.branchOffice === "San Antonio(USA)") {
+    let onsite = "No";
+    if (requestBody.branchOffice === "San Antonio, USA") {
       onsite = "Yes";
     }
-    if (requestBody.branchOffice === null || !["San Antonio(USA)", "Bangalore(INDIA)"].includes(requestBody.branchOffice)) {
+    if (requestBody.branchOffice === null || !["San Antonio, USA", "Bangalore, INDIA"].includes(requestBody.branchOffice)) {
       throw new Error("Incorrect BranchOffice");
     }
     if (requestBody.billableResource === null || !["Yes", "No"].includes(requestBody.billableResource)) {
@@ -62,35 +149,33 @@ const createAssignment = async (event) => {
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
 
-    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+    const assignmentId = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
     async function getHighestSerialNumber() {
       const params = {
         TableName: process.env.ASSIGNMENTS_TABLE,
         ProjectionExpression: "assignmentId",
         Limit: 1,
-        ScanIndexForward: false, // Sort in descending order to get the highest serial number first
+        ScanIndexForward: false,
       };
 
       try {
         const result = await client.send(new ScanCommand(params));
-        console.log("DynamoDB Result:", result); // Add this line to see the DynamoDB response
+        console.log("DynamoDB Result:", result);
         if (result.Items.length === 0) {
-          return 0; // If no records found, return null
+          return 0;
         } else {
-          // Parse and return the highest serial number without incrementing
           const assignmentIdObj = result.Items[0].assignmentId;
-          console.log("Assignment ID from DynamoDB:", assignmentIdObj); // Add this line to see the retrieved assignmentId object
-          const assignmentId = parseInt(assignmentIdObj.N); // Access the N property and parse as a number
-          console.log("Parsed Assignment ID:", assignmentId); // Log the parsed assignmentId
+          console.log("Assignment ID from DynamoDB:", assignmentIdObj);
+          const assignmentId = parseInt(assignmentIdObj.N);
+          console.log("Parsed Assignment ID:", assignmentId);
           return assignmentId;
         }
       } catch (error) {
         console.error("Error retrieving highest serial number:", error);
-        throw error; // Propagate the error up the call stack
+        throw error;
       }
     }
 
-    // Check if an assignment already exists for the employee
     const existingAssignment = await getAssignmentByEmployeeId(requestBody.employeeId);
     if (existingAssignment) {
       throw new Error("An assignment already exists for this employee.");
@@ -101,7 +186,7 @@ const createAssignment = async (event) => {
         TableName: process.env.ASSIGNMENTS_TABLE,
         FilterExpression: "employeeId = :employeeId",
         ExpressionAttributeValues: {
-          ":employeeId": { S: employeeId }, // Assuming employeeId is a string
+          ":employeeId": { N: employeeId },
         },
       };
 
@@ -117,9 +202,7 @@ const createAssignment = async (event) => {
     const checkEmployeeExistence = async (employeeId) => {
       const params = {
         TableName: process.env.EMPLOYEE_TABLE,
-        Key: marshall({
-          employeeId: employeeId,
-        }),
+        Key: { employeeId: { N: employeeId } },
       };
 
       try {
@@ -135,9 +218,9 @@ const createAssignment = async (event) => {
     await checkEmployeeExistence(requestBody.employeeId);
 
     const params = {
-      TableName: process.env.ASSIGNMENTS_TABLE, // Use ASSIGNMENTS_TABLE environment variable
+      TableName: process.env.ASSIGNMENTS_TABLE,
       Item: marshall({
-        assignmentId: nextSerialNumber,
+        assignmentId: assignmentId,
         employeeId: requestBody.employeeId,
         department: requestBody.department,
         branchOffice: requestBody.branchOffice,
@@ -173,6 +256,53 @@ const createAssignment = async (event) => {
   return response;
 };
 
+const getAssignmentByEmployeeId = async (event) => {
+  console.log("Fetch assignment details by employee ID");
+  const employeeId = event.pathParameters.employeeId;
+
+  const response = {
+    statusCode: httpStatusCodes.SUCCESS,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  try {
+    const params = {
+      TableName: process.env.ASSIGNMENTS_TABLE,
+      FilterExpression: "employeeId = :employeeId",
+      ExpressionAttributeValues: {
+        ":employeeId": { N: employeeId },
+      },
+    };
+    const command = new ScanCommand(params);
+    const { Items } = await client.send(command);
+
+    if (!Items || Items.length === 0) {
+      console.log("Assignments details not found for the employee.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: httpStatusMessages.ASSIGNMENTS_NOT_FOUND_FOR_EMPLOYEE,
+      });
+    } else {
+      console.log("Successfully retrieved assignments for the employee.");
+      response.body = JSON.stringify({
+        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_ASSIGNMENT_FOR_EMPLOYEE,
+        data: Items.map((item) => unmarshall(item)),
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    response.statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
+    response.body = JSON.stringify({
+      message: httpStatusMessages.FAILED_TO_RETRIEVE_ASSIGNMENTS,
+      error: error.message,
+    });
+  }
+  return response;
+};
+
 module.exports = {
   createAssignment,
+  updateAssignment,
+  getAssignmentByEmployeeId,
 };

@@ -119,9 +119,14 @@ functions:
     timeout: 120
     events:
       - http:
-          path: assignment/update/{assignmentId}/employee/{employeeId}
+          path: assignment/update
           method: PUT
           cors: true # Enable CORS for this endpoint
+          request:
+            parameters:
+              querystrings:
+                assignmentId: true
+                employeeId: true
   assetCreate:
     handler: src/Lamda/asset/assetHandler.createAsset
     name: assetCreate
