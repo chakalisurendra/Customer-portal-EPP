@@ -69,6 +69,8 @@ const updateAssignment = async (event) => {
           }),
           {
             ":updatedDateTime": formattedDate,
+            ":role": requestBody.role.toLowerCase(),
+            ":designation": requestBody.designation.toLowerCase(),
           }
         )
       ),
