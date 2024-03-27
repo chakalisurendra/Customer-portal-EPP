@@ -66,6 +66,7 @@ const updateAssignment = async (event) => {
       assignmentId: { N: assignmentId },
       employeeId: { N: employeeId },
     };
+      console.log("assignment keys are matched: ", key);
 
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
@@ -73,11 +74,18 @@ const updateAssignment = async (event) => {
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: marshall(expressionAttributeValues),
     };
+      console.log("assignment parameters: ", params);
+
 
     await client.send(new UpdateItemCommand(params));
+      console.log("assignment updated: ", params);
 
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
+      data: {
+        assignmentId: assignmentId,
+        employeeId: employeeId
+      }
     });
   } catch (e) {
     console.error(e);
