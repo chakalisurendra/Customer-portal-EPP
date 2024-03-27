@@ -26,7 +26,7 @@ const updateAssignment = async (event) => {
       throw new Error("employeeId is required");
     }
     const validationResponse = validateAssignment(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    console.log(`validation: ${validationResponse.validation} message: ${validationResponse.validationMessage}`);
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -38,12 +38,6 @@ const updateAssignment = async (event) => {
     }
 
     const objKeys = Object.keys(requestBody).filter((key) => updateAssignmentAllowedFields.includes(key));
-
-    // let updateExpression = "SET updatedDateTime = :updatedDateTime";
-    // const expressionAttributeValues = {
-    //   ":updatedDateTime": formattedDate,
-    // };
-
     if (requestBody.branchOffice === "San Antonio, USA") {
       requestBody.onsite = "Yes";
     } else if (requestBody.branchOffice === "Bangalore, INDIA") {
@@ -59,7 +53,7 @@ const updateAssignment = async (event) => {
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Key: { assignmentId: { N: assignmentId }, employeeId: { N: employeeId } },
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, updatedDateTime = :updatedDateTime`,
       ExpressionAttributeNames: objKeys.reduce(
         (acc, key, index) => ({
           ...acc,
@@ -73,38 +67,18 @@ const updateAssignment = async (event) => {
             ...acc,
             [`:value${index}`]: requestBody[key],
           }),
-          {}
+          {
+            ":updatedDateTime": formattedDate,
+          }
         )
       ),
-      ":updatedDateTime": formattedDate,
     };
 
+    console.log("UpdateItem params:", params); // Debugging: Check the parameters being passed to UpdateItem
+
     const updateResult = await client.send(new UpdateItemCommand(params));
-    // const allowedFields = ["branchOffice", "department", "designation", "coreTechnology", "framework", "reportingManager", "billableResource", "assignedProject", "onsite"];
 
-    // allowedFields.forEach((field) => {
-    //   if (requestBody[field] !== undefined) {
-    //     updateExpression += `, ${field} = :${field}`;
-    //     expressionAttributeValues[`:${field}`] = requestBody[field];
-    //   }
-    // });
-
-    // const key = {
-    //   assignmentId: { N: assignmentId },
-    //   employeeId: { N: employeeId },
-    // };
-    //   console.log("assignment keys are matched: ", key);
-
-    // const params = {
-    //   TableName: process.env.ASSIGNMENTS_TABLE,
-    //   Key: key,
-    //   UpdateExpression: updateExpression,
-    //   ExpressionAttributeValues: marshall(expressionAttributeValues),
-    // };
-    // console.log("assignment parameters: ", params);
-
-    // await client.send(new UpdateItemCommand(params));
-    console.log("assignment updated: ", params);
+    console.log("UpdateItem result:", updateResult); // Debugging: Check the result of the UpdateItem operation
 
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
@@ -123,6 +97,92 @@ const updateAssignment = async (event) => {
   }
   return response;
 };
+// const updateAssignment = async (event) => {
+//   const response = {
+//     statusCode: httpStatusCodes.SUCCESS,
+//     headers: {
+//       "Access-Control-Allow-Origin": "*",
+//     },
+//   };
+
+//   try {
+//     const requestBody = JSON.parse(event.body);
+//     const { employeeId, assignmentId } = event.queryStringParameters;
+//     if (!assignmentId) {
+//       throw new Error("assignmentId is required");
+//     }
+//     if (!employeeId) {
+//       throw new Error("employeeId is required");
+//     }
+//     const validationResponse = validateAssignment(requestBody);
+//     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+
+//     if (!validationResponse.validation) {
+//       console.log(validationResponse.validationMessage);
+//       response.statusCode = 400;
+//       response.body = JSON.stringify({
+//         ErrorMessage: validationResponse.validationMessage,
+//       });
+//       return response;
+//     }
+
+//     const objKeys = Object.keys(requestBody).filter((key) => updateAssignmentAllowedFields.includes(key));
+//       if (requestBody.branchOffice === "San Antonio, USA") {
+//       requestBody.onsite = "Yes";
+//     } else if (requestBody.branchOffice === "Bangalore, INDIA") {
+//       requestBody.onsite = "No";
+//     }
+
+//     if (!requestBody.assignedProject || requestBody.assignedProject.trim() === "") {
+//       requestBody.billableResource = "No";
+//     } else {
+//       requestBody.billableResource = "Yes";
+//     }
+
+//     const params = {
+//       TableName: process.env.ASSIGNMENTS_TABLE,
+//       Key: { assignmentId: { N: assignmentId }, employeeId: { N: employeeId } },
+//       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+//       ExpressionAttributeNames: objKeys.reduce(
+//         (acc, key, index) => ({
+//           ...acc,
+//           [`#key${index}`]: key,
+//         }),
+//         {}
+//       ),
+//       ExpressionAttributeValues: marshall(
+//         objKeys.reduce(
+//           (acc, key, index) => ({
+//             ...acc,
+//             [`:value${index}`]: requestBody[key],
+//           }),
+//           {}
+//         )
+//       ),
+//       ":updatedDateTime": formattedDate,
+//     };
+
+//     const updateResult = await client.send(new UpdateItemCommand(params));
+    
+//     console.log("assignment updated: ", params);
+
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
+//       data: {
+//         assignmentId: assignmentId,
+//         employeeId: employeeId,
+//       },
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     response.statusCode = 400;
+//     response.body = JSON.stringify({
+//       message: httpStatusMessages.FAILED_TO_UPDATE_ASSIGNMENT_DETAILS,
+//       errorMsg: e.message,
+//     });
+//   }
+//   return response;
+// };
 
 const createAssignment = async (event) => {
   console.log("inside the Create employee assignment details");
