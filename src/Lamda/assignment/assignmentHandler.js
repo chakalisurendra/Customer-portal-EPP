@@ -4,6 +4,7 @@ const moment = require("moment");
 const client = new DynamoDBClient();
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const { validateAssignment } = require("../../validator/validateRequest");
+const { updateAssignmentAllowedFields } = require("../../validator/validateFields");
 const currentDate = Date.now();
 const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
 
@@ -35,6 +36,8 @@ const updateAssignment = async (event) => {
       });
       return response;
     }
+
+    const objKeys = Object.keys(requestBody).filter((key) => updateAssignmentAllowedFields.includes(key));
 
     // let updateExpression = "SET updatedDateTime = :updatedDateTime";
     // const expressionAttributeValues = {

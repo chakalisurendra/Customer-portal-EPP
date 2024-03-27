@@ -31,7 +31,9 @@ const updateEmployeeAllowedFields = [
 ];
 
 const updateMetadataAllowedFields = ["name", "type", "status", "updatedDateTime"];
+const updateAssignmentAllowedFields = ["branchOffice", "department", "designation", "coreTechnology", "framework", "reportingManager", "billableResource", "assignedProject", "onsite"];
 module.exports = {
   updateEmployeeAllowedFields,
   updateMetadataAllowedFields,
+  updateAssignmentAllowedFields,
 };
