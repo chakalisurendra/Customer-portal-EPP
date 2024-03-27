@@ -74,12 +74,8 @@ const updateAssignment = async (event) => {
       ),
     };
 
-    console.log("UpdateItem params:", params); // Debugging: Check the parameters being passed to UpdateItem
-
     const updateResult = await client.send(new UpdateItemCommand(params));
-
     console.log("UpdateItem result:", updateResult); // Debugging: Check the result of the UpdateItem operation
-
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
       data: {
@@ -163,7 +159,7 @@ const updateAssignment = async (event) => {
 //     };
 
 //     const updateResult = await client.send(new UpdateItemCommand(params));
-    
+
 //     console.log("assignment updated: ", params);
 
 //     response.body = JSON.stringify({

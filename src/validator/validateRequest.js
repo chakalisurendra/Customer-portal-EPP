@@ -475,8 +475,8 @@ const validateRole = (role) => {
   if (role === null || role === undefined || role === "") {
     return true; // Allow null or undefined values
   }
-  return ["hr", "manager", "employee", "contractor", "accountant"].includes(
-    designatiovn
+  return ["hr", "manager", "developer", "contractor", "accountant"].includes(
+    role
   );
 };
 
