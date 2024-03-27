@@ -49,6 +49,8 @@ const updateAssignment = async (event) => {
     } else {
       requestBody.billableResource = "Yes";
     }
+    const role = requestBody.role.toLowerCase();
+    const designation = requestBody.designation.toLowerCase();
 
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
@@ -69,8 +71,8 @@ const updateAssignment = async (event) => {
           }),
           {
             ":updatedDateTime": formattedDate,
-            ":role": requestBody.role.toLowerCase(),
-            ":designation": requestBody.designation.toLowerCase(),
+            ":role": role,
+            ":designation": designation,
           }
         )
       ),
