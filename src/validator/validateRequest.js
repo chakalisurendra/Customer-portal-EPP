@@ -452,11 +452,11 @@ const validateAssignment = (requestBody) => {
     response.validationMessage = "Invalid is designation";
     return response;
   }
-   if (!validateRole(requestBody.role)) {
+  if (!validateRole(requestBody.role)) {
     response.validationMessage = "Invalid is role";
     return response;
   }
-   if (!validateBranchOffice(requestBody.branchOffice)) {
+  if (!validateBranchOffice(requestBody.branchOffice)) {
     response.validationMessage = `Invalid is Branch Office. Is Branch Office should be either San Antonio, USA, Bangalore, INDIA`;
     return response;
   }
@@ -468,16 +468,25 @@ const validateDepartment = (department) => {
   if (department === null || department === undefined || department === "") {
     return true; // Allow null or undefined values
   }
-  return ["IT", "Non-IT","Sales"].includes(department);
+  return ["IT", "Non-IT", "Sales"].includes(department);
 };
+
+// const validateRole = (role) => {
+//   if (role === null || role === undefined || role === "") {
+//     return true; // Allow null or undefined values
+//   }
+//   return ["hr", "manager", "developer", "contractor", "accountant"].includes(
+//     role
+//   );
+// };
 
 const validateRole = (role) => {
   if (role === null || role === undefined || role === "") {
     return true; // Allow null or undefined values
   }
-  return ["hr", "manager", "developer", "contractor", "accountant"].includes(
-    role
-  );
+  const lowercaseRole = role.toLowerCase();
+  const validRoles = ["hr", "manager", "developer", "contractor", "accountant"].map((r) => r.toLowerCase());
+  return validRoles.includes(lowercaseRole);
 };
 
 module.exports = {
