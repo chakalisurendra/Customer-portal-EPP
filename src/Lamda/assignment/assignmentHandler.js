@@ -36,10 +36,10 @@ const updateAssignment = async (event) => {
       return response;
     }
 
-    let updateExpression = "SET updatedDateTime = :updatedDateTime";
-    const expressionAttributeValues = {
-      ":updatedDateTime": formattedDate,
-    };
+    // let updateExpression = "SET updatedDateTime = :updatedDateTime";
+    // const expressionAttributeValues = {
+    //   ":updatedDateTime": formattedDate,
+    // };
 
     if (requestBody.branchOffice === "San Antonio, USA") {
       requestBody.onsite = "Yes";
@@ -53,39 +53,62 @@ const updateAssignment = async (event) => {
       requestBody.billableResource = "Yes";
     }
 
-    const allowedFields = ["branchOffice", "department", "designation", "coreTechnology", "framework", "reportingManager", "billableResource", "assignedProject", "onsite"];
-
-    allowedFields.forEach((field) => {
-      if (requestBody[field] !== undefined) {
-        updateExpression += `, ${field} = :${field}`;
-        expressionAttributeValues[`:${field}`] = requestBody[field];
-      }
-    });
-
-    const key = {
-      assignmentId: { N: assignmentId },
-      employeeId: { N: employeeId },
-    };
-      console.log("assignment keys are matched: ", key);
-
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
-      Key: key,
-      UpdateExpression: updateExpression,
-      ExpressionAttributeValues: marshall(expressionAttributeValues),
+      Key: { assignmentId: { N: assignmentId }, employeeId: { N: employeeId } },
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+      ExpressionAttributeNames: objKeys.reduce(
+        (acc, key, index) => ({
+          ...acc,
+          [`#key${index}`]: key,
+        }),
+        {}
+      ),
+      ExpressionAttributeValues: marshall(
+        objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`:value${index}`]: requestBody[key],
+          }),
+          {}
+        )
+      ),
+      ":updatedDateTime": formattedDate,
     };
-      console.log("assignment parameters: ", params);
 
+    const updateResult = await client.send(new UpdateItemCommand(params));
+    // const allowedFields = ["branchOffice", "department", "designation", "coreTechnology", "framework", "reportingManager", "billableResource", "assignedProject", "onsite"];
 
-    await client.send(new UpdateItemCommand(params));
-      console.log("assignment updated: ", params);
+    // allowedFields.forEach((field) => {
+    //   if (requestBody[field] !== undefined) {
+    //     updateExpression += `, ${field} = :${field}`;
+    //     expressionAttributeValues[`:${field}`] = requestBody[field];
+    //   }
+    // });
+
+    // const key = {
+    //   assignmentId: { N: assignmentId },
+    //   employeeId: { N: employeeId },
+    // };
+    //   console.log("assignment keys are matched: ", key);
+
+    // const params = {
+    //   TableName: process.env.ASSIGNMENTS_TABLE,
+    //   Key: key,
+    //   UpdateExpression: updateExpression,
+    //   ExpressionAttributeValues: marshall(expressionAttributeValues),
+    // };
+    // console.log("assignment parameters: ", params);
+
+    // await client.send(new UpdateItemCommand(params));
+    console.log("assignment updated: ", params);
 
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
       data: {
         assignmentId: assignmentId,
-        employeeId: employeeId
-      }
+        employeeId: employeeId,
+      },
     });
   } catch (e) {
     console.error(e);
