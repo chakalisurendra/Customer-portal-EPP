@@ -205,6 +205,8 @@ const updateEmployee = async (event) => {
     //   ":updatedDateTime": formattedDate,
     // };
 
+    const currentDate = Date.now();
+    const updateDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
@@ -227,7 +229,7 @@ const updateEmployee = async (event) => {
           }),
           {}
         ),
-        ":updatedDateTime": formattedDate,
+        ":updatedDateTime": updateDate,
       }),
     };
     const updateResult = await client.send(new UpdateItemCommand(params));
