@@ -280,7 +280,7 @@ const validateFeatureAndCurrentDate = (date) => {
   if (isNaN(inputDate.getTime())) {
     return false;
   }
-  if (inputDate > currentDate) {
+  if (inputDate >= currentDate) {
     console.log("true  date:");
     return true;
   } else {
