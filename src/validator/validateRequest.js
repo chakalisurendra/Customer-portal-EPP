@@ -303,7 +303,10 @@ const validateFeatureAndCurrentDate = (date) => {
     return true;
   }
   const currentDate = new Date();
+  console.log("current date:", currentDate);
   const inputDate = new Date(date);
+    console.log("input  date:", inputDate);
+
   if (isNaN(inputDate.getTime())) {
     return false;
   }
