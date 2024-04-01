@@ -1,13 +1,16 @@
-// const moment = require("moment");
-// const currentDate = Date.now();
-// const formattedDate = moment(currentDate).format("MM-DD-YYYY");
-
 const validateEmployeeDetails = (requestBody) => {
   const response = {
     validation: false,
     validationMessage: "Valid Data",
   };
-  const requiredProperties = ["firstName", "lastName", "dateOfBirth", "officialEmailId", "branchOffice", "designation"];
+  const requiredProperties = [
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "officialEmailId",
+    "branchOffice",
+    "designation",
+  ];
 
   for (const property of requiredProperties) {
     if (!requestBody[property] || requestBody[property] === "") {
@@ -25,7 +28,7 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `Date Of Birth is valid (current or past)`;
+    response.validationMessage = `Date Of Birth should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.joiningDate)) {
@@ -33,15 +36,15 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
-    response.validationMessage = `joiningDate is valid (current or past)`;
+    response.validationMessage = `Joining Date should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  if (!validateFeatureAndCurrentDate(requestBody.resignedDate)) {
-    response.validationMessage = `Resigned date is valid (current or past)`;
+  if (!validatePastAndCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `Resignation Date should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.relievedDate)) {
@@ -49,7 +52,7 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateFeatureAndCurrentDate(requestBody.relievedDate)) {
-    response.validationMessage = `relievedDate is valid (current or past)`;
+    response.validationMessage = `relievedDate should have Current and feature Date`;
     return response;
   }
   if (!validatePanNumber(requestBody.panNumber)) {
@@ -57,7 +60,13 @@ const validateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateBranchOffice(requestBody.branchOffice)) {
-    response.validationMessage = `Invalid is Branch Office. Is Branch Office should be either San Antonio, USA, Bangalore, INDIA`;
+    (response.validationMessage =
+      "Invalid is Branch Office. Is Branch Office should be either San Antonio, USA"),
+      "Bangalore, INDIA.";
+    return response;
+  }
+  if (!validateRole(requestBody.role)) {
+    response.validationMessage = "Invalid is role";
     return response;
   }
   if (!validateDesignation(requestBody.designation)) {
@@ -76,23 +85,28 @@ const validateUpdateEmployeeDetails = (requestBody) => {
   };
 
   if (!validatePhone(requestBody.mobileNumber)) {
-    response.validationMessage = "Invalid Mobile Number it will allow 10 to 16 digits, it will not allow Alphabets";
+    response.validationMessage =
+      "Invalid Mobile Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePhone(requestBody.contactNumber)) {
-    response.validationMessage = "Invalid Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
+    response.validationMessage =
+      "Invalid Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePhone(requestBody.emergencyContactNumber)) {
-    response.validationMessage = "Invalid Emergency Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
+    response.validationMessage =
+      "Invalid Emergency Contact Number it will allow 10 to 16 digits, it will not allow Alphabets";
     return response;
   }
   if (!validateSsnNumber(requestBody.ssnNumber)) {
-    response.validationMessage = "Invalid SSN Number it will allow only 9 digits, it will not allow Alphabets";
+    response.validationMessage =
+      "Invalid SSN Number it will allow only 9 digits, it will not allow Alphabets";
     return response;
   }
   if (!validateAadharNumber(requestBody.aadhaarNumber)) {
-    response.validationMessage = "Invalid Aadhar Number it will allow only 12 digits, it will not allow Alphabets";
+    response.validationMessage =
+      "Invalid Aadhar Number it will allow only 12 digits, it will not allow Alphabets";
     return response;
   }
   if (!validatePassportNumber(requestBody.passportNumber)) {
@@ -100,7 +114,8 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateOfficialEmailId(requestBody.officialEmailId)) {
-    response.validationMessage = "Invalid Office Email Address it will allow @hyniva.com";
+    response.validationMessage =
+      "Invalid Office Email Address it will allow @hyniva.com";
     return response;
   }
   if (!validateEmailAddress(requestBody.personalEmailAddress)) {
@@ -108,19 +123,23 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    response.validationMessage =
+      "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
   if (!validateGender(requestBody.gender)) {
-    response.validationMessage = "Invalid gender. Gender should be either 'male' or 'female'.";
+    response.validationMessage =
+      "Invalid gender. Gender should be either 'male' or 'female'.";
     return response;
   }
   if (!validatemaritalStatus(requestBody.maritalStatus)) {
-    response.validationMessage = "Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.";
+    response.validationMessage =
+      "Invalid marital Status. Marital Status should be either 'Single' or 'Married' or 'Divorced'.";
     return response;
   }
   if (!validateIsAbsconded(requestBody.absconded)) {
-    response.validationMessage = "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
+    response.validationMessage =
+      "Invalid is Absconded. Is Absconded should be either 'Yes' or 'No'.";
     return response;
   }
   if (!validateDate(requestBody.dateOfBirth)) {
@@ -128,7 +147,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.dateOfBirth)) {
-    response.validationMessage = `Date Of Birth is valid (current or past)`;
+    response.validationMessage = `Date Of Birth should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.joiningDate)) {
@@ -136,15 +155,15 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validatePastAndCurrentDate(requestBody.joiningDate)) {
-    response.validationMessage = `joiningDate is valid (current or past)`;
+    response.validationMessage = `joiningDate should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.resignedDate)) {
     response.validationMessage = `resignedDate should be in format \"MM-DD-YYYY\"`;
     return response;
   }
-  if (!validateFeatureAndCurrentDate(requestBody.resignedDate)) {
-    response.validationMessage = `resignedDate is valid (current or past)`;
+  if (!validatePastAndCurrentDate(requestBody.resignedDate)) {
+    response.validationMessage = `resignedDate should have Current and Past Date`;
     return response;
   }
   if (!validateDate(requestBody.relievedDate)) {
@@ -152,7 +171,7 @@ const validateUpdateEmployeeDetails = (requestBody) => {
     return response;
   }
   if (!validateFeatureAndCurrentDate(requestBody.relievedDate)) {
-    response.validationMessage = `relievedDate is valid, it has to be feature date of resignedDate`;
+    response.validationMessage = `relievedDate should have Current and feature Date`;
     return response;
   }
   if (!validatePanNumber(requestBody.panNumber)) {
@@ -196,7 +215,11 @@ const validateSsnNumber = (ssnNumber) => {
 };
 
 const validateAadharNumber = (aadharNumber) => {
-  if (aadharNumber === null || aadharNumber === undefined || aadharNumber === "") {
+  if (
+    aadharNumber === null ||
+    aadharNumber === undefined ||
+    aadharNumber === ""
+  ) {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^\d{12}$/;
@@ -208,7 +231,11 @@ const validateAadharNumber = (aadharNumber) => {
 };
 
 const validatePassportNumber = (passportNumber) => {
-  if (passportNumber === null || passportNumber === undefined || passportNumber === "") {
+  if (
+    passportNumber === null ||
+    passportNumber === undefined ||
+    passportNumber === ""
+  ) {
     return true; // Allow null or undefined values
   }
   const numberPattern = /^[A-Z]{4}\d{8}$/;
@@ -220,7 +247,11 @@ const validatePassportNumber = (passportNumber) => {
 };
 
 const validateOfficialEmailId = (officialEmailId) => {
-  if (officialEmailId === null || officialEmailId === undefined || officialEmailId === "") {
+  if (
+    officialEmailId === null ||
+    officialEmailId === undefined ||
+    officialEmailId === ""
+  ) {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@hyniva\.com$/;
@@ -228,7 +259,11 @@ const validateOfficialEmailId = (officialEmailId) => {
 };
 
 const validateEmailAddress = (emailAddress) => {
-  if (emailAddress === null || emailAddress === undefined || emailAddress === "") {
+  if (
+    emailAddress === null ||
+    emailAddress === undefined ||
+    emailAddress === ""
+  ) {
     return true; // Allow null or undefined values
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -306,7 +341,11 @@ const validateStatus = (status) => {
 };
 
 const validateBranchOffice = (branchOffice) => {
-  if (branchOffice === null || branchOffice === undefined || branchOffice === "") {
+  if (
+    branchOffice === null ||
+    branchOffice === undefined ||
+    branchOffice === ""
+  ) {
     return true; // Allow null or undefined values
   }
   return ["San Antonio, USA", "Bangalore, INDIA"].includes(branchOffice);
@@ -345,7 +384,11 @@ const validateGender = (gender) => {
   return ["male", "female"].includes(gender);
 };
 const validatemaritalStatus = (maritalStatus) => {
-  if (maritalStatus === null || maritalStatus === undefined || maritalStatus === "") {
+  if (
+    maritalStatus === null ||
+    maritalStatus === undefined ||
+    maritalStatus === ""
+  ) {
     return true; // Allow null or undefined values
   }
   return ["Single", "Married", "Divorced"].includes(maritalStatus);
@@ -358,7 +401,12 @@ const validateAssetDetails = (requestBody) => {
   };
 
   const { assetId, assetsType, serialNumber, status } = requestBody;
-  const requiredProperties = ["assetId", "assetsType", "serialNumber", "status"];
+  const requiredProperties = [
+    "assetId",
+    "assetsType",
+    "serialNumber",
+    "status",
+  ];
 
   for (const property of requiredProperties) {
     if (!requestBody[property] || requestBody[property] === "") {
@@ -367,7 +415,8 @@ const validateAssetDetails = (requestBody) => {
     }
   }
   if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    response.validationMessage =
+      "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
 
@@ -391,7 +440,8 @@ const validateMetadata = (requestBody) => {
     }
   }
   if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    response.validationMessage =
+      "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
 
@@ -406,7 +456,8 @@ const validateMetadataUpdata = (requestBody) => {
   };
 
   if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
+    response.validationMessage =
+      "Invalid status. Status should be either 'active' or 'inactive'.";
     return response;
   }
 
@@ -414,29 +465,111 @@ const validateMetadataUpdata = (requestBody) => {
   return response;
 };
 
-const validateFinalSettlement = (requestBody) => {
-  const response = {
-    validation: false,
-    validationMessage: "Valid Data",
-  };
+const validateBankUpdateDetails = (requestBody) => {
+  const {
+    bankName,
+    bankAddress,
+    accountHolderName,
+    accountNumber,
+    accountType,
+    routingNumber,
+  } = requestBody;
 
-  const { employeeId, panNumber, bonus, unpaidSalary, variablePay, unavailedLeaves, leaveEncashment } = requestBody;
-  const requiredProperties = ["panNumber", "employeeId", "basicPay", "bonus", "variablePay", "enCashment", "unpaidSalary", "unavailedLeaves", "leaveEncashment", "type"];
-
-  for (const property of requiredProperties) {
-    if (!requestBody[property] || requestBody[property] === "") {
-      response.validationMessage = `${property} is required`;
-      return response;
-    }
+  if (
+    !bankName ||
+    !bankAddress ||
+    !accountHolderName ||
+    !accountNumber ||
+    !accountType
+  ) {
+    return false;
+  } else if (!isValidAccountNumber(accountNumber)) {
+    throw new Error(
+      "Invalid account number, please add a 11 to 16 digit account number"
+    );
+  } else if (routingNumber && !isValidRoutingNumber(routingNumber)) {
+    throw new Error(
+      "Invalid routing number, please add a 9 digit routing number"
+    );
+  } else if (requestBody.ifscCode && !isValidatedIfsc(requestBody.ifscCode)) {
+    throw new Error("Invalid ifsc, please add a 11 digit ifsc number");
+  } else if (!isValidAccountType(accountType)) {
+    throw new Error("Invalid account type, please choose Savings or Salary");
   }
-  if (!validateStatus(requestBody.status)) {
-    response.validationMessage = "Invalid status. Status should be either 'active' or 'inactive'.";
-    return response;
-  }
-
-  response.validation = true;
-  return response;
+  return true;
 };
+
+function isValidAccountNumber(accountNumber) {
+  const regex = /^[0-9]{11,16}$/;
+  return regex.test(accountNumber);
+}
+function isValidRoutingNumber(routingNumber) {
+  const regex = /^\d{9}$/;
+  return regex.test(routingNumber);
+}
+function isValidAccountType(accountType) {
+  return accountType === "Savings" || accountType === "Salary";
+}
+function isValidatedIfsc(ifscCode) {
+  const regex = /^[a-zA-Z0-9]{11}$/;
+  return regex.test(ifscCode);
+}
+
+const validatePfEsiDetails = (requestBody) => {
+  const {
+    uanNumber,
+    pfNumber,
+    pfJoiningDate,
+    esiNumber,
+    esiJoiningDate,
+    esiLeavingDate,
+  } = requestBody;
+
+  if (
+    !uanNumber ||
+    !pfNumber ||
+    !pfJoiningDate ||
+    !esiNumber ||
+    !esiJoiningDate ||
+    !esiLeavingDate
+  ) {
+    return false;
+  } else if (!isValidUANNumber(uanNumber)) {
+    throw new Error("Invalid UAN number, please add a 12 digit UAN number");
+  } else if (!isValidPFNumber(pfNumber)) {
+    throw new Error("Invalid PF Number, please add a 22 digit PF Number");
+  } else if (!isValidESINumber(esiNumber)) {
+    throw new Error("Invalid ESI Number, please add a 13 digit ESI Number");
+  } else if (!isValidDateFormat(pfJoiningDate)) {
+    throw new Error(
+      "pfJoiningDate is not in a valid date format, please add a MM/DD/YYYY"
+    );
+  } else if (!isValidDateFormat(esiJoiningDate)) {
+    throw new Error(
+      "esiJoiningDate is not in a valid date format, please add a MM/DD/YYYY"
+    );
+  } else if (!isValidDateFormat(esiLeavingDate)) {
+    throw new Error(
+      "esiLeavingDate is not in a valid date format, please add a MM/DD/YYYY"
+    );
+  }
+  return true;
+};
+
+const isValidUANNumber = (uanNumber) => {
+  return /^\d{12}$/.test(uanNumber);
+};
+const isValidPFNumber = (pfNumber) => {
+  return /^[a-zA-Z0-9]{22}$/.test(pfNumber);
+};
+const isValidESINumber = (esiNumber) => {
+  return /^\d{13}$/.test(esiNumber);
+};
+
+function isValidDateFormat(dateString) {
+  const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+  return regex.test(dateString);
+}
 
 const validateAssignment = (requestBody) => {
   const response = {
@@ -471,15 +604,6 @@ const validateDepartment = (department) => {
   return ["IT", "Non-IT", "Sales"].includes(department);
 };
 
-// const validateRole = (role) => {
-//   if (role === null || role === undefined || role === "") {
-//     return true; // Allow null or undefined values
-//   }
-//   return ["hr", "manager", "developer", "contractor", "accountant"].includes(
-//     role
-//   );
-// };
-
 const validateRole = (role) => {
   if (role === null || role === undefined || role === "") {
     return true; // Allow null or undefined values
@@ -488,13 +612,13 @@ const validateRole = (role) => {
   const validRoles = ["hr", "manager", "developer", "contractor", "accountant"].map((r) => r.toLowerCase());
   return validRoles.includes(lowercaseRole);
 };
-
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
   validateAssetDetails,
   validateMetadata,
   validateMetadataUpdata,
-  validateFinalSettlement,
+  validateBankUpdateDetails,
+  validatePfEsiDetails,
   validateAssignment,
 };

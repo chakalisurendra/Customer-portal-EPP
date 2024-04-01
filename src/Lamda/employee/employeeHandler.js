@@ -47,6 +47,8 @@ const createEmployee = async (event) => {
         lastName: requestBody.lastName,
         dateOfBirth: requestBody.dateOfBirth,
         officialEmailId: requestBody.officialEmailId,
+        designation: requestBody.designation || null,
+        branchOffice: requestBody.branchOffice || null,
         password: requestBody.password || null,
         gender: requestBody.gender || null,
         ssnNumber: requestBody.ssnNumber || null,
@@ -95,7 +97,7 @@ const createEmployee = async (event) => {
         reportingManager: requestBody.reportingManager || null,
         billableResource: requestBody.billableResource || null,
         createdDateTime: formattedDate,
-        updateDateTime: null,
+        updatedDateTime: null,
       }),
     };
     const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
@@ -180,17 +182,43 @@ const updateEmployee = async (event) => {
       requestBody.status = "inactive";
     }
 
+    // const params = {
+    //   TableName: process.env.EMPLOYEE_TABLE,
+    //   Key: { employeeId: { N: employeeId } },
+    //   UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
+    //   ExpressionAttributeNames: objKeys.reduce(
+    //     (acc, key, index) => ({
+    //       ...acc,
+    //       [`#key${index}`]: key,
+    //     }),
+    //     {}
+    //   ),
+    //   ExpressionAttributeValues: marshall(
+    //     objKeys.reduce(
+    //       (acc, key, index) => ({
+    //         ...acc,
+    //         [`:value${index}`]: requestBody[key],
+    //       }),
+    //       {}
+    //     )
+    //   ),
+    //   ":updatedDateTime": formattedDate,
+    // };
+
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
-      ExpressionAttributeNames: objKeys.reduce(
-        (acc, key, index) => ({
-          ...acc,
-          [`#key${index}`]: key,
-        }),
-        {}
-      ),
+      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, #updatedDateTime = :updatedDateTime`,
+      ExpressionAttributeNames: {
+        ...objKeys.reduce(
+          (acc, key, index) => ({
+            ...acc,
+            [`#key${index}`]: key,
+          }),
+          {}
+        ),
+        "#updatedDateTime": "updatedDateTime",
+      },
       ExpressionAttributeValues: marshall(
         objKeys.reduce(
           (acc, key, index) => ({
@@ -202,7 +230,6 @@ const updateEmployee = async (event) => {
       ),
       ":updatedDateTime": formattedDate,
     };
-
     const updateResult = await client.send(new UpdateItemCommand(params));
     console.log("Successfully updated Employee details.");
     response.body = JSON.stringify({
@@ -286,33 +313,45 @@ const getAllEmployees = async (event) => {
     },
   };
   const { pageNo, pageSize } = event.queryStringParameters;
+  let designationFilter = [];
+  let branchFilter = [];
+
+  if (event.multiValueQueryStringParameters && event.multiValueQueryStringParameters.designation) {
+    designationFilter = event.multiValueQueryStringParameters.designation.flatMap((designation) => designation.split(",")); // Split by commas if exists
+  }
+  if (event.multiValueQueryStringParameters && event.multiValueQueryStringParameters.branchOffice) {
+    branchFilter = event.multiValueQueryStringParameters.branchOffice.flatMap((branchOffice) => branchOffice.split(",")); // Split by commas if exists
+  }
+
   try {
     const params = {
       TableName: process.env.EMPLOYEE_TABLE,
     };
     const { Items } = await client.send(new ScanCommand(params));
-    Items.sort((a, b) => parseInt(a.employeeId.N) - parseInt(b.employeeId.N));
-    console.log({ Items });
-    if (!Items || Items.length === 0) {
-      console.log("No employees found.");
+
+    // Apply filters
+    console.log("Filtering started with designationFilter:", designationFilter, "and branchFilter:", branchFilter);
+    const filteredItems = applyFilters(Items, designationFilter, branchFilter);
+    console.log("Filtered items:", filteredItems);
+
+    // Apply pagination
+    const paginatedData = pagination(
+      filteredItems.map((item) => unmarshall(item)),
+      pageNo,
+      pageSize
+    );
+
+    if (!paginatedData.items || paginatedData.items.length === 0) {
+      console.log("No employees found after filtering.");
       response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
         message: httpStatusMessages.EMPLOYEES_DETAILS_NOT_FOUND,
       });
     } else {
-      console.log("Successfully retrieved all employees.");
-      const sanitizedItems = Items.map((item) => {
-        const sanitizedItem = { ...item };
-        delete sanitizedItem.password; // Assuming password field is called 'password'
-        return sanitizedItem;
-      });
+      console.log("Successfully retrieved filtered and paginated employees.");
       response.body = JSON.stringify({
         message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS,
-        data: pagination(
-          sanitizedItems.map((item) => unmarshall(item)),
-          pageNo,
-          pageSize
-        ),
+        data: paginatedData,
       });
     }
   } catch (e) {
@@ -324,6 +363,40 @@ const getAllEmployees = async (event) => {
     });
   }
   return response;
+};
+
+const applyFilters = (employeesData, designationFilter, branchFilter) => {
+  console.log("Applying filters...");
+  const filteredEmployees = employeesData.filter((employee) => {
+    // Check if employee.branch exists before accessing its properties
+    if (!employee.branchOffice || !employee.branchOffice.S) {
+      return false;
+    }
+    console.log("Employee:", employee);
+    const passesDesignationFilter = designationFilter.length === 0 || designationFilter.includes(employee.designation.S);
+    // Note: Use `.S` to access the string value of DynamoDB attributes
+    const passesBranchFilter = branchFilter.length === 0 || matchesBranch(employee.branchOffice.S, branchFilter);
+    const passesFilters = passesDesignationFilter && passesBranchFilter;
+    return passesFilters;
+  });
+
+  // If no filters are specified or if no employees pass the filters, return all employees
+  if (designationFilter.length === 0 && branchFilter.length === 0) {
+    return employeesData;
+  } else if (filteredEmployees.length === 0) {
+    return employeesData;
+  }
+  return filteredEmployees;
+};
+
+const matchesBranch = (employeeBranch, branchFilter) => {
+  for (const filter of branchFilter) {
+    const phrases = filter.split(",").map((phrase) => phrase.trim());
+    if (phrases.some((phrase) => employeeBranch.includes(phrase))) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const isEmployeeIdExists = async (employeeId) => {
