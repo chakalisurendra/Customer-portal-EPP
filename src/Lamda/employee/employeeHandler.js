@@ -219,16 +219,16 @@ const updateEmployee = async (event) => {
         ),
         "#updatedDateTime": "updatedDateTime",
       },
-      ExpressionAttributeValues: marshall(
-        objKeys.reduce(
+      ExpressionAttributeValues: marshall({
+        ...objKeys.reduce(
           (acc, key, index) => ({
             ...acc,
             [`:value${index}`]: requestBody[key],
           }),
           {}
-        )
-      ),
-      ":updatedDateTime": formattedDate,
+        ),
+        ":updatedDateTime": formattedDate,
+      }),
     };
     const updateResult = await client.send(new UpdateItemCommand(params));
     console.log("Successfully updated Employee details.");
