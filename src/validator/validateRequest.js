@@ -281,8 +281,11 @@ const validateFeatureAndCurrentDate = (date) => {
     return false;
   }
   if (inputDate > currentDate) {
+    console.log("true  date:");
     return true;
   } else {
+    console.log("false  date:" );
+
     return false;
   }
 };
