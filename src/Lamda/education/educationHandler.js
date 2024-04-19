@@ -1,24 +1,13 @@
-const {
-  DynamoDBClient,
-  PutItemCommand,
-  UpdateItemCommand,
-  DeleteItemCommand,
-  GetItemCommand,
-  ScanCommand,
-  QueryCommand,
-} = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand, QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const {
-  httpStatusCodes,
-  httpStatusMessages,
-} = require("../../environment/appconfig");
+const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const currentDate = Date.now(); // get the current date and time in milliseconds
 const formattedDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss"); // formatting date
 const parseMultipart = require("parse-multipart");
-const BUCKET = 'dev-employeeseducationdocuments';
-const AWS = require('aws-sdk');
+const BUCKET = "dev-employeeseducationdocuments";
+const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 
 const createEducation = async (event) => {
@@ -28,40 +17,31 @@ const createEducation = async (event) => {
     const requestBody = JSON.parse(event.body);
 
     // Check for required fields
-    const requiredFields = [
-      "degree",
-      "course",
-      "university",
-      "graduationPassingYear",
-      "employeeId",
-    ];
+    const requiredFields = ["degree", "course", "university", "graduationPassingYear", "employeeId"];
     if (!requiredFields.every((field) => requestBody[field])) {
       throw new Error("Required fields are missing.");
     }
 
-const numericFields = [
-"graduationPassingYear"
-];
+    const numericFields = ["graduationPassingYear"];
 
-for (const field of numericFields) {
-if (requestBody[field] !== undefined || requestBody[field] !== null ) {
-    if (requestBody[field] === '' || typeof requestBody[field] == 'string') {
-        throw new Error(`${field} must be a number.`);
+    for (const field of numericFields) {
+      if (requestBody[field] !== undefined || requestBody[field] !== null) {
+        if (requestBody[field] === "" || typeof requestBody[field] == "string") {
+          throw new Error(`${field} must be a number.`);
+        }
+      }
     }
-}
-}
 
-// Check if graduationPassingYear is a future year
-const currentYear = new Date().getFullYear();
-if (requestBody.graduationPassingYear > currentYear) {
-  throw new Error("graduationPassingYear cannot be a future year.");
-}
+    // Check if graduationPassingYear is a future year
+    const currentYear = new Date().getFullYear();
+    if (requestBody.graduationPassingYear > currentYear) {
+      throw new Error("graduationPassingYear cannot be a future year.");
+    }
 
     const highestSerialNumber = await getHighestSerialNumber();
     console.log("Highest Serial Number:", highestSerialNumber);
 
-    const nextSerialNumber =
-      highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
+    const nextSerialNumber = highestSerialNumber !== null ? parseInt(highestSerialNumber) + 1 : 1;
     async function getHighestSerialNumber() {
       const params = {
         TableName: process.env.EDUCATION_TABLE,
@@ -90,12 +70,10 @@ if (requestBody.graduationPassingYear > currentYear) {
     }
 
     // Check if an education already exists for the employee
-    const existingEducation = await getEducationByEmployee(
-      requestBody.employeeId
-    );
+    const existingEducation = await getEducationByEmployee(requestBody.employeeId);
     if (existingEducation) {
       throw new Error("Education Details already exists for Employee ID.");
-  }
+    }
 
     async function getEducationByEmployee(employeeId) {
       const params = {
@@ -141,7 +119,7 @@ if (requestBody.graduationPassingYear > currentYear) {
         degree: requestBody.degree,
         course: requestBody.course,
         university: requestBody.university,
-        graduationPassingYear : requestBody.graduationPassingYear,
+        graduationPassingYear: requestBody.graduationPassingYear,
         createdDateTime: formattedDate,
         updatedDateTime: null,
       }),
@@ -170,39 +148,39 @@ const uploadEducation = async (event) => {
     const employeeId = event.pathParameters.employeeId; // Assuming employeeId is provided in the path parameters as a string
 
     if (!employeeId) {
-      throw new Error('employeeId is required');
+      throw new Error("employeeId is required");
     }
 
     const educationId = event.pathParameters.educationId; // Assuming employeeId is provided in the path parameters as a string
 
     if (!educationId) {
-      throw new Error('educationId is required');
+      throw new Error("educationId is required");
     }
     const { filename, data } = extractFile(event);
 
     // Upload file to S3
-    await s3.putObject({
-      Bucket: BUCKET,
-      Key: filename,
-      Body: data,
-    }).promise();
+    await s3
+      .putObject({
+        Bucket: BUCKET,
+        Key: filename,
+        Body: data,
+      })
+      .promise();
 
     // Construct S3 object URL
     const s3ObjectUrl = `https://${BUCKET}.s3.amazonaws.com/${filename}`;
 
     // Check if an education already exists for the employee
-    const existingEducation = await getEducationByEmployee(
-      event.pathParameters.educationId
-      );
-      if (!existingEducation) {
-        throw new Error("Education Details Not found.");
+    const existingEducation = await getEducationByEmployee(event.pathParameters.educationId);
+    if (!existingEducation) {
+      throw new Error("Education Details Not found.");
     }
     async function getEducationByEmployee(educationId) {
       const params = {
         TableName: process.env.EDUCATION_TABLE,
         KeyConditionExpression: "educationId = :educationId",
         ExpressionAttributeValues: {
-          ":educationId": { "N": educationId.toString() },
+          ":educationId": { N: educationId.toString() },
         },
       };
 
@@ -215,19 +193,20 @@ const uploadEducation = async (event) => {
       }
     }
 
-
     // Update item in DynamoDB
-    await client.send(new UpdateItemCommand({
-      TableName: process.env.EDUCATION_TABLE,
-      Key: {
-        educationId: { N: educationId.toString() }, // Assuming educationId is a number
-      },
-      UpdateExpression: "SET link = :link",
-      ExpressionAttributeValues: {
-        ":link": { S: s3ObjectUrl },
-      },
-      ReturnValues: "ALL_NEW" // Return the updated item
-    }));
+    await client.send(
+      new UpdateItemCommand({
+        TableName: process.env.EDUCATION_TABLE,
+        Key: {
+          educationId: { N: educationId.toString() }, // Assuming educationId is a number
+        },
+        UpdateExpression: "SET link = :link",
+        ExpressionAttributeValues: {
+          ":link": { S: s3ObjectUrl },
+        },
+        ReturnValues: "ALL_NEW", // Return the updated item
+      })
+    );
 
     return {
       statusCode: 200,
@@ -237,7 +216,7 @@ const uploadEducation = async (event) => {
       }),
     };
   } catch (err) {
-    console.log('error-----', err);
+    console.log("error-----", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: err.message }),
@@ -245,35 +224,27 @@ const uploadEducation = async (event) => {
   }
 };
 
-
 function extractFile(event) {
-  const contentType = event.headers['Content-Type'];
+  const contentType = event.headers["Content-Type"];
   if (!contentType) {
-    throw new Error('Content-Type header is missing in the request.');
+    throw new Error("Content-Type header is missing in the request.");
   }
 
   const boundary = parseMultipart.getBoundary(contentType);
   if (!boundary) {
-    throw new Error(
-      'Unable to determine the boundary from the Content-Type header.'
-    );
+    throw new Error("Unable to determine the boundary from the Content-Type header.");
   }
 
-  const parts = parseMultipart.Parse(
-    Buffer.from(event.body, 'base64'),
-    boundary
-  );
+  const parts = parseMultipart.Parse(Buffer.from(event.body, "base64"), boundary);
 
   if (!parts || parts.length === 0) {
-    throw new Error('No parts found in the multipart request.');
+    throw new Error("No parts found in the multipart request.");
   }
 
   const [{ filename, data }] = parts;
 
   if (!filename || !data) {
-    throw new Error(
-      'Invalid or missing file name or data in the multipart request.'
-    );
+    throw new Error("Invalid or missing file name or data in the multipart request.");
   }
 
   // Check file size (assuming data is in binary format)
@@ -291,5 +262,5 @@ function extractFile(event) {
 
 module.exports = {
   createEducation,
-  uploadEducation
+  uploadEducation,
 };

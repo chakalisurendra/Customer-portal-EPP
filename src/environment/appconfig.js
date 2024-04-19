@@ -70,5 +70,5 @@ const httpStatusMessages = {
 
 module.exports = {
   httpStatusCodes,
-  httpStatusMessagegits,
+  httpStatusMessages,
 };
