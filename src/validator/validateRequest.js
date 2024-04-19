@@ -268,24 +268,17 @@ const validateFeatureAndCurrentDate = (date) => {
     return true;
   }
   const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
+  currentDate.setHours(0, 0, 0, 0);
 
   const inputDate = new Date(date);
-  inputDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
-  // const currentDate = new Date();
-  console.log("current date:", currentDate);
-  // const inputDate = new Date(date);
-  console.log("input  date:", inputDate);
+  inputDate.setHours(0, 0, 0, 0);
 
   if (isNaN(inputDate.getTime())) {
     return false;
   }
   if (inputDate >= currentDate) {
-    console.log("true  date:");
     return true;
   } else {
-    console.log("false  date:" );
-
     return false;
   }
 };
