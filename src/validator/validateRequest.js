@@ -528,6 +528,27 @@ const validateRole = (role) => {
   const validRoles = ["hr", "manager", "developer", "contractor", "accountant"].map((r) => r.toLowerCase());
   return validRoles.includes(lowercaseRole);
 };
+///////////////////////////////////////////////////////////////////
+const validateUpdateCertificationDetails = (requestBody) => {
+  console.log("validateUpdateEmployeeDetails method");
+
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  if (!validatePastAndCurrentDate(requestBody.certifiedDate)) {
+    response.validationMessage = `Certified Date should have Current or Past Date`;
+    return response;
+  }
+  if (!validateFeatureAndCurrentDate(requestBody.validLastDate)) {
+    response.validationMessage = `Valid Last Date should have Current of feature Date`;
+    return response;
+  }
+  response.validation = true;
+  return response;
+};
+
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
@@ -537,4 +558,5 @@ module.exports = {
   validateBankUpdateDetails,
   validatePfEsiDetails,
   validateAssignment,
+  validateUpdateCertificationDetails,
 };

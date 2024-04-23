@@ -65,7 +65,12 @@ const httpStatusMessages = {
   PAYROLL_NOT_FOUND_FOR_EMPLOYEE : "Payroll Not found for employee.",
   SUCCESSFULLY_RETRIEVED_PAYROLL_FOR_EMPLOYEE : "Successfully retrieved payroll detail.",
   FAILED_TO_CREATE_EDUCATION_DETAILS : "Failed to create education details.",
-  SUCCESSFULLY_CREATED_EDUCATION_DETAILS : "Successfully created education details.",
+  SUCCESSFULLY_CREATED_EDUCATION_DETAILS: "Successfully created education details.",
+  ////////////////////////////////////
+  CERTIFICATION_ID_REQUIRED: "Certification Id is required",
+   SUCCESSFULLY_UPDATED_CERTIFICATION_DETAILS: "Successfully updated Certification details.",
+  FAILED_TO_UPDATE_CERTIFICATION_DETAILS: "Failed to update Certification details.",
+
 };
 
 module.exports = {

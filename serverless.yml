@@ -16,6 +16,7 @@ provider:
     PF_ESI_TABLE: ${self:custom.pfTableName}
     PAYROLL_TABLE: ${self:custom.payrollTableName}
     EDUCATION_TABLE: ${self:custom.educationTableName}
+    CERTIFICATION_TABLE: ${self:custom.certificationTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -35,7 +36,9 @@ provider:
         - !GetAtt PfDetailsTable.Arn
         - !GetAtt payrollTable.Arn
         - !GetAtt educationTable.Arn
+        - !GetAtt certificationTable.Arn
         - "arn:aws:s3:::dev-employeeseducationdocuments/*"
+        - "arn:aws:s3:::dev-employeesCertificationDocuments/*"
 custom:
   employeeTableName: employee_Details
   assignmentTableName: assignment_Details
@@ -45,6 +48,8 @@ custom:
   pfTableName: pf_Details
   payrollTableName: payroll
   educationTableName: education
+  certificationTableName: certification
+
   cors:
     origin: "*" # Allow requests from any origin
     headers:
@@ -333,6 +338,34 @@ functions:
       - http:
           path: education/{educationId}
           method: PUT
+  certificationUpdate:
+    handler: src/Lamda/certification/certificationHandler.updateCertification
+    name: certificationUpdate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: certification/update
+          method: PUT
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                certificationId: true
+  certificationUpload:
+    handler: src/Lamda/certification/certificationHandler.uploadCertification
+    name: certificationUpload
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: certification/upload
+          method: PUT
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                certificationId: true
 resources:
   Resources:
     EmployeeTable:
@@ -449,6 +482,19 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: educationId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    certificationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.certificationTableName}
+        AttributeDefinitions:
+          - AttributeName: certificationId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: certificationId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
