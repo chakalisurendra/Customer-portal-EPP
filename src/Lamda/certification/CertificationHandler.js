@@ -113,6 +113,7 @@ const uploadCertification = async (event) => {
     console.log("Request Body:", requestBody);
     const certificationId = event.queryStringParameters && event.queryStringParameters.certificationId;
 
+      
     if (!certificationId) {
       console.log("Certification Id is required");
       throw new Error(httpStatusMessages.CERTIFICATION_ID_REQUIRED);
