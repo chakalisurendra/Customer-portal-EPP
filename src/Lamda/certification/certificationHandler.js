@@ -6,7 +6,7 @@ const { httpStatusCodes, httpStatusMessages } = require("../../environment/appco
 const { validateUpdateCertificationDetails } = require("../../validator/validateRequest");
 const { updateCertificationAllowedFields } = require("../../validator/validateFields");
 const parseMultipart = require("parse-multipart");
-const BUCKET = "dev-employeeseducationdocuments";
+const BUCKET = "dev-employees-certification-documents";
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 

@@ -38,7 +38,7 @@ provider:
         - !GetAtt educationTable.Arn
         - !GetAtt certificationTable.Arn
         - "arn:aws:s3:::dev-employeeseducationdocuments/*"
-        - "arn:aws:s3:::dev-employeesCertificationDocuments/*"
+        - "arn:aws:s3:::dev-employees-certification-documents/*"
 custom:
   employeeTableName: employee_Details
   assignmentTableName: assignment_Details
