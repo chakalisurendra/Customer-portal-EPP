@@ -113,7 +113,7 @@ const updateCertification = async (event) => {
 };
 
 const uploadCertification = async (event) => {
-  onsole.log("Upload certification details");
+  console.log("Upload certification details");
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
