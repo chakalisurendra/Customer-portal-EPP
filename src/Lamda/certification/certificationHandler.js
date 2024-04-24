@@ -40,19 +40,16 @@ const updateCertification = async (event) => {
       return response;
     }
 
-       const validateEmployeeParams = {
+    const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: {
-        employeeId: { N: employeeId },
-      },
+      Key: { employeeId: { N: employeeId } },
     };
-    const { Item1 } = await client.send(new GetItemCommand(validateEmployeeParams));
-    console.log({ Item1 });
-    if (!Item1) {
-      console.log("Employee details not found.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
+    const { Items } = await client.send(new GetItemCommand(getItemParams));
+    if (!Items) {
+      console.log(`Employee with employeeId ${employeeId} not found`);
+      response.statusCode = 404;
       response.body = JSON.stringify({
-        message: "Employee details not found.",
+        message: `Employee with employeeId ${employeeId} not found`,
       });
       return response;
     }
