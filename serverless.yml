@@ -352,6 +352,7 @@ functions:
             parameters:
               querystrings:
                 certificationId: true
+                employeeId: true
   certificationUpload:
     handler: src/Lamda/certification/certificationHandler.uploadCertification
     name: certificationUpload
