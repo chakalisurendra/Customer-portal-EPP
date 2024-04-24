@@ -21,23 +21,41 @@ const updateCertification = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const certificationId = event.queryStringParameters && event.queryStringParameters.certificationId;
+    const { certificationId, employeeId } = event.queryStringParameters;
 
     if (!certificationId) {
       console.log("Certification Id is required");
       throw new Error(httpStatusMessages.CERTIFICATION_ID_REQUIRED);
     }
+    if (!employeeId) {
+      console.log("Employee Id is required");
+      throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
+    }
 
-    const getItemParams = {
+    const getCertificationParams = {
       TableName: process.env.CERTIFICATION_TABLE,
       Key: { certificationId: { N: certificationId } },
     };
-    const { Item } = await client.send(new GetItemCommand(getItemParams));
-    if (!Item) {
-      console.log(`Certification with certificationId ${certificationId} not found`);
+    const { ItemCertification } = await client.send(new GetItemCommand(getCertificationParams));
+    if (!ItemCertification) {
+      console.log(`Certification details not found`);
       response.statusCode = 404;
       response.body = JSON.stringify({
-        message: `Certification with certificationId ${certificationId} not found`,
+        message: `Certification details not found`,
+      });
+      return response;
+    }
+
+    const employee = {
+      TableName: process.env.EMPLOYEE_TABLE,
+      Key: { employeeId: { N: employeeId } },
+    };
+    const { ItemEmployee } = await client.send(new GetItemCommand(employee));
+    if (!ItemEmployee) {
+      console.log(`Employee details not found`);
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `Employee details not found`,
       });
       return response;
     }
@@ -113,7 +131,6 @@ const uploadCertification = async (event) => {
     console.log("Request Body:", requestBody);
     const certificationId = event.queryStringParameters && event.queryStringParameters.certificationId;
 
-      
     if (!certificationId) {
       console.log("Certification Id is required");
       throw new Error(httpStatusMessages.CERTIFICATION_ID_REQUIRED);
