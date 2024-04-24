@@ -46,7 +46,7 @@ const updateAssignmentAllowedFields = [
   "onsite",
 ];
 /////////////////////////////////////////////////////////////
-const updateCertificationAllowedFields = ["technologyName", "certificationAuthority", "certifiedDate", "validLastDate", "updatedDateTime"];
+const updateCertificationAllowedFields = ["technologyName", "certificationAuthority", "certifiedDate", "validLastDate", "link", "updatedDateTime"];
 
 module.exports = {
   updateEmployeeAllowedFields,

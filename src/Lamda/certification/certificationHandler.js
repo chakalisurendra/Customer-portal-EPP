@@ -163,7 +163,7 @@ const uploadCertification = async (event) => {
       new UpdateItemCommand({
         TableName: process.env.CERTIFICATION_TABLE,
         Key: {
-          certificationId: { N: certificationId.toString() }, // Assuming educationId is a number
+          certificationId: { N: certificationId }, 
         },
         UpdateExpression: "SET link = :link",
         ExpressionAttributeValues: {
