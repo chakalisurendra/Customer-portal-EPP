@@ -21,8 +21,8 @@ const updateCertification = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-      const { certificationId, employeeId } = event.queryStringParameters;
-      console.log(`certificationId : ${certificationId} employeeId: ${employeeId} `)
+    const { certificationId, employeeId } = event.queryStringParameters;
+    console.log(`certificationId : ${certificationId} employeeId: ${employeeId} `);
 
     if (!certificationId) {
       console.log("Certification Id is required");
@@ -31,20 +31,6 @@ const updateCertification = async (event) => {
     if (!employeeId) {
       console.log("Employee Id is required");
       throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
-    }
-
-    const getCertificationParams = {
-      TableName: process.env.CERTIFICATION_TABLE,
-      Key: { certificationId: { N: certificationId } },
-    };
-    const { ItemCertification } = await client.send(new GetItemCommand(getCertificationParams));
-    if (!ItemCertification) {
-      console.log(`Certification details not found`);
-      response.statusCode = 404;
-      response.body = JSON.stringify({
-        message: `Certification details not found`,
-      });
-      return response;
     }
 
     const employee = {
@@ -57,6 +43,19 @@ const updateCertification = async (event) => {
       response.statusCode = 404;
       response.body = JSON.stringify({
         message: `Employee details not found`,
+      });
+      return response;
+    }
+    const getCertificationParams = {
+      TableName: process.env.CERTIFICATION_TABLE,
+      Key: { certificationId: { N: certificationId } },
+    };
+    const { ItemCertification } = await client.send(new GetItemCommand(getCertificationParams));
+    if (!ItemCertification) {
+      console.log(`Certification details not found`);
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `Certification details not found`,
       });
       return response;
     }
