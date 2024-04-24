@@ -121,8 +121,8 @@ const uploadCertification = async (event) => {
     },
   };
   try {
-    const requestBody = JSON.parse(event.body);
-    console.log("Request Body:", requestBody);
+    // const requestBody = JSON.parse(event.body);
+    // console.log("Request Body:", requestBody);
     const certificationId = event.queryStringParameters && event.queryStringParameters.certificationId;
 
     if (!certificationId) {
