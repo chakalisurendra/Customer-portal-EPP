@@ -44,8 +44,8 @@ const updateCertification = async (event) => {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
     };
-    const { Items } = await client.send(new GetItemCommand(getItemParams));
-    if (!Items) {
+    const result = await client.send(new GetItemCommand(getItemParams));
+    if (!result.Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404;
       response.body = JSON.stringify({
