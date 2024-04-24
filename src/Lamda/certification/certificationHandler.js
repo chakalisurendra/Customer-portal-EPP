@@ -21,7 +21,8 @@ const updateCertification = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    const { certificationId, employeeId } = event.queryStringParameters;
+      const { certificationId, employeeId } = event.queryStringParameters;
+      console.log(`certificationId : ${certificationId} employeeId: ${employeeId} `)
 
     if (!certificationId) {
       console.log("Certification Id is required");
