@@ -40,8 +40,25 @@ const updateCertification = async (event) => {
       return response;
     }
 
+       const validateEmployeeParams = {
+      TableName: process.env.EMPLOYEE_TABLE,
+      Key: {
+        employeeId: { N: employeeId },
+      },
+    };
+    const { Item1 } = await client.send(new GetItemCommand(validateEmployeeParams));
+    console.log({ Item1 });
+    if (!Item1) {
+      console.log("Employee details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
+      response.body = JSON.stringify({
+        message: "Employee details not found.",
+      });
+      return response;
+    }
+
     const objKeys = Object.keys(requestBody).filter((key) => updateCertificationAllowedFields.includes(key));
-    console.log(`Employee with objKeys ${objKeys} `);
+    console.log(`Certification with objKeys ${objKeys} `);
     const validationResponse = validateUpdateCertificationDetails(requestBody);
     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
 
