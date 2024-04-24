@@ -42,7 +42,7 @@ const updateCertification = async (event) => {
 
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
-      Key: { employeeId: { N: employeeId } },
+      Key: { employeeId: { N: employeeId.toString } },
     };
     const { Items } = await client.send(new GetItemCommand(getItemParams));
     if (!Items) {
