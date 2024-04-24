@@ -84,10 +84,10 @@ const updateCertification = async (event) => {
       }),
     };
     const updateResult = await client.send(new UpdateItemCommand(params));
-    console.log("Successfully updated Employee details.");
+    console.log("Successfully updated Certification details.");
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_CERTIFICATION_DETAILS,
-      employeeId: employeeId,
+      certificationId: certificationId,
     });
   } catch (e) {
     console.error(e);
