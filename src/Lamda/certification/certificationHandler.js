@@ -44,8 +44,8 @@ const updateCertification = async (event) => {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
     };
-    const result = await client.send(new GetItemCommand(getItemParams));
-    if (!result.Item) {
+    const employeeResult = await client.send(new GetItemCommand(getItemParams));
+    if (!employeeResult.Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404;
       response.body = JSON.stringify({
@@ -66,24 +66,24 @@ const updateCertification = async (event) => {
       },
     };
 
-    const permission = await client.send(new ScanCommand(permissionParams));
-    if (!permission.Items) {
-      console.log(`Permission ${name} not found`);
-      response.statusCode = 404;
-      response.body = JSON.stringify({
-        message: `Permission ${name} not found`,
-      });
-      return response;
-    }
-    console.log(`permission ${permission.Items[0]}`);
+    // const permission = await client.send(new ScanCommand(permissionParams));
+    // if (!permission.Items) {
+    //   console.log(`Permission ${name} not found`);
+    //   response.statusCode = 404;
+    //   response.body = JSON.stringify({
+    //     message: `Permission ${name} not found`,
+    //   });
+    //   return response;
+    // }
+    console.log(`role ${employeeResult.Item.role} `);
 
-    if (true === permission.Items[0].hr.BOOL || true === permission.Items[0].developer.BOOL) {
-      console.log(`User has Permission ${name}`);
+    if (employeeResult.Item.role === "hr" || employeeResult.Item.role === "developer" || employeeResult.Item.role === "manager") {
+      console.log(`User have Permission`);
     } else {
-      console.log(`User not have Permission ${name}`);
+      console.log(`User not have Permission`);
       response.statusCode = 404;
       response.body = JSON.stringify({
-        message: `User not have Permission ${name}`,
+        message: `User not have Permission`,
       });
       return response;
     }
