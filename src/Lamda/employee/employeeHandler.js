@@ -96,6 +96,7 @@ const createEmployee = async (event) => {
         department: requestBody.department || null,
         framework: requestBody.framework || null,
         coreTechnology: requestBody.coreTechnology || null,
+        managerId: requestBody.managerId || null,
         reportingManager: requestBody.reportingManager || null,
         billableResource: requestBody.billableResource || null,
         createdDateTime: formattedDate,
@@ -154,6 +155,14 @@ const updateEmployee = async (event) => {
         message: `Employee with employeeId ${employeeId} not found`,
       });
       return response;
+    }
+
+    if (!requestBody.managerId) {
+      const managerExists = await checkEmployeeExistence(requestBody.managerId);
+      if (!managerExists) {
+        console.log("Email address already exists.");
+        throw new Error("Email address already exists.");
+      }
     }
 
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
@@ -500,6 +509,16 @@ const getEmployeesByRole = async (event) => {
   return response;
 };
 
+const checkEmployeeExistence = async (managerId) => {
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    Key: { employeeId: { N: managerId } },
+  };
+
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
+};
 module.exports = {
   createEmployee,
   updateEmployee,
