@@ -71,10 +71,9 @@ const updateAssignment = async (event) => {
           return response;
         }
       } catch (error) {
-        console.log(`Failed to fetch ManagerId ${managerId}`);
         response.statusCode = 404;
         response.body = JSON.stringify({
-          message: `Failed to fetch ManagerId ${managerId}`,
+          message: `Failed to fetch ManagerId`,
         });
         return response;
       }
