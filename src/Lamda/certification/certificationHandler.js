@@ -75,7 +75,7 @@ const updateCertification = async (event) => {
       });
       return response;
     }
-    console.log(`permission ${permission.Items}`);
+    console.log(`permission ${permission.Items[0]}`);
 
     if (true === permission.Items[0].hr.BOOL || true === permission.Items[0].developer.BOOL) {
       console.log(`User has Permission ${name}`);
