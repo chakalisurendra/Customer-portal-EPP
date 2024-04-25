@@ -76,9 +76,17 @@ const updateCertification = async (event) => {
       });
       return response;
     }
-    const data = unmarshall(Item);
-    console.log(`name ${data.name}`);
-    console.log(`name ${permission.Items[0].hr.S}`);
+    console.log(`name ${permission.Items[0].hr.B}`);
+    if (true === permission.Items[0].hr.S || true === permission.Items[0].developer.S) {
+      console.log(`User has Permission ${name}`);
+    } else {
+      console.log(`User not have Permission ${name}`);
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `User not have Permission ${name}`,
+      });
+      return response;
+    }
 
     const objKeys = Object.keys(requestBody).filter((key) => updateCertificationAllowedFields.includes(key));
     console.log(`Certification with objKeys ${objKeys} `);
