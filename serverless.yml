@@ -38,6 +38,7 @@ provider:
         - !GetAtt payrollTable.Arn
         - !GetAtt educationTable.Arn
         - !GetAtt certificationTable.Arn
+        - !GetAtt userPermissionTable.Arn
         - "arn:aws:s3:::dev-employeeseducationdocuments/*"
         - "arn:aws:s3:::dev-employees-certification-documents/*"
 custom:
