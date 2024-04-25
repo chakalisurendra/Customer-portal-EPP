@@ -54,17 +54,17 @@ const updateCertification = async (event) => {
       return response;
     }
 
-    const name = "Edit_Education_And_Certification";
-    const permissionParams = {
-      TableName: process.env.USER_PERMSSION_TABLE,
-      FilterExpression: "#name = :nameValue",
-      ExpressionAttributeNames: {
-        "#name": "name",
-      },
-      ExpressionAttributeValues: {
-        ":nameValue": { S: name },
-      },
-    };
+    // const name = "Edit_Education_And_Certification";
+    // const permissionParams = {
+    //   TableName: process.env.USER_PERMSSION_TABLE,
+    //   FilterExpression: "#name = :nameValue",
+    //   ExpressionAttributeNames: {
+    //     "#name": "name",
+    //   },
+    //   ExpressionAttributeValues: {
+    //     ":nameValue": { S: name },
+    //   },
+    // };
 
     // const permission = await client.send(new ScanCommand(permissionParams));
     // if (!permission.Items) {
@@ -75,10 +75,8 @@ const updateCertification = async (event) => {
     //   });
     //   return response;
     // }
-    console.log(`role ${employeeResult.Item.role} `);
-    console.log(`role1 ${employeeResult.Item.role} `);
-    console.log(`role2 ${employeeResult.Item[0].role.S} `);
-    console.log(`role3 ${employeeResult.Item[0].role} `);
+    console.log(`role ${employeeResult.Item.role.S} `);
+
 
     if (employeeResult.role === "hr" || employeeResult.Item.role.S === "developer" || employeeResult.Item.role.S === "manager") {
       console.log(`User have Permission`);
