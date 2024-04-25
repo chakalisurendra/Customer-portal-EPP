@@ -67,7 +67,6 @@ const updateCertification = async (event) => {
     };
 
     const permission = await client.send(new ScanCommand(permissionParams));
-
     if (!permission.Items) {
       console.log(`Permission ${name} not found`);
       response.statusCode = 404;
