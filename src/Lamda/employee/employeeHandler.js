@@ -37,13 +37,7 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
-    if (!requestBody.managerId) {
-      const managerExists = await checkEmployeeExistence(requestBody.managerId);
-      if (!managerExists) {
-        console.log("manager is not exists.");
-        throw new Error("manager is not exists.");
-      }
-    }
+ 
     const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     console.log("new employee id : ", newEmployeeId);
     const params = {
@@ -164,13 +158,6 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    if (!requestBody.managerId) {
-      const managerExists = await checkEmployeeExistence(requestBody.managerId);
-      if (!managerExists) {
-        console.log("manager is not exists");
-        throw new Error("manager is not exists");
-      }
-    }
 
     const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
     console.log(`Employee with objKeys ${objKeys} `);
@@ -516,17 +503,6 @@ const getEmployeesByRole = async (event) => {
   return response;
 };
 
-const checkEmployeeExistence = async (managerId) => {
-  console.log("checkEmployeeExistence validations");
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    Key: { employeeId: { N: managerId } },
-  };
-
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
 module.exports = {
   createEmployee,
   updateEmployee,

@@ -36,7 +36,8 @@ const updateAssignment = async (event) => {
       });
       return response;
     }
-
+    const currentDate = Date.now();
+    const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const objKeys = Object.keys(requestBody).filter((key) => updateAssignmentAllowedFields.includes(key));
     if (requestBody.branchOffice === "San Antonio, USA") {
       requestBody.onsite = "Yes";
@@ -49,6 +50,35 @@ const updateAssignment = async (event) => {
     } else {
       requestBody.billableResource = "Yes";
     }
+
+    const managerId = requestBody.managerId;
+
+    const checkEmployeeExistence = async (managerId) => {
+      console.log("Error checking employee existence:", error);
+      const params = {
+        TableName: process.env.EMPLOYEE_TABLE,
+        Key: { employeeId: { N: managerId } },
+      };
+
+      try {
+        const result = await client.send(new GetItemCommand(params));
+        if (!result.Item) {
+          console.log(`ManagerId ${managerId} not found`);
+          response.statusCode = 404;
+          response.body = JSON.stringify({
+            message: `ManagerId ${managerId} not found`,
+          });
+          return response;
+        }
+      } catch (error) {
+        console.log(`Failed to fetch ManagerId ${managerId}`);
+        response.statusCode = 404;
+        response.body = JSON.stringify({
+          message: `Failed to fetch ManagerId ${managerId}`,
+        });
+        return response;
+      }
+    };
 
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
@@ -93,93 +123,6 @@ const updateAssignment = async (event) => {
   }
   return response;
 };
-// const updateAssignment = async (event) => {
-//   const response = {
-//     statusCode: httpStatusCodes.SUCCESS,
-//     headers: {
-//       "Access-Control-Allow-Origin": "*",
-//     },
-//   };
-
-//   try {
-//     const requestBody = JSON.parse(event.body);
-//     const { employeeId, assignmentId } = event.queryStringParameters;
-//     if (!assignmentId) {
-//       throw new Error("assignmentId is required");
-//     }
-//     if (!employeeId) {
-//       throw new Error("employeeId is required");
-//     }
-//     const validationResponse = validateAssignment(requestBody);
-//     console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
-
-//     if (!validationResponse.validation) {
-//       console.log(validationResponse.validationMessage);
-//       response.statusCode = 400;
-//       response.body = JSON.stringify({
-//         ErrorMessage: validationResponse.validationMessage,
-//       });
-//       return response;
-//     }
-
-//     const objKeys = Object.keys(requestBody).filter((key) => updateAssignmentAllowedFields.includes(key));
-//       if (requestBody.branchOffice === "San Antonio, USA") {
-//       requestBody.onsite = "Yes";
-//     } else if (requestBody.branchOffice === "Bangalore, INDIA") {
-//       requestBody.onsite = "No";
-//     }
-
-//     if (!requestBody.assignedProject || requestBody.assignedProject.trim() === "") {
-//       requestBody.billableResource = "No";
-//     } else {
-//       requestBody.billableResource = "Yes";
-//     }
-
-//     const params = {
-//       TableName: process.env.ASSIGNMENTS_TABLE,
-//       Key: { assignmentId: { N: assignmentId }, employeeId: { N: employeeId } },
-//       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
-//       ExpressionAttributeNames: objKeys.reduce(
-//         (acc, key, index) => ({
-//           ...acc,
-//           [`#key${index}`]: key,
-//         }),
-//         {}
-//       ),
-//       ExpressionAttributeValues: marshall(
-//         objKeys.reduce(
-//           (acc, key, index) => ({
-//             ...acc,
-//             [`:value${index}`]: requestBody[key],
-//           }),
-//           {}
-//         )
-//       ),
-//       ":updatedDateTime": formattedDate,
-//     };
-
-//     const updateResult = await client.send(new UpdateItemCommand(params));
-
-//     console.log("assignment updated: ", params);
-
-//     response.body = JSON.stringify({
-//       message: httpStatusMessages.SUCCESSFULLY_UPDATED_ASSIGNMENT_DETAILS,
-//       data: {
-//         assignmentId: assignmentId,
-//         employeeId: employeeId,
-//       },
-//     });
-//   } catch (e) {
-//     console.error(e);
-//     response.statusCode = 400;
-//     response.body = JSON.stringify({
-//       message: httpStatusMessages.FAILED_TO_UPDATE_ASSIGNMENT_DETAILS,
-//       errorMsg: e.message,
-//     });
-//   }
-//   return response;
-// };
-
 const createAssignment = async (event) => {
   console.log("inside the Create employee assignment details");
   const response = {
@@ -192,7 +135,7 @@ const createAssignment = async (event) => {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
 
-    const requiredFields = ["employeeId", "department", "designation", "branchOffice", "coreTechnology", "billableResource"];
+    const requiredFields = ["employeeId", "department", "designation", "branchOffice", "coreTechnology", "billableResource", "managerId"];
     if (!requiredFields.every((field) => requestBody[field])) {
       throw new Error("Required fields are missing.");
     }
@@ -210,17 +153,20 @@ const createAssignment = async (event) => {
     if (
       requestBody.designation === null ||
       ![
+        "HR Admin",
+        "HR Generalist",
+        "HR Associate",
+        "Senior Manager",
+        "Delivery Manager",
+        "Project Manager",
         "Software Engineer Trainee",
-        "Software Engineer",
         "Senior software Engineer",
         "Testing Engineer Trainee",
         "Testing Engineer",
         "Senior Testing Engineer",
         "Tech Lead",
+        "Tech Lead",
         "Testing Lead",
-        "Manager",
-        "Project Manager",
-        "Senior Manager",
         "Analyst",
         "Senior Analyst",
         "Architect",
@@ -228,6 +174,8 @@ const createAssignment = async (event) => {
         "Solution Architect",
         "Scrum Master",
         "Data Engineer",
+        "Accountant",
+        "Contractor",
       ].includes(requestBody.designation)
     ) {
       throw new Error("Incorrect Designation!");
@@ -322,6 +270,7 @@ const createAssignment = async (event) => {
         // : [{ [requestBody.designation]: true }], // Convert string to array of object        coreTechnology: requestBody.coreTechnology || null,
         // framework: requestBody.framework || null,
         //reportingManager: typeof requestBody.reportingManager === 'string' ? requestBody.reportingManager : throw new error,
+        managerId: requestBody.managerId,
         reportingManager: requestBody.reportingManager,
         onsite: onsite,
         billableResource: requestBody.billableResource,
