@@ -40,8 +40,8 @@ const createEmployee = async (event) => {
     if (!requestBody.managerId) {
       const managerExists = await checkEmployeeExistence(requestBody.managerId);
       if (!managerExists) {
-        console.log("Email address already exists.");
-        throw new Error("Email address already exists.");
+        console.log("manager is not exists.");
+        throw new Error("manager is not exists.");
       }
     }
     const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
@@ -167,8 +167,8 @@ const updateEmployee = async (event) => {
     if (!requestBody.managerId) {
       const managerExists = await checkEmployeeExistence(requestBody.managerId);
       if (!managerExists) {
-        console.log("Email address already exists.");
-        throw new Error("Email address already exists.");
+        console.log("manager is not exists");
+        throw new Error("manager is not exists");
       }
     }
 
