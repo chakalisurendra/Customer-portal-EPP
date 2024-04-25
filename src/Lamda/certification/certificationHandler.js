@@ -75,9 +75,12 @@ const updateCertification = async (event) => {
     //   });
     //   return response;
     // }
-    console.log(`role ${employeeResult.Item.role.S} `);
+    console.log(`role ${employeeResult.Item.role} `);
+    console.log(`role1 ${employeeResult.Item.role} `);
+    console.log(`role2 ${employeeResult.Item[0].role.S} `);
+    console.log(`role3 ${employeeResult.Item[0].role} `);
 
-    if (employeeResult.Item.role.S === "hr" || employeeResult.Item.role.S === "developer" || employeeResult.Item.role.S === "manager") {
+    if (employeeResult.role === "hr" || employeeResult.Item.role.S === "developer" || employeeResult.Item.role.S === "manager") {
       console.log(`User have Permission`);
     } else {
       console.log(`User not have Permission`);
