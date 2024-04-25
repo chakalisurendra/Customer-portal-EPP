@@ -54,6 +54,32 @@ const updateCertification = async (event) => {
       return response;
     }
 
+    const name = "Edit_Education_And_Certification";
+    const permissionParams = {
+      TableName: process.env.USER_PERMSSION_TABLE,
+      FilterExpression: "#name = :nameValue",
+      ExpressionAttributeNames: {
+        "#name": "name",
+      },
+      ExpressionAttributeValues: {
+        ":nameValue": { S: name },
+      },
+    };
+
+    const permission = await client.send(new ScanCommand(permissionParams));
+
+    if (!permission.Items) {
+      console.log(`Permission ${name} not found`);
+      response.statusCode = 404;
+      response.body = JSON.stringify({
+        message: `Permission ${name} not found`,
+      });
+      return response;
+    }
+    const data = unmarshall(Item);
+    console.log(`name ${data.name}`);
+    console.log(`name ${permission.Items[0].hr.S}`);
+
     const objKeys = Object.keys(requestBody).filter((key) => updateCertificationAllowedFields.includes(key));
     console.log(`Certification with objKeys ${objKeys} `);
     const validationResponse = validateUpdateCertificationDetails(requestBody);
@@ -163,7 +189,7 @@ const uploadCertification = async (event) => {
       new UpdateItemCommand({
         TableName: process.env.CERTIFICATION_TABLE,
         Key: {
-          certificationId: { N: certificationId }, 
+          certificationId: { N: certificationId },
         },
         UpdateExpression: "SET link = :link",
         ExpressionAttributeValues: {

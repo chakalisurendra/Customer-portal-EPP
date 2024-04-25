@@ -17,6 +17,7 @@ provider:
     PAYROLL_TABLE: ${self:custom.payrollTableName}
     EDUCATION_TABLE: ${self:custom.educationTableName}
     CERTIFICATION_TABLE: ${self:custom.certificationTableName}
+    USER_PERMSSION_TABLE: ${self:custom.userPermissionTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -49,6 +50,7 @@ custom:
   payrollTableName: payroll
   educationTableName: education
   certificationTableName: certification
+  userPermissionTableName: user_permission
 
   cors:
     origin: "*" # Allow requests from any origin
@@ -496,6 +498,19 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: certificationId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+  userPermissionTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userPermissionTableName}
+        AttributeDefinitions:
+          - AttributeName: permissionId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: permissionId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
