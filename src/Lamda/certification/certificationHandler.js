@@ -23,29 +23,29 @@ const updateCertification = async (event) => {
     console.log("Request Body:", requestBody);
     const { certificationId, employeeId } = event.queryStringParameters;
 
-    const validateCertificatonParams = {
-      TableName: process.env.CERTIFICATION_TABLE,
-      Key: {
-        certificationId: { N: certificationId },
-      },
-    };
-    const { Item } = await client.send(new GetItemCommand(validateCertificatonParams));
-    console.log({ Item });
-    if (!Item) {
-      console.log("Certification details not found.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
-      response.body = JSON.stringify({
-        message: "Certification details not found.",
-      });
-      return response;
-    }
+    // const validateCertificatonParams = {
+    //   TableName: process.env.CERTIFICATION_TABLE,
+    //   Key: {
+    //     certificationId: { N: certificationId },
+    //   },
+    // };
+    // const { Item } = await client.send(new GetItemCommand(validateCertificatonParams));
+    // console.log({ Item });
+    // if (!Item) {
+    //   console.log("Certification details not found.");
+    //   response.statusCode = httpStatusCodes.NOT_FOUND;
+    //   response.body = JSON.stringify({
+    //     message: "Certification details not found.",
+    //   });
+    //   return response;
+    // }
 
     const getItemParams = {
       TableName: process.env.EMPLOYEE_TABLE,
       Key: { employeeId: { N: employeeId } },
     };
-    const employeeResult = await client.send(new GetItemCommand(getItemParams));
-    if (!employeeResult.Item) {
+    const { Item } = await client.send(new GetItemCommand(getItemParams));
+    if (Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404;
       response.body = JSON.stringify({
@@ -53,6 +53,10 @@ const updateCertification = async (event) => {
       });
       return response;
     }
+
+    const role = Item && Item.role && Item.role.S;
+
+    console.log(`role ${role} `);
 
     // const name = "Edit_Education_And_Certification";
     // const permissionParams = {
@@ -77,8 +81,7 @@ const updateCertification = async (event) => {
     // }
     console.log(`role ${employeeResult.Item.role.S} `);
 
-
-    if (employeeResult.role === "hr" || employeeResult.Item.role.S === "developer" || employeeResult.Item.role.S === "manager") {
+    if (role === "hr" || role === "developer" || role === "manager") {
       console.log(`User have Permission`);
     } else {
       console.log(`User not have Permission`);
