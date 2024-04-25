@@ -75,9 +75,9 @@ const updateCertification = async (event) => {
     //   });
     //   return response;
     // }
-    console.log(`role ${employeeResult.Item.role} `);
+    console.log(`role ${employeeResult.Item.role.S} `);
 
-    if (employeeResult.Item.role === "hr" || employeeResult.Item.role === "developer" || employeeResult.Item.role === "manager") {
+    if (employeeResult.Item.role.S === "hr" || employeeResult.Item.role.S === "developer" || employeeResult.Item.role.S === "manager") {
       console.log(`User have Permission`);
     } else {
       console.log(`User not have Permission`);
