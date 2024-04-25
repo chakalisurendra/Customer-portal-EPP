@@ -37,6 +37,13 @@ const createEmployee = async (event) => {
       console.log("Email address already exists.");
       throw new Error("Email address already exists.");
     }
+    if (!requestBody.managerId) {
+      const managerExists = await checkEmployeeExistence(requestBody.managerId);
+      if (!managerExists) {
+        console.log("Email address already exists.");
+        throw new Error("Email address already exists.");
+      }
+    }
     const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
     console.log("new employee id : ", newEmployeeId);
     const params = {
@@ -510,6 +517,7 @@ const getEmployeesByRole = async (event) => {
 };
 
 const checkEmployeeExistence = async (managerId) => {
+  console.log("checkEmployeeExistence validations");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
     Key: { employeeId: { N: managerId } },
