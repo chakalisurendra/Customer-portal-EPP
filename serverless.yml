@@ -370,6 +370,17 @@ functions:
             parameters:
               querystrings:
                 certificationId: true
+  getEmployeesByRole:
+    handler: src/Lamda/employee/employeeHandler.getEmployeesByRole
+    events:
+      - http:
+          path: employee/role
+          method: GET
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                role: true
 resources:
   Resources:
     EmployeeTable:
