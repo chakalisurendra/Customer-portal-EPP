@@ -60,6 +60,7 @@ const updateAssignment = async (event) => {
       });
       return response;
     }
+    
 
     // const checkEmployeeExistence = async (managerId) => {
     //   console.log("Error checking employee existence:", error);
@@ -368,24 +369,31 @@ const getAssignmentByEmployeeId = async (event) => {
 //   const { Item } = await client.send(new GetItemCommand(params));
 //   return !!Item;
 // };
-
-const isEmployeeExists = async (managerId, role) => {
-  console.log("in side isEmployeeExists");
+const isEmployeeExists = async (employeeId) => {
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "role = :role AND employeeId == :id",
-    ExpressionAttributeValues: {
-      ":role": { S: role },
-      ":id": { N: managerId },
-    },
-    ProjectionExpression: "role",
+    Key: { employeeId: { N: employeeId } },
   };
-  // const command = new ScanCommand(params);
-  // const data = await client.send(command);
-  const { Items } = await client.send(new ScanCommand(params));
-
-  return Items.length > 0;
+  const { Item } = await client.send(new GetItemCommand(params));
+  return !!Item;
 };
+// const isEmployeeExists = async (managerId, role) => {
+//   console.log("in side isEmployeeExists");
+//   const params = {
+//     TableName: process.env.EMPLOYEE_TABLE,
+//     FilterExpression: "role = :role AND employeeId == :id",
+//     ExpressionAttributeValues: {
+//       ":role": { S: role },
+//       ":id": { N: managerId },
+//     },
+//     ProjectionExpression: "role",
+//   };
+//   // const command = new ScanCommand(params);
+//   // const data = await client.send(command);
+//   const { Items } = await client.send(new ScanCommand(params));
+
+//   return Items.length > 0;
+// };
 
 module.exports = {
   createAssignment,
