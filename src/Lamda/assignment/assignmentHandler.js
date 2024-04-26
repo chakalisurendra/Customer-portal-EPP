@@ -50,35 +50,43 @@ const updateAssignment = async (event) => {
     } else {
       requestBody.billableResource = "Yes";
     }
+    const role = "manager";
+    const managerExits = await isEmployeeExists(requestBody.managerId, role);
+    if (managerExits) {
+      console.log("Manager is not found.");
+      response.statusCode = 400;
+      response.body = JSON.stringify({
+        message: "Manager is not found.",
+      });
+      return response;
+    }
 
-    const managerId = requestBody.managerId;
+    // const checkEmployeeExistence = async (managerId) => {
+    //   console.log("Error checking employee existence:", error);
+    //   const params = {
+    //     TableName: process.env.EMPLOYEE_TABLE,
+    //     Key: { employeeId: { N: managerId } },
+    //   };
 
-    const checkEmployeeExistence = async (managerId) => {
-      console.log("Error checking employee existence:", error);
-      const params = {
-        TableName: process.env.EMPLOYEE_TABLE,
-        Key: { employeeId: { N: managerId } },
-      };
-
-      try {
-        const result = await client.send(new GetItemCommand(params));
-        if (!result.Item) {
-          console.log(`ManagerId ${managerId} not found`);
-          response.statusCode = 404;
-          response.body = JSON.stringify({
-            message: `ManagerId ${managerId} not found`,
-          });
-          return response;
-        }
-      } catch (error) {
-        console.log(`Failed to fetch ManagerId ${managerId}`);
-        response.statusCode = 404;
-        response.body = JSON.stringify({
-          message: `Failed to fetch ManagerId ${managerId}`,
-        });
-        return response;
-      }
-    };
+    //   try {
+    //     const result = await client.send(new GetItemCommand(params));
+    //     if (!result.Item) {
+    //       console.log(`ManagerId ${managerId} not found`);
+    //       response.statusCode = 404;
+    //       response.body = JSON.stringify({
+    //         message: `ManagerId ${managerId} not found`,
+    //       });
+    //       return response;
+    //     }
+    //   } catch (error) {
+    //     console.log(`Failed to fetch ManagerId ${managerId}`);
+    //     response.statusCode = 404;
+    //     response.body = JSON.stringify({
+    //       message: `Failed to fetch ManagerId ${managerId}`,
+    //     });
+    //     return response;
+    //   }
+    // };
     console.log("objKeys:", objKeys); // Add this line for debugging
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
@@ -340,7 +348,26 @@ const getAssignmentByEmployeeId = async (event) => {
   }
   return response;
 };
-
+////////////////////////////////////////////////
+// const isEmployeeIdExists = async (employeeId) => {
+//   const params = {
+//     TableName: process.env.EMPLOYEE_TABLE,
+//     Key: { employeeId: { N: employeeId } },
+//   };
+//   const { Item } = await client.send(new GetItemCommand(params));
+//   return !!Item;
+// };
+const isEmployeeExists = async (managerId, role) => {
+  const params = {
+    TableName: process.env.EMPLOYEE_TABLE,
+    Key: {
+      employeeId: { N: managerId },
+      role: { S: role }, // Assuming role is a string, adjust if it's another type
+    },
+  };
+  const { Item } = await client.send(new GetItemCommand(params));
+  return !!Item;
+};
 module.exports = {
   createAssignment,
   updateAssignment,
