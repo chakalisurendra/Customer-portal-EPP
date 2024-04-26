@@ -378,7 +378,7 @@ const isEmployeeExists = async (managerId, role) => {
       ":role": { S: role }, 
       ":id": { N: managerId },
     },
-    ProjectionExpression: "officeEmailAddress",
+    ProjectionExpression: "role",
   };
   const command = new ScanCommand(params);
   const data = await client.send(command);
