@@ -52,7 +52,7 @@ const updateAssignment = async (event) => {
     }
     const role = "manager";
     const managerExits = await isEmployeeExists(requestBody.managerId, role);
-    if (managerExits) {
+    if (!managerExits) {
       console.log("Manager is not found.");
       response.statusCode = 400;
       response.body = JSON.stringify({
@@ -357,17 +357,34 @@ const getAssignmentByEmployeeId = async (event) => {
 //   const { Item } = await client.send(new GetItemCommand(params));
 //   return !!Item;
 // };
+// const isEmployeeExists = async (managerId, role) => {
+//   const params = {
+//     TableName: process.env.EMPLOYEE_TABLE,
+//     Key: {
+//       employeeId: { N: managerId },
+//       role: { S: role }, // Assuming role is a string, adjust if it's another type
+//     },
+//   };
+//   const { Item } = await client.send(new GetItemCommand(params));
+//   return !!Item;
+// };
+
 const isEmployeeExists = async (managerId, role) => {
+  console.log("in side isEmailNotEmployeeIdExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    Key: {
-      employeeId: { N: managerId },
-      role: { S: role }, // Assuming role is a string, adjust if it's another type
+    FilterExpression: "role = :role AND employeeId <> :id",
+    ExpressionAttributeValues: {
+      ":email": { S: role },
+      ":id": { N: managerId },
     },
+    ProjectionExpression: "officeEmailAddress",
   };
-  const { Item } = await client.send(new GetItemCommand(params));
-  return !!Item;
+  const command = new ScanCommand(params);
+  const data = await client.send(command);
+  return data.Items.length > 0;
 };
+
 module.exports = {
   createAssignment,
   updateAssignment,
