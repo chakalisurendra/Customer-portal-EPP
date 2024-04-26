@@ -373,7 +373,7 @@ const isEmployeeExists = async (managerId, role) => {
   console.log("in side isEmployeeExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "role = :role AND employeeId <> :id",
+    FilterExpression: "role = :role AND employeeId == :id",
     ExpressionAttributeValues: {
       ":role": { S: role },
       ":id": { N: managerId },
