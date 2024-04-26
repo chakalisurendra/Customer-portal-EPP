@@ -370,12 +370,12 @@ const getAssignmentByEmployeeId = async (event) => {
 // };
 
 const isEmployeeExists = async (managerId, role) => {
-  console.log("in side isEmailNotEmployeeIdExists");
+  console.log("in side isEmployeeExists");
   const params = {
     TableName: process.env.EMPLOYEE_TABLE,
     FilterExpression: "role = :role AND employeeId <> :id",
     ExpressionAttributeValues: {
-      ":email": { S: role },
+      ":role": { S: role }, 
       ":id": { N: managerId },
     },
     ProjectionExpression: "officeEmailAddress",
