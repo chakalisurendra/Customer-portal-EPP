@@ -375,14 +375,16 @@ const isEmployeeExists = async (managerId, role) => {
     TableName: process.env.EMPLOYEE_TABLE,
     FilterExpression: "role = :role AND employeeId <> :id",
     ExpressionAttributeValues: {
-      ":role": { S: role }, 
+      ":role": { S: role },
       ":id": { N: managerId },
     },
     ProjectionExpression: "role",
   };
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
+  // const command = new ScanCommand(params);
+  // const data = await client.send(command);
+  const { Items } = await client.send(new ScanCommand(params));
+
+  return Items.length > 0;
 };
 
 module.exports = {
