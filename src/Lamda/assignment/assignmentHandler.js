@@ -51,7 +51,7 @@ const updateAssignment = async (event) => {
       requestBody.billableResource = "Yes";
     }
     const role = "manager";
-    const managerExits = await isEmployeeExists(requestBody.managerId, role);
+    const managerExits = await isEmployeeExists(requestBody.managerId);
     if (!managerExits) {
       console.log("Manager is not found.");
       response.statusCode = 400;
@@ -60,7 +60,7 @@ const updateAssignment = async (event) => {
       });
       return response;
     }
-    
+
 
     // const checkEmployeeExistence = async (managerId) => {
     //   console.log("Error checking employee existence:", error);
