@@ -414,7 +414,7 @@ const isEmployeeIdExists = async (employeeId) => {
     Key: { employeeId: { N: employeeId } },
   };
   const { Item } = await client.send(new GetItemCommand(params));
-  return !!Item;
+  return Item.length > 0;
 };
 
 const isEmailExists = async (emailAddress) => {

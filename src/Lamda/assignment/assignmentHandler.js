@@ -50,17 +50,34 @@ const updateAssignment = async (event) => {
     } else {
       requestBody.billableResource = "Yes";
     }
-    const role = "manager";
-    const managerExits = await isEmployeeExists(requestBody.managerId);
-    if (!managerExits) {
-      console.log("Manager is not found.");
-      response.statusCode = 400;
+
+    const manager = requestBody.managerId;
+    const validateEmployeeParams = {
+      TableName: process.env.EMPLOYEE_TABLE,
+      Key: {
+        employeeId: { N: manager },
+      },
+    };
+    const { Item } = await client.send(new GetItemCommand(validateEmployeeParams));
+    console.log({ Item });
+    if (!Item) {
+      console.log("Employee details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
-        message: "Manager is not found.",
+        message: "Employee details not found.",
       });
       return response;
     }
-
+    // const role = "manager";
+    // const managerExits = await isEmployeeExists(requestBody.managerId, role);
+    // if (!managerExits) {
+    //   console.log("Manager is not found.");
+    //   response.statusCode = 400;
+    //   response.body = JSON.stringify({
+    //     message: "Manager is not found.",
+    //   });
+    //   return response;
+    // }
 
     // const checkEmployeeExistence = async (managerId) => {
     //   console.log("Error checking employee existence:", error);
