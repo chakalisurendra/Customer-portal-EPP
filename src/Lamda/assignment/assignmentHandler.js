@@ -79,7 +79,7 @@ const updateAssignment = async (event) => {
         return response;
       }
     };
-
+    console.log("objKeys:", objKeys); // Add this line for debugging
     const params = {
       TableName: process.env.ASSIGNMENTS_TABLE,
       Key: { assignmentId: { N: assignmentId }, employeeId: { N: employeeId } },
@@ -103,6 +103,7 @@ const updateAssignment = async (event) => {
         )
       ),
     };
+    console.log("UpdateItem params:", params); // Add this line for debugging
 
     const updateResult = await client.send(new UpdateItemCommand(params));
     console.log("UpdateItem result:", updateResult); // Debugging: Check the result of the UpdateItem operation

@@ -44,6 +44,7 @@ const updateAssignmentAllowedFields = [
   "billableResource",
   "assignedProject",
   "onsite",
+  "managerId",
 ];
 /////////////////////////////////////////////////////////////
 const updateCertificationAllowedFields = ["technologyName", "certificationAuthority", "certifiedDate", "validLastDate", "link", "updatedDateTime"];
