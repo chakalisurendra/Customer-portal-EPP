@@ -541,7 +541,7 @@ const validateUpdateCertificationDetails = (requestBody) => {
     response.validationMessage = `Certified Date should have Current or Past Date`;
     return response;
   }
-  if (!validateFeatureAndCurrentDate(requestBody.validLastDate)) {
+  if (!validateFeatureAndCurrentDate(requestBody.validityLastDate)) {
     response.validationMessage = `Valid Last Date should have Current of feature Date`;
     return response;
   }
