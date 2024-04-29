@@ -45,6 +45,8 @@ const updateCertification = async (event) => {
       Key: { employeeId: { N: employeeId } },
     };
     const { Item } = await client.send(new GetItemCommand(getItemParams));
+    console.log(`role ${role} `);
+
     if (Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404;
