@@ -3,7 +3,7 @@ const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-const { validateCreateCertification } = require("../../validator/validateRequest");
+const { validateCreateCertification, validateUpdateCertificationDetails } = require("../../validator/validateRequest");
 const { updateCertificationAllowedFields } = require("../../validator/validateFields");
 
 const { autoIncreamentId } = require("../../utils/comman");
