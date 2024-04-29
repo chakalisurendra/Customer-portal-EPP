@@ -45,7 +45,7 @@ const updateCertification = async (event) => {
       Key: { employeeId: { N: employeeId } },
     };
     const { Item } = await client.send(new GetItemCommand(getItemParams));
-    console.log(`role ${role} `);
+    console.log(`employee details ${Item} `);
 
     if (Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
