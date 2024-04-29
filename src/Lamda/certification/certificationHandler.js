@@ -361,5 +361,6 @@ const employeePermissions = async (employeeId) => {
 
 module.exports = {
   createCertification,
+  updateCertification,
   uploadCertification,
 };
