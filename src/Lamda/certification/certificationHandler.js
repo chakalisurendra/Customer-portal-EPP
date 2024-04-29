@@ -4,7 +4,7 @@ const moment = require("moment");
 const client = new DynamoDBClient();
 const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
 const { validateCreateCertification } = require("../../validator/validateRequest");
-const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
+const { updateCertificationAllowedFields } = require("../../validator/validateFields");
 
 const { autoIncreamentId } = require("../../utils/comman");
 const currentDate = Date.now(); // get the current date and time in milliseconds
