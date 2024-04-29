@@ -45,8 +45,6 @@ const updateCertification = async (event) => {
       Key: { employeeId: { N: employeeId } },
     };
     const { Item } = await client.send(new GetItemCommand(getItemParams));
-    console.log("employee details" + JSON.stringify(Item));
-
     if (!Item) {
       console.log(`Employee with employeeId ${employeeId} not found`);
       response.statusCode = 404;
@@ -55,34 +53,8 @@ const updateCertification = async (event) => {
       });
       return response;
     }
-
     const role = Item && Item.role && Item.role.S;
-
     console.log(`role ${role} `);
-
-    // const name = "Edit_Education_And_Certification";
-    // const permissionParams = {
-    //   TableName: process.env.USER_PERMSSION_TABLE,
-    //   FilterExpression: "#name = :nameValue",
-    //   ExpressionAttributeNames: {
-    //     "#name": "name",
-    //   },
-    //   ExpressionAttributeValues: {
-    //     ":nameValue": { S: name },
-    //   },
-    // };
-
-    // const permission = await client.send(new ScanCommand(permissionParams));
-    // if (!permission.Items) {
-    //   console.log(`Permission ${name} not found`);
-    //   response.statusCode = 404;
-    //   response.body = JSON.stringify({
-    //     message: `Permission ${name} not found`,
-    //   });
-    //   return response;
-    // }
-    console.log(`role ${employeeResult.Item.role.S} `);
-
     if (role === "hr" || role === "developer" || role === "manager") {
       console.log(`User have Permission`);
     } else {
