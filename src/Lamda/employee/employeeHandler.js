@@ -1,16 +1,33 @@
-const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBClient,
+  PutItemCommand,
+  UpdateItemCommand,
+  DeleteItemCommand,
+  GetItemCommand,
+  ScanCommand,
+  QueryCommand,
+} = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const moment = require("moment");
 const client = new DynamoDBClient();
-const { validateEmployeeDetails, validateUpdateEmployeeDetails } = require("../../validator/validateRequest");
-const { autoIncreamentId, pagination } = require("../../utils/comman");
-const { updateEmployeeAllowedFields } = require("../../validator/validateFields");
-const { httpStatusCodes, httpStatusMessages } = require("../../environment/appconfig");
-const currentDate = Date.now();
-const formattedDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
+const {
+  httpStatusCodes,
+  httpStatusMessages,
+} = require("../../environment/appconfig");
+const {
+  validateCreateCertification,
+} = require("../../validator/validateRequest");
+const { autoIncreamentId } = require("../../utils/comman");
+const currentDate = Date.now(); // get the current date and time in milliseconds
+const formattedDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss"); // formatting date
+const parseMultipart = require("parse-multipart");
+const BUCKET = "dev-employees-certification-documents";
+const AWS = require("aws-sdk");
+const path = require("path");
+const s3 = new AWS.S3();
 
-const createEmployee = async (event) => {
-  console.log("Create employee details");
+const createCertification = async (event) => {
+  console.log("Create Certification details");
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
@@ -20,103 +37,95 @@ const createEmployee = async (event) => {
   try {
     const requestBody = JSON.parse(event.body);
 
-    const validationResponse = validateEmployeeDetails(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
-
+    const validationResponse = validateCreateCertification(requestBody);
+    console.log(
+      `Validation: ${validationResponse.validation} Message: ${validationResponse.validationMessage}`
+    );
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
-      response.statusCode = 400;
+      response.statusCode = httpStatusCodes.BAD_REQUEST;
       response.body = JSON.stringify({
-        ErrorMessage: validationResponse.validationMessage,
+        message: validationResponse.validationMessage,
       });
       return response;
     }
 
-    const emailExists = await isEmailExists(requestBody.officialEmailId);
-    if (emailExists) {
-      console.log("Email address already exists.");
-      throw new Error("Email address already exists.");
+    const newCertificationId = await autoIncreamentId(
+      process.env.CERTIFICATION_TABLE,
+      "certificationId"
+    );
+
+    // Check if an Certification already exists for the employee
+    const existingCertification = await getCertificationByEmployee(
+      requestBody.employeeId
+    );
+    if (existingCertification) {
+      throw new Error(
+        "A Certification Details already exists for Employee ID."
+      );
     }
- 
-    const newEmployeeId = await autoIncreamentId(process.env.EMPLOYEE_TABLE, "employeeId");
-    console.log("new employee id : ", newEmployeeId);
+
+    async function getCertificationByEmployee(employeeId) {
+      const params = {
+        TableName: process.env.CERTIFICATION_TABLE,
+        FilterExpression: "employeeId = :employeeId",
+        ExpressionAttributeValues: {
+          ":employeeId": { S: employeeId },
+        },
+      };
+
+      try {
+        const result = await client.send(new ScanCommand(params));
+        return result.Items.length > 0;
+      } catch (error) {
+        console.error("Error retrieving cerification by employeeId:", error);
+        throw error;
+      }
+    }
+
+    const checkCerticationExistence = async (employeeId) => {
+      const params = {
+        TableName: process.env.EMPLOYEE_TABLE,
+        Key: { employeeId: { N: employeeId } },
+      };
+
+      try {
+        const result = await client.send(new GetItemCommand(params));
+        if (!result.Item) {
+          throw new Error("Employee not found.");
+        }
+      } catch (error) {
+        console.error("Error checking employee existence:", error);
+        throw error;
+      }
+    };
+    await checkCerticationExistence(requestBody.employeeId);
+
     const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
+      TableName: process.env.CERTIFICATION_TABLE,
       Item: marshall({
-        employeeId: newEmployeeId,
-        firstName: requestBody.firstName,
-        lastName: requestBody.lastName,
-        name: `${requestBody.firstName} ${requestBody.lastName}`,
-        dateOfBirth: requestBody.dateOfBirth,
-        officialEmailId: requestBody.officialEmailId,
-        designation: requestBody.designation || null,
-        branchOffice: requestBody.branchOffice || null,
-        password: requestBody.password || null,
-        gender: requestBody.gender || null,
-        ssnNumber: requestBody.ssnNumber || null,
-        maritalStatus: requestBody.maritalStatus || null,
-        nationality: requestBody.nationality || null,
-        passportNumber: requestBody.passportNumber || null,
-        mobileNumber: requestBody.mobileNumber || null,
-        permanentAddress: requestBody.permanentAddress || null,
-        contactPerson: requestBody.contactPerson || null,
-        personalEmailAddress: requestBody.personalEmailAddress || null,
-        presentAddress: requestBody.presentAddress || null,
-        contactNumber: requestBody.contactNumber || null,
-        joiningDate: requestBody.joiningDate || null,
-        emergencyContactPerson: requestBody.emergencyContactPerson || null,
-        panNumber: requestBody.panNumber || null,
-        emergencyContactNumber: requestBody.emergencyContactNumber || null,
-        resignedDate: requestBody.resignedDate || null,
-        relievedDate: requestBody.relievedDate || null,
-        leaveStructure: requestBody.leaveStructure || null,
-        department: requestBody.department || null,
-        aadhaarNumber: requestBody.aadhaarNumber || null,
-        role: requestBody.role || null,
-        status: "active",
-        isAbsconded: "No",
+        certificationId: newCertificationId,
+        employeeId: requestBody.employeeId,
+        technologyName: requestBody.technologyName,
+        certificationAuthority: requestBody.certificationAuthority,
+        certifiedDate: requestBody.certifiedDate,
+        validityLastDate: requestBody.validityLastDate,
         createdDateTime: formattedDate,
         updatedDateTime: null,
       }),
     };
-    const createResult = await client.send(new PutItemCommand(params));
-    let onsite = "No";
-    if (requestBody.branchOffice === "San Antonio, USA") {
-      onsite = "Yes";
-    }
-    const newAssignmentId = await autoIncreamentId(process.env.ASSIGNMENTS_TABLE, "assignmentId");
-    const assignmentParams = {
-      TableName: process.env.ASSIGNMENTS_TABLE,
-      Item: marshall({
-        assignmentId: newAssignmentId,
-        employeeId: newEmployeeId,
-        branchOffice: requestBody.branchOffice || null,
-        role: requestBody.role || null,
-        designation: requestBody.designation || null,
-        onsite: onsite,
-        department: requestBody.department || null,
-        framework: requestBody.framework || null,
-        coreTechnology: requestBody.coreTechnology || null,
-        managerId: requestBody.managerId || null,
-        reportingManager: requestBody.reportingManager || null,
-        billableResource: requestBody.billableResource || null,
-        createdDateTime: formattedDate,
-        updatedDateTime: null,
-      }),
-    };
-    const createAssignmentResult = await client.send(new PutItemCommand(assignmentParams));
+
+    await client.send(new PutItemCommand(params));
     response.body = JSON.stringify({
-      message: httpStatusMessages.SUCCESSFULLY_CREATED_EMPLOYEE_DETAILS,
-      data: {
-        employeeId: newEmployeeId,
-        assignmentId: newAssignmentId,
-      },
+      message: httpStatusMessages.SUCCESSFULLY_CREATED_CERTIFICATION_DETAILS,
+      certificationId: newCertificationId,
+      employeeId: requestBody.employeeId,
     });
   } catch (e) {
     console.error(e);
     response.statusCode = httpStatusCodes.BAD_REQUEST;
     response.body = JSON.stringify({
-      message: httpStatusMessages.FAILED_TO_CREATE_EMPLOYEE_DETAILS,
+      message: httpStatusMessages.FAILED_TO_CREATE_CERTIFICATION_DETAILS,
       errorMsg: e.message,
       errorStack: e.stack,
     });
@@ -124,45 +133,47 @@ const createEmployee = async (event) => {
   return response;
 };
 
-const updateEmployee = async (event) => {
-  console.log("Update employee details");
+const updateCertification = async (event) => {
+  console.log("update certification details");
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
   };
-
   try {
     const requestBody = JSON.parse(event.body);
     console.log("Request Body:", requestBody);
-    //const { employeeId } = event.queryStringParameters;
-    const employeeId = event.queryStringParameters && event.queryStringParameters.employeeId;
+    const { certificationId, employeeId } = event.queryStringParameters;
 
-    if (!employeeId) {
-      console.log("Employee Id is required");
-      throw new Error(httpStatusMessages.EMPLOYEE_ID_REQUIRED);
-    }
-
-    const getItemParams = {
-      TableName: process.env.EMPLOYEE_TABLE,
-      Key: { employeeId: { N: employeeId } },
+    const validateCertificatonParams = {
+      TableName: process.env.CERTIFICATION_TABLE,
+      Key: {
+        certificationId: { N: certificationId },
+      },
     };
-    const { Item } = await client.send(new GetItemCommand(getItemParams));
+    const { Item } = await client.send(
+      new GetItemCommand(validateCertificatonParams)
+    );
+    console.log({ Item });
     if (!Item) {
-      console.log(`Employee with employeeId ${employeeId} not found`);
-      response.statusCode = 404;
+      console.log("Certification details not found.");
+      response.statusCode = httpStatusCodes.NOT_FOUND;
       response.body = JSON.stringify({
-        message: `Employee with employeeId ${employeeId} not found`,
+        message: "Certification details not found.",
       });
       return response;
     }
+    const employeePermission = await employeePermissions(employeeId);
 
-
-    const objKeys = Object.keys(requestBody).filter((key) => updateEmployeeAllowedFields.includes(key));
-    console.log(`Employee with objKeys ${objKeys} `);
-    const validationResponse = validateUpdateEmployeeDetails(requestBody);
-    console.log(`valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `);
+    const objKeys = Object.keys(requestBody).filter((key) =>
+      updateCertificationAllowedFields.includes(key)
+    );
+    console.log(`Certification with objKeys ${objKeys} `);
+    const validationResponse = validateUpdateCertificationDetails(requestBody);
+    console.log(
+      `valdation : ${validationResponse.validation} message: ${validationResponse.validationMessage} `
+    );
 
     if (!validationResponse.validation) {
       console.log(validationResponse.validationMessage);
@@ -173,26 +184,14 @@ const updateEmployee = async (event) => {
       return response;
     }
 
-    const officialEmailIdExists = await isEmailNotEmployeeIdExists(requestBody.officialEmailId, employeeId);
-    if (officialEmailIdExists) {
-      console.log("officialEmailId already exists.");
-      response.statusCode = 400;
-      response.body = JSON.stringify({
-        message: "officialEmailId already exists.",
-      });
-      return response;
-    }
-
-    if (requestBody.isAbsconded === "Yes") {
-      requestBody.status = "inactive";
-    }
-
     const currentDate = Date.now();
     const updateDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
-      Key: { employeeId: { N: employeeId } },
-      UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, #updatedDateTime = :updatedDateTime`,
+      TableName: process.env.CERTIFICATION_TABLE,
+      Key: { certificationId: { N: certificationId } },
+      UpdateExpression: `SET ${objKeys
+        .map((_, index) => `#key${index} = :value${index}`)
+        .join(", ")}, #updatedDateTime = :updatedDateTime`,
       ExpressionAttributeNames: {
         ...objKeys.reduce(
           (acc, key, index) => ({
@@ -215,298 +214,199 @@ const updateEmployee = async (event) => {
       }),
     };
     const updateResult = await client.send(new UpdateItemCommand(params));
-    console.log("Successfully updated Employee details.");
+    console.log("Successfully updated Certification details.");
     response.body = JSON.stringify({
-      message: httpStatusMessages.SUCCESSFULLY_UPDATED_EMPLOYEE_DETAILS,
-      employeeId: employeeId,
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_CERTIFICATION_DETAILS,
+      certificationId: certificationId,
     });
   } catch (e) {
     console.error(e);
     response.statusCode = 400;
     response.body = JSON.stringify({
-      message: httpStatusMessages.FAILED_TO_UPDATED_EMPLOYEE_DETAILS,
+      message: httpStatusMessages.FAILED_TO_UPDATE_CERTIFICATION_DETAILS,
       errorMsg: e.message,
     });
   }
   return response;
 };
 
-const getEmployee = async (event) => {
-  console.log("Get employee details");
-  const response = {
-    statusCode: httpStatusCodes.SUCCESS,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
+const uploadCertification = async (event) => {
   try {
-    const { employeeId } = event.queryStringParameters;
+    const certificationId = event.pathParameters.certificationId;
 
-    const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
-      Key: { employeeId: { N: employeeId } },
-    };
-    const { Item } = await client.send(new GetItemCommand(params));
-    console.log({ Item });
-    if (!Item) {
-      console.log("Employee details not found.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
-      response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEE_DETAILS_NOT_FOUND,
-      });
-    } else {
-      console.log("Successfully retrieved Employee details.");
-
-      // Fetch assignments for the current employee
-      const assignmentsParams = {
-        TableName: process.env.ASSIGNMENTS_TABLE,
-        FilterExpression: "employeeId = :employeeId",
+    if (!certificationId) {
+      throw new Error("certificationId is required");
+    }
+    // Check if an certification already exists for the employee
+    const existingCertification = await getCertificationByEmployee(
+      event.pathParameters.certificationId
+    );
+    if (!existingCertification) {
+      throw new Error("Certification Details Not found.");
+    }
+    async function getCertificationByEmployee(certificationId) {
+      const params = {
+        TableName: process.env.CERTIFICATION_TABLE,
+        KeyConditionExpression: "certificationId = :certificationId",
         ExpressionAttributeValues: {
-          ":employeeId": { N: employeeId },
+          ":certificationId": { N: certificationId.toString() },
         },
       };
-      const assignmentsCommand = new ScanCommand(assignmentsParams);
-      const { Items: assignmentItems } = await client.send(assignmentsCommand);
 
-      const employeeData = unmarshall(Item);
-      // Attach assignments to the employee object
-      employeeData.assignments = assignmentItems.map(unmarshall);
-
-      response.body = JSON.stringify({
-        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEE_DETAILS,
-        data: employeeData,
-      });
+      try {
+        const result = await client.send(new QueryCommand(params));
+        return result.Items.length > 0;
+      } catch (error) {
+        console.error(
+          "Error retrieving certification by certificationId:",
+          error
+        );
+        throw error;
+      }
     }
-  } catch (e) {
-    console.error(e);
-    response.body = JSON.stringify({
-      statusCode: e.statusCode || httpStatusCodes.INTERNAL_SERVER_ERROR,
-      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
-      errorMsg: e.message,
-    });
+
+    const { filename, data } = extractFile(event);
+
+    // Modify filename to include certificationId
+    const modifiedFilename = `${certificationId}_${filename.replace(
+      /\s/g,
+      "_"
+    )}`;
+
+    // Upload file to S3
+    await s3
+      .putObject({
+        Bucket: BUCKET,
+        Key: modifiedFilename,
+        Body: data,
+      })
+      .promise();
+
+    // Construct S3 object URL
+    const s3ObjectUrl = `https://${BUCKET}.s3.amazonaws.com/${modifiedFilename}`;
+
+    await client.send(
+      new UpdateItemCommand({
+        TableName: process.env.CERTIFICATION_TABLE,
+        Key: {
+          certificationId: { N: certificationId.toString() },
+        },
+        UpdateExpression: "SET link = :link",
+        ExpressionAttributeValues: {
+          ":link": { S: s3ObjectUrl },
+        },
+        ReturnValues: "ALL_NEW", // Return the updated item
+      })
+    );
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        link: s3ObjectUrl,
+        message: "Certification Document updated successfully",
+      }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    };
+  } catch (err) {
+    console.log("error-----", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: err.message }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    };
   }
-  return response;
 };
 
-const getAllEmployees = async (event) => {
-  console.log("Get all employees");
+function extractFile(event) {
+  const contentType = event.headers["Content-Type"];
+  if (!contentType) {
+    throw new Error("Content-Type header is missing in the request.");
+  }
+
+  const boundary = parseMultipart.getBoundary(contentType);
+  if (!boundary) {
+    throw new Error(
+      "Unable to determine the boundary from the Content-Type header."
+    );
+  }
+
+  const parts = parseMultipart.Parse(
+    Buffer.from(event.body, "base64"),
+    boundary
+  );
+
+  if (!parts || parts.length === 0) {
+    throw new Error("No parts found in the multipart request.");
+  }
+
+  const [{ filename, data }] = parts;
+
+  if (!filename || !data) {
+    throw new Error(
+      "Invalid or missing file name or data in the multipart request."
+    );
+  }
+
+  const fileType = path.extname(filename).toLowerCase();
+  if (fileType !== ".pdf") {
+    throw new Error("Invalid file type. Only PDF files are allowed.");
+  }
+
+  // Check file size in binary format
+  const fileSizeInMB = data.length / (1024 * 1024); // Convert bytes to MB
+  const maxSizeInMB = 3;
+  if (fileSizeInMB > maxSizeInMB) {
+    throw new Error(
+      `File size exceeds the maximum limit of ${maxSizeInMB} MB.`
+    );
+  }
+
+  return {
+    filename,
+    data,
+  };
+}
+
+const employeePermissions = async (employeeId) => {
+  console.log(`Inside employeePermissions`);
   const response = {
     statusCode: httpStatusCodes.SUCCESS,
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  const { pageNo, pageSize, searchText } = event.queryStringParameters;
-  let designationFilter = [];
-  let branchFilter = [];
-
-  if (event.multiValueQueryStringParameters && event.multiValueQueryStringParameters.designation) {
-    designationFilter = event.multiValueQueryStringParameters.designation.flatMap((designation) => designation.split(",")); // Split by commas if exists
-  }
-  if (event.multiValueQueryStringParameters && event.multiValueQueryStringParameters.branchOffice) {
-    branchFilter = event.multiValueQueryStringParameters.branchOffice.flatMap((branchOffice) => branchOffice.split(",")); // Split by commas if exists
-  }
-
-  try {
-    const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
-    };
-    const { Items } = await client.send(new ScanCommand(params));
-
-    let filteredItems = Items;
-
-    // Apply search criteria if provided
-    if (searchText) {
-      console.log("Applying search criteria:", searchText);
-      filteredItems = applySearchCriteria(Items, searchText);
-      if (filteredItems.length === 0) {
-        throw new Error("No employees found matching the search criteria.");
-      }
-    }
-
-    // Apply filters if provided
-    if (designationFilter.length > 0 || branchFilter.length > 0) {
-      console.log("Filtering started with designationFilter:", designationFilter, "and branchFilter:", branchFilter);
-      filteredItems = applyFilters(filteredItems, designationFilter, branchFilter);
-      if (filteredItems.length === 0) {
-        throw new Error("No employees found matching the filter criteria.");
-      }
-      console.log("Filtered items:", filteredItems);
-    }
-
-    // Apply pagination
-    const paginatedData = pagination(
-      filteredItems.map((item) => unmarshall(item)),
-      pageNo,
-      pageSize
-    );
-
-    if (!paginatedData.items || paginatedData.items.length === 0) {
-      console.log("No employees found after filtering.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
-      response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEES_DETAILS_NOT_FOUND,
-      });
-    } else {
-      console.log("Successfully retrieved filtered and paginated employees.");
-      response.body = JSON.stringify({
-        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEES_DETAILS,
-        data: paginatedData,
-      });
-    }
-  } catch (e) {
-    console.error(e);
-    response.body = JSON.stringify({
-      statusCode: e.statusCode,
-      message: httpStatusMessages.FAILED_TO_RETRIEVE_EMPLOYEE_DETAILS,
-      errorMsg: e.message,
-    });
-  }
-  return response;
-};
-
-const applySearchCriteria = (employeesData, searchText) => {
-  console.log("Applying search criteria:", searchText);
-  return employeesData.filter((employee) => matchesSearchText(employee, searchText));
-};
-
-const applyFilters = (employeesData, designationFilter, branchFilter) => {
-  console.log("Applying filters...");
-  return employeesData.filter((employee) => {
-    // Check if employee.branch exists before accessing its properties
-    if (!employee.branchOffice || !employee.branchOffice.S || !employee.designation || !employee.designation.S) {
-      // If employee data is incomplete, skip filtering for this employee
-      return false;
-    }
-    console.log("Employee:", employee);
-    const passesDesignationFilter = designationFilter.length === 0 || (employee.designation && designationFilter.includes(employee.designation.S));
-    // Note: Use `.S` to access the string value of DynamoDB attributes
-    const passesBranchFilter = branchFilter.length === 0 || matchesBranch(employee.branchOffice.S, branchFilter);
-    const passesFilters = passesDesignationFilter && passesBranchFilter;
-    return passesFilters;
-  });
-};
-
-const matchesSearchText = (employee, searchText) => {
-  // Check if search text meets the minimum character requirement for name search
-  if (searchText.length < 3) {
-    throw new Error("Search text for name must be at least 3 characters long.");
-  }
-  const name = employee.name ? employee.name.S.toLowerCase() : "";
-  //const employeeId = employee.employeeId ? employee.employeeId.N.toString() : ""; // Convert to string for comparison
-  return name.includes(searchText.toLowerCase());
-  //  || employeeId === searchText
-};
-
-const matchesBranch = (employeeBranch, branchFilter) => {
-  for (const filter of branchFilter) {
-    const phrases = filter.split(",").map((phrase) => phrase.trim());
-    if (phrases.some((phrase) => employeeBranch.includes(phrase))) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const isEmployeeIdExists = async (employeeId) => {
-  const params = {
+  const getItemParams = {
     TableName: process.env.EMPLOYEE_TABLE,
     Key: { employeeId: { N: employeeId } },
   };
-  const { Item } = await client.send(new GetItemCommand(params));
-  return Item.length > 0;
-};
-
-const isEmailExists = async (emailAddress) => {
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officeEmailAddress = :email",
-    ExpressionAttributeValues: {
-      ":email": { S: emailAddress },
-    },
-    ProjectionExpression: "officeEmailAddress",
-  };
-
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
-
-const isEmailNotEmployeeIdExists = async (emailAddress, employeeId) => {
-  console.log("in side isEmailNotEmployeeIdExists");
-  const params = {
-    TableName: process.env.EMPLOYEE_TABLE,
-    FilterExpression: "officeEmailAddress = :email AND employeeId <> :id",
-    ExpressionAttributeValues: {
-      ":email": { S: emailAddress },
-      ":id": { N: employeeId },
-    },
-    ProjectionExpression: "officeEmailAddress",
-  };
-  const command = new ScanCommand(params);
-  const data = await client.send(command);
-  return data.Items.length > 0;
-};
-
-/////////////////////////////////////////////////////////////
-const getEmployeesByRole = async (event) => {
-  console.log("Get employees by role");
-  const response = {
-    statusCode: httpStatusCodes.SUCCESS,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-  try {
-    const { role } = event.queryStringParameters;
-
-    const params = {
-      TableName: process.env.EMPLOYEE_TABLE,
-      FilterExpression: "#role = :roleValue",
-      ExpressionAttributeNames: {
-        "#role": "role",
-      },
-      ExpressionAttributeValues: {
-        ":roleValue": { S: role },
-      },
-    };
-
-    const { Items } = await client.send(new ScanCommand(params));
-
-    const sortedItems = Items.sort((a, b) => parseInt(a.employeeId.N) - parseInt(b.employeeId.N));
-    const employees = sortedItems.map((item) => {
-      const employee = unmarshall(item);
-      return employee;
-    });
-    console.log({ employees });
-    if (!employees || !employees.length > 0) {
-      console.log("Employees details not found.");
-      response.statusCode = httpStatusCodes.NOT_FOUND;
-      response.body = JSON.stringify({
-        message: httpStatusMessages.EMPLOYEES_DETAILS_NOT_FOUND,
-      });
-    } else {
-      console.log("Successfully retrieved employee details.");
-      response.body = JSON.stringify({
-        message: httpStatusMessages.SUCCESSFULLY_RETRIEVED_EMPLOYEE_DETAILS,
-        data: employees,
-      });
-    }
-  } catch (e) {
-    console.error(e);
+  const { Item } = await client.send(new GetItemCommand(getItemParams));
+  if (!Item) {
+    console.log(`Employee with employeeId ${employeeId} not found`);
+    response.statusCode = 404;
     response.body = JSON.stringify({
-      statusCode: e.statusCode,
-      message: httpStatusMessages.FAILED_TO_RETRIEVE_METADATA,
-      errorMsg: e.message,
+      message: `Employee with employeeId ${employeeId} not found`,
     });
+    return response;
   }
-  return response;
+  const role = Item && Item.role && Item.role.S;
+  console.log(`role ${role} `);
+  if (role === "hr" || role === "developer" || role === "manager") {
+    console.log(`User have Permission`);
+  } else {
+    console.log(`User not have Permission`);
+    response.statusCode = 404;
+    response.body = JSON.stringify({
+      message: `User not have Permission`,
+    });
+    return response;
+  }
 };
 
 module.exports = {
-  createEmployee,
-  updateEmployee,
-  getEmployee,
-  getAllEmployees,
-  getEmployeesByRole,
+  createCertification,
+  uploadCertification,
 };
