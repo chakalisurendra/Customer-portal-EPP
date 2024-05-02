@@ -71,6 +71,8 @@ const httpStatusMessages = {
   CERTIFICATION_ID_REQUIRED: "Certification Id is required",
   SUCCESSFULLY_UPDATED_CERTIFICATION_DETAILS: "Successfully updated Certification details.",
   FAILED_TO_UPDATE_CERTIFICATION_DETAILS: "Failed to update Certification details.",
+  SUCCESSFULLY_UPDATED_DOCUMENTS_DETAILS: "Successfully updated documents details.",
+  FAILED_TO_UPDATE_DOCUMENTS_DETAILS: "Failed to update documents details.",
 };
 
 module.exports = {

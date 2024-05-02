@@ -263,8 +263,8 @@ const updateEmployeeDocument = async (event) => {
     const currentDate = Date.now();
     const updateDate = moment(currentDate).format("MM-DD-YYYY HH:mm:ss");
     const params = {
-      TableName: process.env.CERTIFICATION_TABLE,
-      Key: { certificationId: { N: certificationId } },
+      TableName: process.env.DOCUMENT_TABLE,
+      Key: { documentId: { N: documentId } },
       UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}, #updatedDateTime = :updatedDateTime`,
       ExpressionAttributeNames: {
         ...objKeys.reduce(
@@ -290,14 +290,14 @@ const updateEmployeeDocument = async (event) => {
     const updateResult = await client.send(new UpdateItemCommand(params));
     console.log("Successfully updated Certification details.");
     response.body = JSON.stringify({
-      message: httpStatusMessages.SUCCESSFULLY_UPDATED_CERTIFICATION_DETAILS,
+      message: httpStatusMessages.SUCCESSFULLY_UPDATED_DOCUMENTS_DETAILS,
       certificationId: certificationId,
     });
   } catch (e) {
     console.error(e);
     response.statusCode = 400;
     response.body = JSON.stringify({
-      message: httpStatusMessages.FAILED_TO_UPDATE_CERTIFICATION_DETAILS,
+      message: httpStatusMessages.FAILED_TO_UPDATE_DOCUMENTS_DETAILS,
       errorMsg: e.message,
     });
   }
