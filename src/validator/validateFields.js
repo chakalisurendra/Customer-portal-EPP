@@ -46,12 +46,14 @@ const updateAssignmentAllowedFields = [
   "onsite",
   "managerId",
 ];
-/////////////////////////////////////////////////////////////
 const updateCertificationAllowedFields = ["technologyName", "certificationAuthority", "certifiedDate", "validityLastDate", "link", "updatedDateTime"];
+/////////////////////////////////////////////////////////////
+const updateDocumentAllowedFields = ["documentType", "documentName", "updateDate", "link", "updatedDateTime"];
 
 module.exports = {
   updateEmployeeAllowedFields,
   updateMetadataAllowedFields,
   updateAssignmentAllowedFields,
   updateCertificationAllowedFields,
+  updateDocumentAllowedFields,
 };

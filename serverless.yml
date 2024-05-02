@@ -16,8 +16,8 @@ provider:
     PF_ESI_TABLE: ${self:custom.pfTableName}
     PAYROLL_TABLE: ${self:custom.payrollTableName}
     EDUCATION_TABLE: ${self:custom.educationTableName}
+    DOCUMENT_TABLE: ${self:custom.documentTableName}
     CERTIFICATION_TABLE: ${self:custom.certificationTableName}
-    USER_PERMSSION_TABLE: ${self:custom.userPermissionTableName}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -37,10 +37,11 @@ provider:
         - !GetAtt PfDetailsTable.Arn
         - !GetAtt payrollTable.Arn
         - !GetAtt educationTable.Arn
+        - !GetAtt documentTable.Arn
         - !GetAtt certificationTable.Arn
-        - !GetAtt userPermissionTable.Arn
-        - "arn:aws:s3:::dev-employeeseducationdocuments/*"
+        - "arn:aws:s3:::dev-employees-education-documents/*"
         - "arn:aws:s3:::dev-employees-certification-documents/*"
+        - "arn:aws:s3:::dev-empemployeedocuments/*"
 custom:
   employeeTableName: employee_Details
   assignmentTableName: assignment_Details
@@ -50,9 +51,8 @@ custom:
   pfTableName: pf_Details
   payrollTableName: payroll
   educationTableName: education
+  documentTableName: document_details
   certificationTableName: certification
-  userPermissionTableName: user_permission
-
   cors:
     origin: "*" # Allow requests from any origin
     headers:
@@ -335,11 +335,54 @@ functions:
   educationUpload:
     handler: src/Lamda/education/educationHandler.uploadEducation
     name: educationUpload
+    memorySize: 256
+    timeout: 240
+    events:
+      - http:
+          path: education/{educationId}
+          method: PUT
+  createDocument:
+    handler: src/Lamda/documents/documentHandler.createEmployeeDocument
+    name: createDocument
     memorySize: 128
     timeout: 120
     events:
       - http:
-          path: education/{educationId}
+          path: document
+          method: POST
+          cors: true
+  updateDocument:
+    handler: src/Lamda/documents/documentHandler.updateEmployeeDocument
+    name: udpateDocument
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: document/update
+          method: PUT
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                documentId: true
+                employeeId: true
+  certificationCreate:
+    handler: src/Lamda/certification/certificationHandler.createCertification
+    name: certificationCreate
+    memorySize: 128
+    timeout: 120
+    events:
+      - http:
+          path: certification
+          method: POST
+  certificationUpload:
+    handler: src/Lamda/certification/certificationHandler.uploadCertification
+    name: certificationUpload
+    memorySize: 256
+    timeout: 240
+    events:
+      - http:
+          path: certification/{certificationId}
           method: PUT
   certificationUpdate:
     handler: src/Lamda/certification/certificationHandler.updateCertification
@@ -356,20 +399,6 @@ functions:
               querystrings:
                 certificationId: true
                 employeeId: true
-  certificationUpload:
-    handler: src/Lamda/certification/certificationHandler.uploadCertification
-    name: certificationUpload
-    memorySize: 128
-    timeout: 120
-    events:
-      - http:
-          path: certification/upload
-          method: PUT
-          cors: true
-          request:
-            parameters:
-              querystrings:
-                certificationId: true
   getEmployeesByRole:
     handler: src/Lamda/employee/employeeHandler.getEmployeesByRole
     events:
@@ -381,6 +410,16 @@ functions:
             parameters:
               querystrings:
                 role: true
+  uploadDocument:
+    handler: src/Lamda/documents/documentHandler.uploadEmployeeDocument
+    name: uploadEmployeeDocument
+    memorySize: 256
+    timeout: 240
+    events:
+      - http:
+          path: document/{documentId}
+          method: PUT
+          cors: true
 resources:
   Resources:
     EmployeeTable:
@@ -501,6 +540,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    documentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.documentTableName}
+        AttributeDefinitions:
+          - AttributeName: documentId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: documentId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     certificationTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -510,19 +562,6 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: certificationId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    userPermissionTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.userPermissionTableName}
-        AttributeDefinitions:
-          - AttributeName: permissionId
-            AttributeType: N
-        KeySchema:
-          - AttributeName: permissionId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

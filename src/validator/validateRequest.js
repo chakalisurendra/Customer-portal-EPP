@@ -548,7 +548,30 @@ const validateUpdateCertificationDetails = (requestBody) => {
   response.validation = true;
   return response;
 };
+//////////////////////////////////////////////////////////////////////////////
 
+const validateUpdateDocumetDetails = (requestBody) => {
+  console.log("validateUpdateDocumetDetails method");
+
+  const response = {
+    validation: false,
+    validationMessage: "Valid Data",
+  };
+
+  if (!validateFeatureAndCurrentDate(requestBody.updateDate)) {
+    response.validationMessage = `Update Date should have Current of feature Date`;
+    return response;
+  }
+  response.validation = true;
+  return response;
+};
+
+const validateDocumentType = (documentType) => {
+  if (documentType === null || documentType === undefined || documentType === "") {
+    return true; // Allow null or undefined values
+  }
+  return ["Certification", "ID Proof", "Career Doc", "Education", "Other section"].includes(documentType);
+};
 module.exports = {
   validateEmployeeDetails,
   validateUpdateEmployeeDetails,
@@ -559,4 +582,5 @@ module.exports = {
   validatePfEsiDetails,
   validateAssignment,
   validateUpdateCertificationDetails,
+  validateUpdateDocumetDetails,
 };
