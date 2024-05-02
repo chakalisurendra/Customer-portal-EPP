@@ -291,7 +291,7 @@ const updateEmployeeDocument = async (event) => {
     console.log("Successfully updated Certification details.");
     response.body = JSON.stringify({
       message: httpStatusMessages.SUCCESSFULLY_UPDATED_DOCUMENTS_DETAILS,
-      certificationId: certificationId,
+      documentId: documentId,
     });
   } catch (e) {
     console.error(e);
