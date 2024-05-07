@@ -12,7 +12,7 @@ const pool = new Pool({
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
-  post: process.env.PORT, // Note: It seems there's a typo here, it should be 'port' instead of 'post'
+  port: process.env.PORT, 
 });
 
 const getMetadata = async (event) => {
@@ -22,7 +22,7 @@ const getMetadata = async (event) => {
     const { metadataId } = event.queryStringParameters;
 
     const query = {
-      text: "SELECT * FROM metadata_table WHERE metadata_id = $1",
+      text: "SELECT * FROM metadata WHERE metadata_id = $1",
       values: [metadataId],
     };
 
