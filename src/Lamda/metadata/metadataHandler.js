@@ -25,7 +25,6 @@ const getMetadata = async (event) => {
       text: "SELECT * FROM metadata WHERE metadataId = $1",
       values: [metadataId],
     };
-
     const result = await pool.query(query);
     if (result.rows.length === 0) {
       console.log("Metadata details not found.");
