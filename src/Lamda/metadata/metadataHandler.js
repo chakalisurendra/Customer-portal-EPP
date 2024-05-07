@@ -22,7 +22,7 @@ const getMetadata = async (event) => {
     const { metadataId } = event.queryStringParameters;
 
     const query = {
-      text: "SELECT * FROM metadata WHERE metadata_id = $1",
+      text: "SELECT * FROM metadata WHERE metadataId = $1",
       values: [metadataId],
     };
 
