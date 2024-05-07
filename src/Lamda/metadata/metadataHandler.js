@@ -12,7 +12,7 @@ const pool = new Pool({
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
-  port: process.env.PORT, 
+  port: process.env.PORT,
 });
 
 const getMetadata = async (event) => {
@@ -24,7 +24,7 @@ const getMetadata = async (event) => {
     // const query = {
     //   text: "SELECT * FROM metadata",
     // };
-    const result = await pool.query('SELECT * FROM metadata');
+    const result = await pool.query("SELECT * FROM metadata");
     if (result.rows.length === 0) {
       console.log("Metadata details not found.");
       response.statusCode = httpStatusCodes.NOT_FOUND;

@@ -420,6 +420,36 @@ functions:
           path: document/{documentId}
           method: PUT
           cors: true
+  getAllTodos:
+    handler: todos.getAllTodosHandler
+    events:
+      - http:
+          path: todos
+          method: get
+  getTodoById:
+    handler: todos.getTodoByIdHandler
+    events:
+      - http:
+          path: todos/{id}
+          method: get
+  createTodo:
+    handler: todos.createTodoHandler
+    events:
+      - http:
+          path: todos
+          method: post
+  updateTodo:
+    handler: todos.updateTodoHandler
+    events:
+      - http:
+          path: todos/{id}
+          method: put
+  deleteTodo:
+    handler: todos.deleteTodoHandler
+    events:
+      - http:
+          path: todos/{id}
+          method: delete
 resources:
   Resources:
     EmployeeTable:
