@@ -92,7 +92,7 @@ async function deleteTodoHandler(event) {
   }
 }
 
-export default {
+module.exports=  {
   getAllTodosHandler,
   getTodoByIdHandler,
   createTodoHandler,
