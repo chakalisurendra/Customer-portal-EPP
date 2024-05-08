@@ -1,17 +1,16 @@
-const db = require("./db");
-//const { getAllTodosHandler, getTodoByIdHandler, createTodoHandler, updateTodoHandler, deleteTodoHandler } = require("./todos");
+const {client} = require("./db");
 
 // Get all todos
 async function getAllTodos() {
   const query = "SELECT * FROM todos";
-  const { rows } = await db.query(query);
+  const { rows } = await client.query(query);
   return rows;
 }
 
 // Get todo by ID
 async function getTodoById(id) {
   const query = "SELECT * FROM todos WHERE id = $1";
-  const { rows } = await db.query(query, [id]);
+  const { rows } = await client.query(query, [id]);
   return rows[0];
 }
 
@@ -19,7 +18,7 @@ async function getTodoById(id) {
 async function createTodo(todo) {
   const { description, completed } = todo;
   const query = "INSERT INTO todos (description, completed) VALUES ($1, $2) RETURNING *";
-  const { rows } = await db.query(query, [description, completed]);
+  const { rows } = await client.query(query, [description, completed]);
   return rows[0];
 }
 
@@ -27,14 +26,14 @@ async function createTodo(todo) {
 async function updateTodo(id, updates) {
   const { description, completed } = updates;
   const query = "UPDATE todos SET description = $1, completed = $2 WHERE id = $3 RETURNING *";
-  const { rows } = await db.query(query, [description, completed, id]);
+  const { rows } = await client.query(query, [description, completed, id]);
   return rows[0];
 }
 
 // Delete todo by ID
 async function deleteTodo(id) {
   const query = "DELETE FROM todos WHERE id = $1 RETURNING *";
-  const { rows } = await db.query(query, [id]);
+  const { rows } = await client.query(query, [id]);
   return rows[0];
 }
 

@@ -1,4 +1,4 @@
-const db = require("./db");
+const {cleint} = require("./db");
 const { getAllTodosHandler, getTodoByIdHandler, createTodoHandler, updateTodoHandler, deleteTodoHandler } = require("./todos");
 
 // Get all todos
