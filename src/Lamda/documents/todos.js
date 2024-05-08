@@ -14,6 +14,7 @@ const getTodoById = async (event) => {
   const query = "SELECT * FROM todos WHERE id = $1";
   const { rows } = await client.query(query, [id]);
   console.log("after connection");
+  
   return rows[0];
 };
 

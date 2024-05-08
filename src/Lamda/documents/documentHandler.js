@@ -22,6 +22,7 @@ const getTodoByIdHandler = async (event) => {
   try {
     console.log("id",id)
     const todo = await getTodoById(id);
+    
     if (!todo) {
       return {
         statusCode: 404,
