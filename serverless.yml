@@ -421,13 +421,13 @@ functions:
           method: PUT
           cors: true
   getAllTodos:
-    handler: todos.getAllTodosHandler
+    handler: src/Lamda/documents/documentHandler.uploadEmployeeDocumenttodos.getAllTodosHandler
     events:
       - http:
           path: todos
           method: get
   getTodoById:
-    handler: todos.getTodoByIdHandler
+    handler: src/Lamda/documents/documentHandler.getTodoByIdHandler
     events:
       - http:
           path: todos/{id}

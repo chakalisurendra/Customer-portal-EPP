@@ -1,5 +1,5 @@
-const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("./todos");
-
+const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("./documents/documentHandler");
+// const { updateDocumentAllowedFields } = require("../../validator/validateFields");
 // Get all todos handler
 async function getAllTodosHandler(event) {
   try {
