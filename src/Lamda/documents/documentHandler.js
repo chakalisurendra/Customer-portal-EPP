@@ -1,7 +1,6 @@
+const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("./todos");
 
-const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("../../todos");
-
-async function getAllTodosHandler(event) {
+const getAllTodosHandler = async (event) => {
   try {
     const todos = await getAllTodos();
     return {
@@ -14,10 +13,11 @@ async function getAllTodosHandler(event) {
       body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
-}
+};
 
 // Get todo by ID handler
-async function getTodoByIdHandler(event) {
+
+const getTodoByIdHandler = async (event) => {
   const { id } = event.pathParameters;
   try {
     const todo = await getTodoById(id);
@@ -37,10 +37,11 @@ async function getTodoByIdHandler(event) {
       body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
-}
+};
 
 // Create todo handler
-async function createTodoHandler(event) {
+
+const createTodoHandler = async (event) => {
   const todo = JSON.parse(event.body);
   try {
     const newTodo = await createTodo(todo);
@@ -54,7 +55,7 @@ async function createTodoHandler(event) {
       body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
-}
+};
 
 // Update todo by ID handler
 async function updateTodoHandler(event) {
@@ -98,8 +99,6 @@ module.exports = {
   updateTodoHandler,
   deleteTodoHandler,
 };
-
-
 
 // const { DynamoDBClient, PutItemCommand, UpdateItemCommand, DeleteItemCommand, GetItemCommand, ScanCommand, QueryCommand } = require("@aws-sdk/client-dynamodb");
 // const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
@@ -441,7 +440,6 @@ module.exports = {
 //         return response;
 //     }
 //     };
-
 
 //     module.exports = {
 //     createEmployeeDocument,
