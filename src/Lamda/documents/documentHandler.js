@@ -1,50 +1,103 @@
-const {client} = require("./db");
 
-// Get all todos
-async function getAllTodos() {
-  const query = "SELECT * FROM todos";
-  const { rows } = await client.query(query);
-  return rows;
+const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("./todos");
+
+async function getAllTodosHandler(event) {
+  try {
+    const todos = await getAllTodos();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(todos),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
-// Get todo by ID
-async function getTodoById(id) {
-  const query = "SELECT * FROM todos WHERE id = $1";
-  const { rows } = await client.query(query, [id]);
-  return rows[0];
+// Get todo by ID handler
+async function getTodoByIdHandler(event) {
+  const { id } = event.pathParameters;
+  try {
+    const todo = await getTodoById(id);
+    if (!todo) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "Todo not found" }),
+      };
+    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(todo),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
-// Create a new todo
-async function createTodo(todo) {
-  const { description, completed } = todo;
-  const query = "INSERT INTO todos (description, completed) VALUES ($1, $2) RETURNING *";
-  const { rows } = await client.query(query, [description, completed]);
-  return rows[0];
+// Create todo handler
+async function createTodoHandler(event) {
+  const todo = JSON.parse(event.body);
+  try {
+    const newTodo = await createTodo(todo);
+    return {
+      statusCode: 201,
+      body: JSON.stringify(newTodo),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
-// Update todo by ID
-async function updateTodo(id, updates) {
-  const { description, completed } = updates;
-  const query = "UPDATE todos SET description = $1, completed = $2 WHERE id = $3 RETURNING *";
-  const { rows } = await client.query(query, [description, completed, id]);
-  return rows[0];
+// Update todo by ID handler
+async function updateTodoHandler(event) {
+  const { id } = event.pathParameters;
+  const updates = JSON.parse(event.body);
+  try {
+    const updatedTodo = await updateTodo(id, updates);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(updatedTodo),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
-// Delete todo by ID
-async function deleteTodo(id) {
-  const query = "DELETE FROM todos WHERE id = $1 RETURNING *";
-  const { rows } = await client.query(query, [id]);
-  return rows[0];
+// Delete todo by ID handler
+async function deleteTodoHandler(event) {
+  const { id } = event.pathParameters;
+  try {
+    const deletedTodo = await deleteTodo(id);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(deletedTodo),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 }
 
 module.exports = {
-  getAllTodos,
-  getTodoById,
-  createTodo,
-  updateTodo,
-  deleteTodo,
+  getAllTodosHandler,
+  getTodoByIdHandler,
+  createTodoHandler,
+  updateTodoHandler,
+  deleteTodoHandler,
 };
-
 
 
 
