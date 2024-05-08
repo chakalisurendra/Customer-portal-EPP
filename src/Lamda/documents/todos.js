@@ -1,4 +1,4 @@
-const { client } = require("./db");
+const { client } = require("../../../db");
 
 // Get all todos
 const getAllTodos = async (event) => {

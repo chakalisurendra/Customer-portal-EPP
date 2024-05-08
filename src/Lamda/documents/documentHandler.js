@@ -1,4 +1,4 @@
-const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("../todos");
+const { getAllTodos, getTodoById, createTodo, updateTodo, deleteTodo } = require("./todos");
 
 const getAllTodosHandler = async (event) => {
   try {
