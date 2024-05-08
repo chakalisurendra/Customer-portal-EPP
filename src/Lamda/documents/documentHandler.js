@@ -20,6 +20,7 @@ const getAllTodosHandler = async (event) => {
 const getTodoByIdHandler = async (event) => {
   const { id } = event.pathParameters;
   try {
+    console.log("id",id)
     const todo = await getTodoById(id);
     if (!todo) {
       return {

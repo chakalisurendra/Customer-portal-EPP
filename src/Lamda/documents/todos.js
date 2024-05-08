@@ -9,8 +9,12 @@ const getAllTodos = async (event) => {
 
 // Get todo by ID
 const getTodoById = async (event) => {
+  console.log("SELECT * FROM todos WHERE id = $1");
+
   const query = "SELECT * FROM todos WHERE id = $1";
   const { rows } = await client.query(query, [id]);
+  console.log("after connection");
+  
   return rows[0];
 };
 
