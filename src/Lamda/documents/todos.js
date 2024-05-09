@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Pool } = require("pg");
 
 // Create a connection pool
@@ -9,28 +10,6 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// Get todo by ID
-// const getTodoById = async (event) => {
-//   const query = "SELECT * FROM todos";
-//   console.log("pool" + pool);
-//   console.log(process.env.DB_HOST);
-//   console.log(process.env.DB_PORT);
-//   console.log(process.env.DB_NAME);
-//   console.log(process.env.DB_USER);
-//   console.log(process.env.DB_PASSWORD);
-//   const xz = await client.connect((err) => {
-//     if (err) {
-//       console.error("Error connecting to PostgreSQL database:", err);
-//     } else {
-//       console.log("Connected to PostgreSQL database successfully.");
-//     }
-//   });
-//   console.log("query" + query);
-//   const { rows } = await pool.query(query);
-//   console.log("rows" + rows);
-
-//   return rows;
-// };
 
 const getTodoById = async (event) => {
   const query = "SELECT * FROM todos";
@@ -55,6 +34,28 @@ const getTodoById = async (event) => {
   }
 };
 
+// Get todo by ID
+// const getTodoById = async (event) => {
+//   const query = "SELECT * FROM todos";
+//   console.log("pool" + pool);
+//   console.log(process.env.DB_HOST);
+//   console.log(process.env.DB_PORT);
+//   console.log(process.env.DB_NAME);
+//   console.log(process.env.DB_USER);
+//   console.log(process.env.DB_PASSWORD);
+//   const xz = await client.connect((err) => {
+//     if (err) {
+//       console.error("Error connecting to PostgreSQL database:", err);
+//     } else {
+//       console.log("Connected to PostgreSQL database successfully.");
+//     }
+//   });
+//   console.log("query" + query);
+//   const { rows } = await pool.query(query);
+//   console.log("rows" + rows);
+
+//   return rows;
+// };
 
 // const { Pool } = require("pg");
 
