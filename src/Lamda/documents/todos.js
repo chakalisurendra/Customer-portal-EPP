@@ -10,21 +10,49 @@ const pool = new Pool({
 });
 
 // Get todo by ID
+// const getTodoById = async (event) => {
+//   const query = "SELECT * FROM todos";
+//   console.log("pool" + pool);
+//   console.log(process.env.DB_HOST);
+//   console.log(process.env.DB_PORT);
+//   console.log(process.env.DB_NAME);
+//   console.log(process.env.DB_USER);
+//   console.log(process.env.DB_PASSWORD);
+//   const xz = await client.connect((err) => {
+//     if (err) {
+//       console.error("Error connecting to PostgreSQL database:", err);
+//     } else {
+//       console.log("Connected to PostgreSQL database successfully.");
+//     }
+//   });
+//   console.log("query" + query);
+//   const { rows } = await pool.query(query);
+//   console.log("rows" + rows);
+
+//   return rows;
+// };
+
 const getTodoById = async (event) => {
   const query = "SELECT * FROM todos";
-  console.log("pool" + pool);
-  const xz = await client.connect((err) => {
-    if (err) {
-      console.error("Error connecting to PostgreSQL database:", err);
-    } else {
-      console.log("Connected to PostgreSQL database successfully.");
-    }
-  });
-  console.log("query" + query);
-  const { rows } = await pool.query(query);
-  console.log("rows" + rows);
 
-  return rows;
+  // No need to manually connect using client.connect()
+
+  console.log(process.env.DB_HOST);
+  console.log(process.env.DB_PORT);
+  console.log(process.env.DB_NAME);
+  console.log(process.env.DB_USER);
+  console.log(process.env.DB_PASSWORD);
+
+  console.log("query: ", query);
+
+  try {
+    const { rows } = await pool.query(query);
+    console.log("rows: ", rows);
+    return rows;
+  } catch (error) {
+    console.error("Error executing query:", error);
+    throw error; // Rethrow the error to propagate it to the caller
+  }
 };
 
 // const { Pool } = require("pg");
@@ -37,12 +65,12 @@ const getTodoById = async (event) => {
 //   port: process.env.DB_PORT,
 //   });
 
-// // Get all todos
-// const getAllTodos = async (event) => {
-//   const query = "SELECT * FROM todos";
-//   const { rows } = await client.query(query);
-//   return rows;
-// };
+// Get all todos
+const getAllTodos = async (event) => {
+  const query = "SELECT * FROM todos";
+  const { rows } = await client.query(query);
+  return rows;
+};
 
 // // Get todo by ID
 // const getTodoById = async (event) => {
