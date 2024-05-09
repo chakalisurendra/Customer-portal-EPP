@@ -11,18 +11,18 @@ const pool = new Pool({
 });
 
 const getTodoById = async (event) => {
- // const query = "SELECT * FROM test";
-
-  // No need to manually connect using client.connect()
- // console.log("query: ", query);
+  console.log("getTodoById");
 
   try {
     await pool.connect(function (err, client, done) {
       if (err) throw new Error(err);
-      const ageQuery = format("SELECT * FROM test");
-      client.query(ageQuery, function (err, result) {
+      const selectQuery = format("SELECT * FROM test");
+      console.log("selectQuery: ", selectQuery);
+      const testData = client.query(selectQuery, function (err, result) {
         if (err) throw new Error(err);
       });
+      console.log("testdata: ", testData);
+      return testData;
     });
     return null;
   } catch (error) {
@@ -90,12 +90,12 @@ const getAllTodos = async (event) => {
 // };
 
 // // Create a new todo
-// const createTodo = async (event) => {
-//   const { description, completed } = todo;
-//   const query = "INSERT INTO todos (description, completed) VALUES ($1, $2) RETURNING *";
-//   const { rows } = await client.query(query, [description, completed]);
-//   return rows[0];
-// };
+const createTodo = async (event) => {
+  const { name } = todo;
+  const query = "INSERT INTO test (name) VALUES ($1) RETURNING *";
+  const { rows } = await client.query(query, [name]);
+  return rows[0];
+};
 
 // // Update todo by ID
 // const updateTodo = async (event) => {

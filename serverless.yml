@@ -433,7 +433,7 @@ functions:
           path: todos/{id}
           method: get
   createTodo:
-    handler: todos.createTodoHandler
+    handler: src/Lamda/documents/documentHandler.createTodoHandler
     events:
       - http:
           path: todos
