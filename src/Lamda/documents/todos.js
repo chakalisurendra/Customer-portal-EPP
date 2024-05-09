@@ -18,7 +18,14 @@ const getAllTodos = async (event) => {
 
 // Get todo by ID
 const getTodoById = async (event) => {
-  const query = "SELECT * FROM test";
+  const query = "SELECT * FROM todos";
+   const xz = await client.connect((err) => {
+  if (err) {
+    console.error("Error connecting to PostgreSQL database:", err);
+  } else {
+    console.log("Connected to PostgreSQL database successfully.");
+  }
+});
   console.log("query" + query);
   const { rows } = await pool.query(query);
   console.log("rows" + rows);
