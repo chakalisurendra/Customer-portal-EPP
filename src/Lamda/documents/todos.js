@@ -18,7 +18,7 @@ const getAllTodos = async (event) => {
 
 // Get todo by ID
 const getTodoById = async (event) => {
-  const query = "SELECT * FROM todos";
+  const query = "SELECT * FROM test";
   console.log("query" + query);
   const { rows } = await pool.query(query);
   console.log("rows" + rows);
