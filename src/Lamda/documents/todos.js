@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const { Pool } = require("pg");
 
 // Create a connection pool
@@ -10,24 +10,21 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-
 const getTodoById = async (event) => {
-  const query = "SELECT * FROM todos";
+ // const query = "SELECT * FROM test";
 
   // No need to manually connect using client.connect()
-
-  console.log(process.env.DB_HOST);
-  console.log(process.env.DB_PORT);
-  console.log(process.env.DB_NAME);
-  console.log(process.env.DB_USER);
-  console.log(process.env.DB_PASSWORD);
-
-  console.log("query: ", query);
+ // console.log("query: ", query);
 
   try {
-    const { rows } = await pool.query(query);
-    console.log("rows: ", rows);
-    return rows;
+    await pool.connect(function (err, client, done) {
+      if (err) throw new Error(err);
+      const ageQuery = format("SELECT * FROM test");
+      client.query(ageQuery, function (err, result) {
+        if (err) throw new Error(err);
+      });
+    });
+    return null;
   } catch (error) {
     console.error("Error executing query:", error);
     throw error; // Rethrow the error to propagate it to the caller
