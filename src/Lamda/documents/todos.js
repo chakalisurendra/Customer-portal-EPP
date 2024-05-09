@@ -14,23 +14,53 @@ const getTodoById = async (event) => {
   console.log("getTodoById");
 
   try {
-    await pool.connect(function (err, client, done) {
-      if (err) throw new Error(err);
-      const selectQuery = format("SELECT * FROM test");
-      console.log("selectQuery: ", selectQuery);
-      const testData = client.query(selectQuery, function (err, result) {
-        if (err) throw new Error(err);
-      });
-      console.log("testdata: ", testData);
-      return testData;
-    });
-    return null;
+    const client = await pool.connect();
+    const selectQuery = "SELECT * FROM test";
+    console.log("selectQuery: ", selectQuery);
+    const testData = await client.query(selectQuery);
+    console.log("testdata: ", testData.rows);
+    client.release(); // Release the client back to the pool
+    return testData.rows;
   } catch (error) {
     console.error("Error executing query:", error);
     throw error; // Rethrow the error to propagate it to the caller
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////////
+// require("dotenv").config();
+// const { Pool } = require("pg");
+
+// // Create a connection pool
+// const pool = new Pool({
+//   user: process.env.DB_USER,
+//   host: process.env.DB_HOST,
+//   database: process.env.DB_NAME,
+//   password: process.env.DB_PASSWORD,
+//   port: process.env.DB_PORT,
+// });
+
+// const getTodoById = async (event) => {
+//   console.log("getTodoById");
+
+//   try {
+//     await pool.connect(function (err, client, done) {
+//       if (err) throw new Error(err);
+//       const selectQuery = format("SELECT * FROM test");
+//       console.log("selectQuery: ", selectQuery);
+//       const testData = client.query(selectQuery, function (err, result) {
+//         if (err) throw new Error(err);
+//       });
+//       console.log("testdata: ", testData);
+//       return testData;
+//     });
+//     return null;
+//   } catch (error) {
+//     console.error("Error executing query:", error);
+//     throw error; // Rethrow the error to propagate it to the caller
+//   }
+// };
+//============================================================
 // Get todo by ID
 // const getTodoById = async (event) => {
 //   const query = "SELECT * FROM todos";
