@@ -1,7 +1,12 @@
-const { client } = require("../../../db");
-
 const { Pool } = require("pg");
 
+const client = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
+  });
 
 // Get all todos
 const getAllTodos = async (event) => {
@@ -14,16 +19,7 @@ const getAllTodos = async (event) => {
 const getTodoById = async (event) => {
   console.log("SELECT * FROM todos WHERE id = $1");
 
-  const client = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-  });
-  
-
-  await client.connect((err) => {
+  const xz = await client.connect((err) => {
   if (err) {
     console.error("Error connecting to PostgreSQL database:", err);
   } else {
@@ -32,9 +28,9 @@ const getTodoById = async (event) => {
 });
   // const query = "SELECT * FROM todos WHERE id = $1";
   // const { rows } = await client.query(query, [id]);
-  console.log("after connection");
+  console.log("after connection:  " + xz);
   
-  return rows[0];
+  return [];
 };
 
 // Create a new todo
